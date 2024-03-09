@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:moneygo/ui/widgets/Cards/remaining_balance_card.dart';
+import 'package:moneygo/ui/widgets/Cards/budget_screen/remaining_balance_card.dart';
+import 'package:moneygo/ui/widgets/Themes/custom_color_scheme.dart';
 
 class BudgetScreen extends StatefulWidget {
   const BudgetScreen({super.key});
@@ -21,6 +22,7 @@ class _BudgetScreenState extends State<BudgetScreen> {
             'Budget Screen',
             style: Theme.of(context).textTheme.titleLarge,
           ),
+          const SizedBox(height: 10),
         ],
       ),
     );

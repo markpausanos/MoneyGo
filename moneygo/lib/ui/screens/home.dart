@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:moneygo/ui/mini_screens/budget_screen.dart';
 import 'package:moneygo/ui/widgets/Buttons/navigation_button.dart';
 import 'package:moneygo/ui/widgets/Cards/base_card.dart';
-import 'package:moneygo/ui/widgets/Cards/remaining_balance_card.dart';
+import 'package:moneygo/ui/widgets/Cards/budget_screen/remaining_balance_card.dart';
 
 class Home extends StatefulWidget {
   final String username;

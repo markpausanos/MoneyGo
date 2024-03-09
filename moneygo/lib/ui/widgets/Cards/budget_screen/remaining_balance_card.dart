@@ -1,15 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:moneygo/ui/widgets/Cards/base_card.dart';
 
-class RemainingBalanceCard extends StatefulWidget {
+class RemainingBalanceCard extends StatelessWidget {
   const RemainingBalanceCard({super.key});
 
-  @override
-  State<RemainingBalanceCard> createState() => _RemainingBalanceCardState();
-}
-
-class _RemainingBalanceCardState extends State<RemainingBalanceCard> {
-  List<String> months = [
+  static final List<String> months = [
     'January',
     'February',
     'March',
@@ -39,7 +34,6 @@ class _RemainingBalanceCardState extends State<RemainingBalanceCard> {
                 style: Theme.of(context).textTheme.labelSmall,
               ),
               Text(
-                // in the format of MM/YYYY month name Example February 2024
                 '${months[DateTime.now().month - 1]} ${DateTime.now().year}',
                 textAlign: TextAlign.right,
                 style: Theme.of(context).textTheme.labelSmall,

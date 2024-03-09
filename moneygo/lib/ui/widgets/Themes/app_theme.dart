@@ -10,9 +10,7 @@ final ThemeData appTheme = ThemeData(
     scaffoldBackgroundColor: const Color.fromRGBO(241, 241, 241, 1),
     fontFamily: GoogleFonts.lato().fontFamily,
     visualDensity: VisualDensity.adaptivePlatformDensity,
-
     cardColor: const Color.fromRGBO(254, 254, 254, 1),
-
     textTheme: const TextTheme(
       titleLarge: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
       titleMedium: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
