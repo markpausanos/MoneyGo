@@ -1,19 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:moneygo/ui/mini_screens/budget_screen.dart';
 import 'package:moneygo/ui/widgets/Buttons/navigation_button.dart';
-import 'package:moneygo/ui/widgets/Cards/base_card.dart';
-import 'package:moneygo/ui/widgets/Cards/budget_screen/remaining_balance_card.dart';
 
-class Home extends StatefulWidget {
+class HomeScreen extends StatefulWidget {
   final String username;
 
-  const Home({super.key, required this.username});
+  const HomeScreen({super.key, required this.username});
 
   @override
-  State<Home> createState() => _HomeState();
+  State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeState extends State<Home> {
+class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
 
   void _selectButton(int index) {
@@ -36,7 +34,7 @@ class _HomeState extends State<Home> {
   Widget _getCurrentScreen() {
     switch (_selectedIndex) {
       case 0:
-        return BudgetScreen();
+        return const BudgetScreen();
       case 1:
         return const Text('Savings Screen');
       case 2:
@@ -66,7 +64,7 @@ class _HomeState extends State<Home> {
           backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         ),
         body: Padding(
-          padding: const EdgeInsets.fromLTRB(8.0, 10.0, 8.0, 0),
+          padding: const EdgeInsets.fromLTRB(18.0, 10.0, 18.0, 0),
           child: Column(
             children: [
               SizedBox(
@@ -84,12 +82,18 @@ class _HomeState extends State<Home> {
             ],
           ),
         ),
-        floatingActionButton: FloatingActionButton(
-          onPressed: () {},
-          backgroundColor: Theme.of(context).colorScheme.primary,
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(30.0)),
-          child: const Icon(Icons.add),
+        floatingActionButton: SizedBox(
+          width: 80,
+          height: 80,
+          child: FittedBox(
+            child: FloatingActionButton(
+              onPressed: () {},
+              backgroundColor: Theme.of(context).colorScheme.primary,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(50.0)),
+              child: const Icon(Icons.add),
+            ),
+          ),
         ));
   }
 }

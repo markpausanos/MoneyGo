@@ -1,9 +1,11 @@
 import 'package:drift/drift.dart';
 
-class Accounts extends Table {
+@DataClassName('Transaction')
+class Transactions extends Table {
   IntColumn get id => integer().autoIncrement()();
-  TextColumn get name => text().withLength(min: 1, max: 50)();
-  RealColumn get balance => real().withDefault(const Constant(0.0))();
+  RealColumn get amount => real()();
+  TextColumn get description => text().nullable()();
+  DateTimeColumn get date => dateTime()();
   DateTimeColumn get dateCreated =>
       dateTime().withDefault(currentDateAndTime)();
   DateTimeColumn get dateUpdated =>

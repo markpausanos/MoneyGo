@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:moneygo/ui/widgets/Themes/custom_color_scheme.dart';
 
 class NavigationButton extends StatelessWidget {
   final String title;
@@ -19,7 +20,7 @@ class NavigationButton extends StatelessWidget {
       style: ButtonStyle(
         backgroundColor: MaterialStateProperty.all(
           isSelected
-              ? const Color.fromRGBO(89, 156, 255, 1)
+              ? CustomColorScheme.selected
               : Theme.of(context).scaffoldBackgroundColor,
         ),
         shape: MaterialStateProperty.all(

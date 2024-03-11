@@ -1,10 +1,11 @@
 import 'package:drift/drift.dart';
 
-class BudgetCategories extends Table {
+@DataClassName('Category')
+class Categories extends Table {
   IntColumn get id => integer().autoIncrement()();
   TextColumn get name => text().withLength(min: 1, max: 50)();
-  RealColumn get maxAmount => real().nullable()();
-  RealColumn get currentAmount => real().nullable()();
+  RealColumn get maxBudget => real().nullable()();
+  RealColumn get balance => real().nullable()();
   DateTimeColumn get dateCreated =>
       dateTime().withDefault(currentDateAndTime)();
   DateTimeColumn get dateUpdated =>

@@ -17,29 +17,50 @@ class CategoryRemainingBudget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Stack(children: <Widget>[
-      SizedBox(
-        child: LinearProgressIndicator(
-            value: percentage,
-            minHeight: 40,
-            borderRadius: BorderRadius.circular(10),
-            backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-            valueColor: AlwaysStoppedAnimation(
-              percentage > 0.75
-                  ? CustomColorScheme.percentageGood
-                  : percentage > 0.5
-                      ? CustomColorScheme.percentageAverage
-                      : CustomColorScheme.percentageBad,
-            )),
-      ),
-      Positioned(
-        left: 10,
-        top: 10,
-        child: Text(
-          '50%',
-          style: Theme.of(context).textTheme.labelSmall,
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 5.0),
+      child: Stack(children: <Widget>[
+        SizedBox(
+          child: LinearProgressIndicator(
+              value: percentage,
+              minHeight: 56,
+              borderRadius: BorderRadius.circular(10),
+              backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+              valueColor: AlwaysStoppedAnimation(
+                percentage > 0.75
+                    ? CustomColorScheme.percentageGood
+                    : percentage > 0.5
+                        ? CustomColorScheme.percentageAverage
+                        : CustomColorScheme.percentageBad,
+              )),
         ),
-      ),
-    ]);
+        Padding(
+          padding: const EdgeInsets.all(10.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Text(
+                name,
+                style: Theme.of(context).textTheme.labelSmall,
+              ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(
+                    'P${remainingValue.toStringAsFixed(2)}',
+                    style: Theme.of(context).textTheme.labelSmall,
+                  ),
+                  Text(
+                    'remaining budget',
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                ],
+              )
+            ],
+          ),
+        ),
+      ]),
+    );
   }
 }
