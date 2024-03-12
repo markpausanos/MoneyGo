@@ -9,7 +9,7 @@ class BaseCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-      color: Theme.of(context).cardColor,
+      surfaceTintColor: Theme.of(context).cardColor,
       elevation: 5,
       child: Container(
         padding: const EdgeInsets.all(15),

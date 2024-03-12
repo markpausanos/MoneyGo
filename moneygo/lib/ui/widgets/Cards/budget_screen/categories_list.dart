@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:moneygo/data/app_database.dart';
 import 'package:moneygo/ui/widgets/Cards/base_card.dart';
 import 'package:moneygo/ui/widgets/ProgressBars/category_remaining_budget.dart';
+import 'package:moneygo/ui/widgets/Themes/custom_text_scheme.dart';
 
 class CategoriesCard extends StatelessWidget {
   final List<Category> categories;
@@ -18,10 +19,10 @@ class CategoriesCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
+              const Text(
                 'Categories',
                 textAlign: TextAlign.left,
-                style: Theme.of(context).textTheme.labelSmall,
+                style: CustomTextStyleScheme.cardTitle,
               ),
               TextButton(
                   style: TextButton.styleFrom(
@@ -35,7 +36,8 @@ class CategoriesCard extends StatelessWidget {
                   child: Text(
                     'View All',
                     textAlign: TextAlign.right,
-                    style: Theme.of(context).textTheme.labelSmall,
+                    style: CustomTextStyleScheme.cardTitle.copyWith(
+                        color: Colors.black, fontWeight: FontWeight.bold),
                   )),
             ],
           ),

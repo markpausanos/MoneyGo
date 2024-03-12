@@ -12,12 +12,29 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  final ScrollController _scrollController = ScrollController();
   int _selectedIndex = 0;
+  int _previousIndex = -1;
 
-  void _selectButton(int index) {
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _selectButton(int index, int previousIndex) {
     setState(() {
+      _previousIndex = previousIndex;
       _selectedIndex = index;
     });
+
+    double offset = (_selectedIndex - _previousIndex) * 80;
+
+    _scrollController.animateTo(
+      offset,
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeInOut,
+    );
   }
 
   Widget _buildNavigationButton(String title, int index) {
@@ -26,7 +43,7 @@ class _HomeScreenState extends State<HomeScreen> {
       child: NavigationButton(
         title: title,
         isSelected: _selectedIndex == index,
-        onPressed: () => _selectButton(index),
+        onPressed: () => _selectButton(index, _selectedIndex),
       ),
     );
   }
@@ -62,14 +79,16 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           titleSpacing: 0,
           backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+          surfaceTintColor: Theme.of(context).scaffoldBackgroundColor,
         ),
-        body: Padding(
-          padding: const EdgeInsets.fromLTRB(18.0, 10.0, 18.0, 0),
+        body: SingleChildScrollView(
+          padding: const EdgeInsets.fromLTRB(18.0, 10.0, 18.0, 100),
           child: Column(
             children: [
               SizedBox(
                 height: 35,
                 child: ListView(
+                  controller: _scrollController,
                   scrollDirection: Axis.horizontal,
                   children: buttonTitles
                       .map((title) => _buildNavigationButton(
@@ -87,6 +106,7 @@ class _HomeScreenState extends State<HomeScreen> {
           height: 80,
           child: FittedBox(
             child: FloatingActionButton(
+              elevation: 10,
               onPressed: () {},
               backgroundColor: Theme.of(context).colorScheme.primary,
               shape: RoundedRectangleBorder(

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:moneygo/ui/widgets/Themes/custom_color_scheme.dart';
+import 'package:moneygo/ui/widgets/Themes/custom_text_scheme.dart';
 
 class NavigationButton extends StatelessWidget {
   final String title;
@@ -20,7 +21,7 @@ class NavigationButton extends StatelessWidget {
       style: ButtonStyle(
         backgroundColor: MaterialStateProperty.all(
           isSelected
-              ? CustomColorScheme.selected
+              ? CustomColorScheme.buttonSelected
               : Theme.of(context).scaffoldBackgroundColor,
         ),
         shape: MaterialStateProperty.all(
@@ -30,7 +31,9 @@ class NavigationButton extends StatelessWidget {
       ),
       child: Text(
         title,
-        style: TextStyle(color: isSelected ? Colors.white : Colors.black),
+        style: isSelected
+            ? CustomTextStyleScheme.navigationButtonsPressed
+            : CustomTextStyleScheme.navigationButtonsNotPressed,
       ),
     );
   }

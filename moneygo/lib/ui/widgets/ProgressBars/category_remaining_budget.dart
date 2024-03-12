@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:moneygo/ui/widgets/Themes/custom_color_scheme.dart';
+import 'package:moneygo/ui/widgets/Themes/custom_text_scheme.dart';
 
 class CategoryRemainingBudget extends StatelessWidget {
   final String name;
@@ -42,18 +44,26 @@ class CategoryRemainingBudget extends StatelessWidget {
             children: [
               Text(
                 name,
-                style: Theme.of(context).textTheme.labelSmall,
+                style: CustomTextStyleScheme.progressBarLabel,
               ),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  Text(
-                    'P${remainingValue.toStringAsFixed(2)}',
-                    style: Theme.of(context).textTheme.labelSmall,
+                  Row(
+                    children: [
+                      Text(
+                        '₱',
+                        style: CustomTextStyleScheme.progressBarBalancePeso,
+                      ),
+                      Text(
+                        remainingValue.toStringAsFixed(2),
+                        style: CustomTextStyleScheme.progressBarBalance,
+                      ),
+                    ],
                   ),
-                  Text(
+                  const Text(
                     'remaining budget',
-                    style: Theme.of(context).textTheme.bodySmall,
+                    style: CustomTextStyleScheme.progressBarText,
                   ),
                 ],
               )

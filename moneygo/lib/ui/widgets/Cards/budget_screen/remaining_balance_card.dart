@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:moneygo/ui/widgets/Cards/base_card.dart';
+import 'package:moneygo/ui/widgets/Themes/custom_text_scheme.dart';
 
 class RemainingBalanceCard extends StatelessWidget {
   const RemainingBalanceCard({super.key});
@@ -28,22 +29,31 @@ class RemainingBalanceCard extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
+              const Text(
                 'Remaining Balance',
                 textAlign: TextAlign.left,
-                style: Theme.of(context).textTheme.labelSmall,
+                style: CustomTextStyleScheme.cardTitle,
               ),
               Text(
                 '${months[DateTime.now().month - 1]} ${DateTime.now().year}',
                 textAlign: TextAlign.right,
-                style: Theme.of(context).textTheme.labelSmall,
+                style: CustomTextStyleScheme.cardTitle,
               ),
             ],
           ),
           const SizedBox(height: 15),
-          Text(
-            'P1,000.00',
-            style: Theme.of(context).textTheme.titleLarge,
+          Row(
+            children: [
+              Text(
+                '₱',
+                style: CustomTextStyleScheme.pesoSign,
+              ),
+              const SizedBox(width: 5),
+              const Text(
+                '1,000.00',
+                style: CustomTextStyleScheme.remainingBalanceText,
+              ),
+            ],
           ),
         ],
       ),
