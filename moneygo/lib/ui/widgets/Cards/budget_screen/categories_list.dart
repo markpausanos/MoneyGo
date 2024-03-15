@@ -31,7 +31,7 @@ class CategoriesCard extends StatelessWidget {
                     minimumSize: Size.zero,
                   ),
                   onPressed: () {
-                    Navigator.of(context).pushNamed('/categories');
+                    Navigator.of(context).pushNamed('/categories', arguments: categories);
                   },
                   child: Text(
                     'View All',

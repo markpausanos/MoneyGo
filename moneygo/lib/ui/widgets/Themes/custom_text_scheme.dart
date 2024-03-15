@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:moneygo/ui/widgets/Themes/custom_color_scheme.dart';
 
 class CustomTextStyleScheme {
-  static const Color gray = Color.fromRGBO(107, 100, 100, 1);
-
   static const TextStyle appBarTitleHome = TextStyle(
     fontSize: 18,
     fontWeight: FontWeight.bold,
@@ -18,7 +17,7 @@ class CustomTextStyleScheme {
   static const TextStyle navigationButtonsNotPressed = TextStyle(
     fontSize: 14,
     fontWeight: FontWeight.w600,
-    color: gray,
+    color: CustomColorScheme.appGray,
   );
   static const TextStyle navigationButtonsPressed = TextStyle(
     fontSize: 14,
@@ -41,7 +40,7 @@ class CustomTextStyleScheme {
   static const TextStyle cardTitle = TextStyle(
     fontSize: 14,
     fontWeight: FontWeight.normal,
-    color: gray,
+    color: CustomColorScheme.appGray,
   );
 
   static const TextStyle progressBarLabel =
@@ -53,8 +52,15 @@ class CustomTextStyleScheme {
       fontWeight: FontWeight.w600,
       color: Colors.black,
       fontFamily: GoogleFonts.roboto().fontFamily);
-  static const TextStyle progressBarText =
-      TextStyle(fontSize: 12, fontWeight: FontWeight.normal, color: gray);
+  static const TextStyle progressBarText = TextStyle(
+      fontSize: 12,
+      fontWeight: FontWeight.normal,
+      color: CustomColorScheme.appGray);
 
   static const TextStyle dialogTitle = appBarTitleCategories;
+  static const TextStyle dialogBody = TextStyle(
+    fontSize: 20,
+    fontWeight: FontWeight.bold,
+    color: Colors.black,
+  );
 }

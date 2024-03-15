@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:moneygo/data/blocs/categories/category_bloc.dart';
+import 'package:moneygo/data/dao/categories.dart';
 import 'package:moneygo/routes.dart';
 import 'package:provider/provider.dart';
 import 'package:moneygo/data/app_database.dart';
@@ -19,10 +22,14 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return Provider<AppDatabase>(
       create: (_) => database,
-      child: MaterialApp(
-        debugShowCheckedModeBanner: false,
-        theme: appTheme,
-        routes: AppRoutes.routes,
+      child: BlocProvider<CategoryBloc>(
+        create: (context) =>
+            CategoryBloc(categoriesDao: CategoriesDao(database)),
+        child: MaterialApp(
+          debugShowCheckedModeBanner: false,
+          theme: appTheme,
+          routes: AppRoutes.routes,
+        ),
       ),
     );
   }

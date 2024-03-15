@@ -1,4 +1,5 @@
 import 'package:drift/drift.dart';
+import 'package:moneygo/data/tables/sources.dart';
 import 'package:moneygo/data/tables/transactions.dart';
 
 @DataClassName('Income')

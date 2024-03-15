@@ -4,14 +4,26 @@ import 'package:moneygo/ui/widgets/Themes/custom_color_scheme.dart';
 import 'package:moneygo/ui/widgets/Themes/custom_text_scheme.dart';
 
 class CheckBoxWithItem extends StatefulWidget {
-  const CheckBoxWithItem({super.key});
+  final int id;
+  final String name;
+  final double budget;
+  final bool isChecked;
+  final ValueChanged<bool?> onChanged;
+
+  const CheckBoxWithItem(
+      {super.key,
+      required this.id,
+      required this.isChecked,
+      required this.onChanged,
+      required this.name,
+      required this.budget});
 
   @override
   State<CheckBoxWithItem> createState() => _CheckBoxWithItemState();
 }
 
 class _CheckBoxWithItemState extends State<CheckBoxWithItem> {
-  bool _isChecked = false;
+  late bool isChecked;
 
   @override
   Widget build(BuildContext context) {
@@ -21,13 +33,9 @@ class _CheckBoxWithItemState extends State<CheckBoxWithItem> {
           flex: 2,
           child: Checkbox(
             side:
-                const BorderSide(color: CustomColorScheme.primary, width: 3.0),
-            value: _isChecked,
-            onChanged: (bool? value) {
-              setState(() {
-                _isChecked = value!;
-              });
-            },
+                const BorderSide(color: CustomColorScheme.appBlue, width: 3.0),
+            value: widget.isChecked,
+            onChanged: widget.onChanged,
           ),
         ),
         const Expanded(flex: 1, child: SizedBox(width: 0)),
@@ -43,7 +51,7 @@ class _CheckBoxWithItemState extends State<CheckBoxWithItem> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      const Text('Food',
+                      Text(widget.name,
                           style: CustomTextStyleScheme.progressBarLabel),
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.end,
@@ -55,8 +63,8 @@ class _CheckBoxWithItemState extends State<CheckBoxWithItem> {
                                 style: CustomTextStyleScheme
                                     .progressBarBalancePeso,
                               ),
-                              const Text(
-                                '1,000.00',
+                              Text(
+                                widget.budget.toStringAsFixed(2),
                                 style: CustomTextStyleScheme.progressBarBalance,
                               ),
                             ],

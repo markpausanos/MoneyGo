@@ -11,6 +11,9 @@ class CategoriesDao extends DatabaseAccessor<AppDatabase>
 
   Future<List<Category>> getAllCategories() => select(categories).get();
 
+  Future<Category?> getCategoryById(int id) =>
+      (select(categories)..where((tbl) => tbl.id.equals(id))).getSingleOrNull();
+
   Stream<List<Category>> watchAllCategories() => select(categories).watch();
 
   Future<int> insertCategory(CategoriesCompanion category) =>
@@ -21,4 +24,7 @@ class CategoriesDao extends DatabaseAccessor<AppDatabase>
 
   Future<int> deleteCategory(Category category) =>
       delete(categories).delete(category);
+
+  Future<int> deleteCategoryById(int id) =>
+      (delete(categories)..where((tbl) => tbl.id.equals(id))).go();
 }

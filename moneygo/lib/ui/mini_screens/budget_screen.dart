@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:moneygo/data/app_database.dart';
-import 'package:moneygo/data/dao/categories.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:moneygo/data/blocs/categories/category_bloc.dart';
+import 'package:moneygo/data/blocs/categories/category_event.dart';
+import 'package:moneygo/data/blocs/categories/category_state.dart';
 import 'package:moneygo/ui/widgets/Cards/budget_screen/categories_list.dart';
 import 'package:moneygo/ui/widgets/Cards/budget_screen/remaining_balance_card.dart';
-import 'package:provider/provider.dart';
 
 class BudgetScreen extends StatefulWidget {
   const BudgetScreen({super.key});
@@ -14,28 +15,28 @@ class BudgetScreen extends StatefulWidget {
 
 class _BudgetScreenState extends State<BudgetScreen> {
   @override
-  Widget build(BuildContext context) {
-    final database = Provider.of<AppDatabase>(context);
-    final CategoriesDao categoriesDao = CategoriesDao(database);
+  void initState() {
+    super.initState();
+    BlocProvider.of<CategoryBloc>(context).add(LoadCategories());
+  }
 
+  @override
+  Widget build(BuildContext context) {
     return Column(
       children: [
         const RemainingBalanceCard(),
         const SizedBox(height: 10),
-        StreamBuilder<List<Category>>(
-          stream: categoriesDao.watchAllCategories(),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const CircularProgressIndicator();
-            } else if (snapshot.hasError) {
-              return Text('Error: ${snapshot.error}');
-            } else if (snapshot.hasData) {
-              return CategoriesCard(categories: snapshot.data!);
-            } else {
-              return const Text('No categories found');
-            }
-          },
-        ),
+        BlocBuilder<CategoryBloc, CategoryState>(builder: (context, state) {
+          if (state is CategoriesLoading) {
+            return const CircularProgressIndicator();
+          } else if (state is CategoriesLoaded) {
+            return CategoriesCard(categories: state.categories);
+          } else if (state is CategoriesError) {
+            return Text('Error: ${state.message}');
+          } else {
+            return const Text('No categories found');
+          }
+        })
       ],
     );
   }
