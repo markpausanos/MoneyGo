@@ -1,12 +1,13 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:moneygo/data/blocs/categories/category_event.dart';
 import 'package:moneygo/data/blocs/categories/category_state.dart';
-import 'package:moneygo/data/dao/categories.dart';
+import 'package:moneygo/data/repositories/category_repository.dart';
 
 class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
-  final CategoriesDao categoriesDao;
+  final CategoryRepository categoryRepository;
 
-  CategoryBloc({required this.categoriesDao}) : super(CategoriesLoading()) {
+  CategoryBloc({required this.categoryRepository})
+      : super(CategoriesLoading()) {
     on<LoadCategories>(_onLoadCategories);
     on<AddCategory>(_onAddCategory);
     on<DeleteCategory>(_onDeleteCategory);
@@ -15,7 +16,7 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
   void _onLoadCategories(
       LoadCategories event, Emitter<CategoryState> emit) async {
     try {
-      final categories = await categoriesDao.getAllCategories();
+      final categories = await categoryRepository.getAllCategories();
       emit(CategoriesLoaded(categories));
     } catch (e) {
       emit(CategoriesError(e.toString()));
@@ -24,8 +25,8 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
 
   void _onAddCategory(AddCategory event, Emitter<CategoryState> emit) async {
     try {
-      await categoriesDao.insertCategory(event.category);
-      final categories = await categoriesDao.getAllCategories();
+      await categoryRepository.insertCategory(event.category);
+      final categories = await categoryRepository.getAllCategories();
       emit(CategoriesSaveSuccess(event.category.name.value));
       emit(CategoriesLoaded(categories));
     } catch (e) {
@@ -36,7 +37,7 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
   void _onDeleteCategory(
       DeleteCategory event, Emitter<CategoryState> emit) async {
     try {
-      await categoriesDao.deleteCategoryById(event.categoryId);
+      await categoryRepository.deleteCategoryById(event.categoryId);
       add(LoadCategories());
     } catch (e) {
       emit(CategoriesError(e.toString()));

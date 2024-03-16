@@ -1,18 +1,14 @@
 import 'package:drift/drift.dart' hide Column;
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:moneygo/data/app_database.dart';
 import 'package:moneygo/data/blocs/categories/category_bloc.dart';
 import 'package:moneygo/data/blocs/categories/category_event.dart';
 import 'package:moneygo/data/blocs/categories/category_state.dart';
-import 'package:moneygo/data/dao/categories.dart';
-import 'package:moneygo/data/tables/categories.dart';
 import 'package:moneygo/ui/widgets/CheckBoxWithItem/checkbox_with_item.dart';
 import 'package:moneygo/ui/widgets/IconButton/large_icon_button.dart';
 import 'package:moneygo/ui/widgets/Themes/custom_color_scheme.dart';
 import 'package:moneygo/ui/widgets/Themes/custom_text_scheme.dart';
-import 'package:provider/provider.dart';
 
 class CategoriesScreen extends StatefulWidget {
   const CategoriesScreen({super.key});
@@ -321,6 +317,8 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                           value.isEmpty ||
                           double.tryParse(value) == null) {
                         return 'Please enter a proper budget';
+                      } else if (double.parse(value) <= 0.0) {
+                        return 'Budget must be greater than 0';
                       }
                       return null;
                     },

@@ -1,16 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:moneygo/data/blocs/categories/category_bloc.dart';
-import 'package:moneygo/data/dao/categories.dart';
-import 'package:moneygo/routes.dart';
-import 'package:provider/provider.dart';
 import 'package:moneygo/data/app_database.dart';
+import 'package:moneygo/data/blocs/categories/category_bloc.dart';
+import 'package:moneygo/data/daos/category_dao.dart';
+import 'package:moneygo/data/repositories/category_repository.dart';
+import 'package:moneygo/routes.dart';
 import 'package:moneygo/ui/widgets/Themes/app_theme.dart';
+import 'package:provider/provider.dart';
 
-Future<void> main() async {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  final database = AppDatabase(openConnection());
+  final database = await initDatabase();
   runApp(MyApp(database: database));
+}
+
+Future<AppDatabase> initDatabase() async {
+  return AppDatabase(openConnection());
 }
 
 class MyApp extends StatelessWidget {
@@ -20,16 +25,19 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Provider<AppDatabase>(
-      create: (_) => database,
-      child: BlocProvider<CategoryBloc>(
-        create: (context) =>
-            CategoryBloc(categoriesDao: CategoriesDao(database)),
-        child: MaterialApp(
-          debugShowCheckedModeBanner: false,
-          theme: appTheme,
-          routes: AppRoutes.routes,
+    return MultiProvider(
+      providers: [
+        Provider<AppDatabase>(create: (_) => database),
+        BlocProvider<CategoryBloc>(
+          create: (context) => CategoryBloc(
+            categoryRepository: CategoryRepository(CategoryDao(context.read())),
+          ),
         ),
+      ],
+      child: MaterialApp(
+        debugShowCheckedModeBanner: false,
+        theme: appTheme,
+        routes: AppRoutes.routes,
       ),
     );
   }

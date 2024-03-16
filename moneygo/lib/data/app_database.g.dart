@@ -54,9 +54,15 @@ class $CategoriesTable extends Categories
       type: DriftSqlType.dateTime,
       requiredDuringInsert: false,
       defaultValue: currentDateAndTime);
+  static const VerificationMeta _dateDeletedMeta =
+      const VerificationMeta('dateDeleted');
+  @override
+  late final GeneratedColumn<DateTime> dateDeleted = GeneratedColumn<DateTime>(
+      'date_deleted', aliasedName, true,
+      type: DriftSqlType.dateTime, requiredDuringInsert: false);
   @override
   List<GeneratedColumn> get $columns =>
-      [id, name, maxBudget, balance, dateCreated, dateUpdated];
+      [id, name, maxBudget, balance, dateCreated, dateUpdated, dateDeleted];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -96,6 +102,12 @@ class $CategoriesTable extends Categories
           dateUpdated.isAcceptableOrUnknown(
               data['date_updated']!, _dateUpdatedMeta));
     }
+    if (data.containsKey('date_deleted')) {
+      context.handle(
+          _dateDeletedMeta,
+          dateDeleted.isAcceptableOrUnknown(
+              data['date_deleted']!, _dateDeletedMeta));
+    }
     return context;
   }
 
@@ -117,6 +129,8 @@ class $CategoriesTable extends Categories
           .read(DriftSqlType.dateTime, data['${effectivePrefix}date_created'])!,
       dateUpdated: attachedDatabase.typeMapping
           .read(DriftSqlType.dateTime, data['${effectivePrefix}date_updated']),
+      dateDeleted: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}date_deleted']),
     );
   }
 
@@ -133,13 +147,15 @@ class Category extends DataClass implements Insertable<Category> {
   final double? balance;
   final DateTime dateCreated;
   final DateTime? dateUpdated;
+  final DateTime? dateDeleted;
   const Category(
       {required this.id,
       required this.name,
       this.maxBudget,
       this.balance,
       required this.dateCreated,
-      this.dateUpdated});
+      this.dateUpdated,
+      this.dateDeleted});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -154,6 +170,9 @@ class Category extends DataClass implements Insertable<Category> {
     map['date_created'] = Variable<DateTime>(dateCreated);
     if (!nullToAbsent || dateUpdated != null) {
       map['date_updated'] = Variable<DateTime>(dateUpdated);
+    }
+    if (!nullToAbsent || dateDeleted != null) {
+      map['date_deleted'] = Variable<DateTime>(dateDeleted);
     }
     return map;
   }
@@ -172,6 +191,9 @@ class Category extends DataClass implements Insertable<Category> {
       dateUpdated: dateUpdated == null && nullToAbsent
           ? const Value.absent()
           : Value(dateUpdated),
+      dateDeleted: dateDeleted == null && nullToAbsent
+          ? const Value.absent()
+          : Value(dateDeleted),
     );
   }
 
@@ -185,6 +207,7 @@ class Category extends DataClass implements Insertable<Category> {
       balance: serializer.fromJson<double?>(json['balance']),
       dateCreated: serializer.fromJson<DateTime>(json['dateCreated']),
       dateUpdated: serializer.fromJson<DateTime?>(json['dateUpdated']),
+      dateDeleted: serializer.fromJson<DateTime?>(json['dateDeleted']),
     );
   }
   @override
@@ -197,6 +220,7 @@ class Category extends DataClass implements Insertable<Category> {
       'balance': serializer.toJson<double?>(balance),
       'dateCreated': serializer.toJson<DateTime>(dateCreated),
       'dateUpdated': serializer.toJson<DateTime?>(dateUpdated),
+      'dateDeleted': serializer.toJson<DateTime?>(dateDeleted),
     };
   }
 
@@ -206,7 +230,8 @@ class Category extends DataClass implements Insertable<Category> {
           Value<double?> maxBudget = const Value.absent(),
           Value<double?> balance = const Value.absent(),
           DateTime? dateCreated,
-          Value<DateTime?> dateUpdated = const Value.absent()}) =>
+          Value<DateTime?> dateUpdated = const Value.absent(),
+          Value<DateTime?> dateDeleted = const Value.absent()}) =>
       Category(
         id: id ?? this.id,
         name: name ?? this.name,
@@ -214,6 +239,7 @@ class Category extends DataClass implements Insertable<Category> {
         balance: balance.present ? balance.value : this.balance,
         dateCreated: dateCreated ?? this.dateCreated,
         dateUpdated: dateUpdated.present ? dateUpdated.value : this.dateUpdated,
+        dateDeleted: dateDeleted.present ? dateDeleted.value : this.dateDeleted,
       );
   @override
   String toString() {
@@ -223,14 +249,15 @@ class Category extends DataClass implements Insertable<Category> {
           ..write('maxBudget: $maxBudget, ')
           ..write('balance: $balance, ')
           ..write('dateCreated: $dateCreated, ')
-          ..write('dateUpdated: $dateUpdated')
+          ..write('dateUpdated: $dateUpdated, ')
+          ..write('dateDeleted: $dateDeleted')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode =>
-      Object.hash(id, name, maxBudget, balance, dateCreated, dateUpdated);
+  int get hashCode => Object.hash(
+      id, name, maxBudget, balance, dateCreated, dateUpdated, dateDeleted);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -240,7 +267,8 @@ class Category extends DataClass implements Insertable<Category> {
           other.maxBudget == this.maxBudget &&
           other.balance == this.balance &&
           other.dateCreated == this.dateCreated &&
-          other.dateUpdated == this.dateUpdated);
+          other.dateUpdated == this.dateUpdated &&
+          other.dateDeleted == this.dateDeleted);
 }
 
 class CategoriesCompanion extends UpdateCompanion<Category> {
@@ -250,6 +278,7 @@ class CategoriesCompanion extends UpdateCompanion<Category> {
   final Value<double?> balance;
   final Value<DateTime> dateCreated;
   final Value<DateTime?> dateUpdated;
+  final Value<DateTime?> dateDeleted;
   const CategoriesCompanion({
     this.id = const Value.absent(),
     this.name = const Value.absent(),
@@ -257,6 +286,7 @@ class CategoriesCompanion extends UpdateCompanion<Category> {
     this.balance = const Value.absent(),
     this.dateCreated = const Value.absent(),
     this.dateUpdated = const Value.absent(),
+    this.dateDeleted = const Value.absent(),
   });
   CategoriesCompanion.insert({
     this.id = const Value.absent(),
@@ -265,6 +295,7 @@ class CategoriesCompanion extends UpdateCompanion<Category> {
     this.balance = const Value.absent(),
     this.dateCreated = const Value.absent(),
     this.dateUpdated = const Value.absent(),
+    this.dateDeleted = const Value.absent(),
   }) : name = Value(name);
   static Insertable<Category> custom({
     Expression<int>? id,
@@ -273,6 +304,7 @@ class CategoriesCompanion extends UpdateCompanion<Category> {
     Expression<double>? balance,
     Expression<DateTime>? dateCreated,
     Expression<DateTime>? dateUpdated,
+    Expression<DateTime>? dateDeleted,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -281,6 +313,7 @@ class CategoriesCompanion extends UpdateCompanion<Category> {
       if (balance != null) 'balance': balance,
       if (dateCreated != null) 'date_created': dateCreated,
       if (dateUpdated != null) 'date_updated': dateUpdated,
+      if (dateDeleted != null) 'date_deleted': dateDeleted,
     });
   }
 
@@ -290,7 +323,8 @@ class CategoriesCompanion extends UpdateCompanion<Category> {
       Value<double?>? maxBudget,
       Value<double?>? balance,
       Value<DateTime>? dateCreated,
-      Value<DateTime?>? dateUpdated}) {
+      Value<DateTime?>? dateUpdated,
+      Value<DateTime?>? dateDeleted}) {
     return CategoriesCompanion(
       id: id ?? this.id,
       name: name ?? this.name,
@@ -298,6 +332,7 @@ class CategoriesCompanion extends UpdateCompanion<Category> {
       balance: balance ?? this.balance,
       dateCreated: dateCreated ?? this.dateCreated,
       dateUpdated: dateUpdated ?? this.dateUpdated,
+      dateDeleted: dateDeleted ?? this.dateDeleted,
     );
   }
 
@@ -322,6 +357,9 @@ class CategoriesCompanion extends UpdateCompanion<Category> {
     if (dateUpdated.present) {
       map['date_updated'] = Variable<DateTime>(dateUpdated.value);
     }
+    if (dateDeleted.present) {
+      map['date_deleted'] = Variable<DateTime>(dateDeleted.value);
+    }
     return map;
   }
 
@@ -333,7 +371,8 @@ class CategoriesCompanion extends UpdateCompanion<Category> {
           ..write('maxBudget: $maxBudget, ')
           ..write('balance: $balance, ')
           ..write('dateCreated: $dateCreated, ')
-          ..write('dateUpdated: $dateUpdated')
+          ..write('dateUpdated: $dateUpdated, ')
+          ..write('dateDeleted: $dateDeleted')
           ..write(')'))
         .toString();
   }
@@ -385,9 +424,15 @@ class $SourcesTable extends Sources with TableInfo<$SourcesTable, Source> {
       type: DriftSqlType.dateTime,
       requiredDuringInsert: false,
       defaultValue: currentDateAndTime);
+  static const VerificationMeta _dateDeletedMeta =
+      const VerificationMeta('dateDeleted');
+  @override
+  late final GeneratedColumn<DateTime> dateDeleted = GeneratedColumn<DateTime>(
+      'date_deleted', aliasedName, true,
+      type: DriftSqlType.dateTime, requiredDuringInsert: false);
   @override
   List<GeneratedColumn> get $columns =>
-      [id, name, balance, dateCreated, dateUpdated];
+      [id, name, balance, dateCreated, dateUpdated, dateDeleted];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -423,6 +468,12 @@ class $SourcesTable extends Sources with TableInfo<$SourcesTable, Source> {
           dateUpdated.isAcceptableOrUnknown(
               data['date_updated']!, _dateUpdatedMeta));
     }
+    if (data.containsKey('date_deleted')) {
+      context.handle(
+          _dateDeletedMeta,
+          dateDeleted.isAcceptableOrUnknown(
+              data['date_deleted']!, _dateDeletedMeta));
+    }
     return context;
   }
 
@@ -442,6 +493,8 @@ class $SourcesTable extends Sources with TableInfo<$SourcesTable, Source> {
           .read(DriftSqlType.dateTime, data['${effectivePrefix}date_created'])!,
       dateUpdated: attachedDatabase.typeMapping
           .read(DriftSqlType.dateTime, data['${effectivePrefix}date_updated']),
+      dateDeleted: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}date_deleted']),
     );
   }
 
@@ -457,12 +510,14 @@ class Source extends DataClass implements Insertable<Source> {
   final double balance;
   final DateTime dateCreated;
   final DateTime? dateUpdated;
+  final DateTime? dateDeleted;
   const Source(
       {required this.id,
       required this.name,
       required this.balance,
       required this.dateCreated,
-      this.dateUpdated});
+      this.dateUpdated,
+      this.dateDeleted});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -472,6 +527,9 @@ class Source extends DataClass implements Insertable<Source> {
     map['date_created'] = Variable<DateTime>(dateCreated);
     if (!nullToAbsent || dateUpdated != null) {
       map['date_updated'] = Variable<DateTime>(dateUpdated);
+    }
+    if (!nullToAbsent || dateDeleted != null) {
+      map['date_deleted'] = Variable<DateTime>(dateDeleted);
     }
     return map;
   }
@@ -485,6 +543,9 @@ class Source extends DataClass implements Insertable<Source> {
       dateUpdated: dateUpdated == null && nullToAbsent
           ? const Value.absent()
           : Value(dateUpdated),
+      dateDeleted: dateDeleted == null && nullToAbsent
+          ? const Value.absent()
+          : Value(dateDeleted),
     );
   }
 
@@ -497,6 +558,7 @@ class Source extends DataClass implements Insertable<Source> {
       balance: serializer.fromJson<double>(json['balance']),
       dateCreated: serializer.fromJson<DateTime>(json['dateCreated']),
       dateUpdated: serializer.fromJson<DateTime?>(json['dateUpdated']),
+      dateDeleted: serializer.fromJson<DateTime?>(json['dateDeleted']),
     );
   }
   @override
@@ -508,6 +570,7 @@ class Source extends DataClass implements Insertable<Source> {
       'balance': serializer.toJson<double>(balance),
       'dateCreated': serializer.toJson<DateTime>(dateCreated),
       'dateUpdated': serializer.toJson<DateTime?>(dateUpdated),
+      'dateDeleted': serializer.toJson<DateTime?>(dateDeleted),
     };
   }
 
@@ -516,13 +579,15 @@ class Source extends DataClass implements Insertable<Source> {
           String? name,
           double? balance,
           DateTime? dateCreated,
-          Value<DateTime?> dateUpdated = const Value.absent()}) =>
+          Value<DateTime?> dateUpdated = const Value.absent(),
+          Value<DateTime?> dateDeleted = const Value.absent()}) =>
       Source(
         id: id ?? this.id,
         name: name ?? this.name,
         balance: balance ?? this.balance,
         dateCreated: dateCreated ?? this.dateCreated,
         dateUpdated: dateUpdated.present ? dateUpdated.value : this.dateUpdated,
+        dateDeleted: dateDeleted.present ? dateDeleted.value : this.dateDeleted,
       );
   @override
   String toString() {
@@ -531,13 +596,15 @@ class Source extends DataClass implements Insertable<Source> {
           ..write('name: $name, ')
           ..write('balance: $balance, ')
           ..write('dateCreated: $dateCreated, ')
-          ..write('dateUpdated: $dateUpdated')
+          ..write('dateUpdated: $dateUpdated, ')
+          ..write('dateDeleted: $dateDeleted')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, name, balance, dateCreated, dateUpdated);
+  int get hashCode =>
+      Object.hash(id, name, balance, dateCreated, dateUpdated, dateDeleted);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -546,7 +613,8 @@ class Source extends DataClass implements Insertable<Source> {
           other.name == this.name &&
           other.balance == this.balance &&
           other.dateCreated == this.dateCreated &&
-          other.dateUpdated == this.dateUpdated);
+          other.dateUpdated == this.dateUpdated &&
+          other.dateDeleted == this.dateDeleted);
 }
 
 class SourcesCompanion extends UpdateCompanion<Source> {
@@ -555,12 +623,14 @@ class SourcesCompanion extends UpdateCompanion<Source> {
   final Value<double> balance;
   final Value<DateTime> dateCreated;
   final Value<DateTime?> dateUpdated;
+  final Value<DateTime?> dateDeleted;
   const SourcesCompanion({
     this.id = const Value.absent(),
     this.name = const Value.absent(),
     this.balance = const Value.absent(),
     this.dateCreated = const Value.absent(),
     this.dateUpdated = const Value.absent(),
+    this.dateDeleted = const Value.absent(),
   });
   SourcesCompanion.insert({
     this.id = const Value.absent(),
@@ -568,6 +638,7 @@ class SourcesCompanion extends UpdateCompanion<Source> {
     this.balance = const Value.absent(),
     this.dateCreated = const Value.absent(),
     this.dateUpdated = const Value.absent(),
+    this.dateDeleted = const Value.absent(),
   }) : name = Value(name);
   static Insertable<Source> custom({
     Expression<int>? id,
@@ -575,6 +646,7 @@ class SourcesCompanion extends UpdateCompanion<Source> {
     Expression<double>? balance,
     Expression<DateTime>? dateCreated,
     Expression<DateTime>? dateUpdated,
+    Expression<DateTime>? dateDeleted,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -582,6 +654,7 @@ class SourcesCompanion extends UpdateCompanion<Source> {
       if (balance != null) 'balance': balance,
       if (dateCreated != null) 'date_created': dateCreated,
       if (dateUpdated != null) 'date_updated': dateUpdated,
+      if (dateDeleted != null) 'date_deleted': dateDeleted,
     });
   }
 
@@ -590,13 +663,15 @@ class SourcesCompanion extends UpdateCompanion<Source> {
       Value<String>? name,
       Value<double>? balance,
       Value<DateTime>? dateCreated,
-      Value<DateTime?>? dateUpdated}) {
+      Value<DateTime?>? dateUpdated,
+      Value<DateTime?>? dateDeleted}) {
     return SourcesCompanion(
       id: id ?? this.id,
       name: name ?? this.name,
       balance: balance ?? this.balance,
       dateCreated: dateCreated ?? this.dateCreated,
       dateUpdated: dateUpdated ?? this.dateUpdated,
+      dateDeleted: dateDeleted ?? this.dateDeleted,
     );
   }
 
@@ -618,6 +693,9 @@ class SourcesCompanion extends UpdateCompanion<Source> {
     if (dateUpdated.present) {
       map['date_updated'] = Variable<DateTime>(dateUpdated.value);
     }
+    if (dateDeleted.present) {
+      map['date_deleted'] = Variable<DateTime>(dateDeleted.value);
+    }
     return map;
   }
 
@@ -628,7 +706,8 @@ class SourcesCompanion extends UpdateCompanion<Source> {
           ..write('name: $name, ')
           ..write('balance: $balance, ')
           ..write('dateCreated: $dateCreated, ')
-          ..write('dateUpdated: $dateUpdated')
+          ..write('dateUpdated: $dateUpdated, ')
+          ..write('dateDeleted: $dateDeleted')
           ..write(')'))
         .toString();
   }
