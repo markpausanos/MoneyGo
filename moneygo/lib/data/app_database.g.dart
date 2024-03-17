@@ -30,14 +30,18 @@ class $CategoriesTable extends Categories
       const VerificationMeta('maxBudget');
   @override
   late final GeneratedColumn<double> maxBudget = GeneratedColumn<double>(
-      'max_budget', aliasedName, true,
-      type: DriftSqlType.double, requiredDuringInsert: false);
+      'max_budget', aliasedName, false,
+      type: DriftSqlType.double,
+      requiredDuringInsert: false,
+      defaultValue: const Constant(0.0));
   static const VerificationMeta _balanceMeta =
       const VerificationMeta('balance');
   @override
   late final GeneratedColumn<double> balance = GeneratedColumn<double>(
-      'balance', aliasedName, true,
-      type: DriftSqlType.double, requiredDuringInsert: false);
+      'balance', aliasedName, false,
+      type: DriftSqlType.double,
+      requiredDuringInsert: false,
+      defaultValue: const Constant(0.0));
   static const VerificationMeta _dateCreatedMeta =
       const VerificationMeta('dateCreated');
   @override
@@ -122,9 +126,9 @@ class $CategoriesTable extends Categories
       name: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}name'])!,
       maxBudget: attachedDatabase.typeMapping
-          .read(DriftSqlType.double, data['${effectivePrefix}max_budget']),
+          .read(DriftSqlType.double, data['${effectivePrefix}max_budget'])!,
       balance: attachedDatabase.typeMapping
-          .read(DriftSqlType.double, data['${effectivePrefix}balance']),
+          .read(DriftSqlType.double, data['${effectivePrefix}balance'])!,
       dateCreated: attachedDatabase.typeMapping
           .read(DriftSqlType.dateTime, data['${effectivePrefix}date_created'])!,
       dateUpdated: attachedDatabase.typeMapping
@@ -143,16 +147,16 @@ class $CategoriesTable extends Categories
 class Category extends DataClass implements Insertable<Category> {
   final int id;
   final String name;
-  final double? maxBudget;
-  final double? balance;
+  final double maxBudget;
+  final double balance;
   final DateTime dateCreated;
   final DateTime? dateUpdated;
   final DateTime? dateDeleted;
   const Category(
       {required this.id,
       required this.name,
-      this.maxBudget,
-      this.balance,
+      required this.maxBudget,
+      required this.balance,
       required this.dateCreated,
       this.dateUpdated,
       this.dateDeleted});
@@ -161,12 +165,8 @@ class Category extends DataClass implements Insertable<Category> {
     final map = <String, Expression>{};
     map['id'] = Variable<int>(id);
     map['name'] = Variable<String>(name);
-    if (!nullToAbsent || maxBudget != null) {
-      map['max_budget'] = Variable<double>(maxBudget);
-    }
-    if (!nullToAbsent || balance != null) {
-      map['balance'] = Variable<double>(balance);
-    }
+    map['max_budget'] = Variable<double>(maxBudget);
+    map['balance'] = Variable<double>(balance);
     map['date_created'] = Variable<DateTime>(dateCreated);
     if (!nullToAbsent || dateUpdated != null) {
       map['date_updated'] = Variable<DateTime>(dateUpdated);
@@ -181,12 +181,8 @@ class Category extends DataClass implements Insertable<Category> {
     return CategoriesCompanion(
       id: Value(id),
       name: Value(name),
-      maxBudget: maxBudget == null && nullToAbsent
-          ? const Value.absent()
-          : Value(maxBudget),
-      balance: balance == null && nullToAbsent
-          ? const Value.absent()
-          : Value(balance),
+      maxBudget: Value(maxBudget),
+      balance: Value(balance),
       dateCreated: Value(dateCreated),
       dateUpdated: dateUpdated == null && nullToAbsent
           ? const Value.absent()
@@ -203,8 +199,8 @@ class Category extends DataClass implements Insertable<Category> {
     return Category(
       id: serializer.fromJson<int>(json['id']),
       name: serializer.fromJson<String>(json['name']),
-      maxBudget: serializer.fromJson<double?>(json['maxBudget']),
-      balance: serializer.fromJson<double?>(json['balance']),
+      maxBudget: serializer.fromJson<double>(json['maxBudget']),
+      balance: serializer.fromJson<double>(json['balance']),
       dateCreated: serializer.fromJson<DateTime>(json['dateCreated']),
       dateUpdated: serializer.fromJson<DateTime?>(json['dateUpdated']),
       dateDeleted: serializer.fromJson<DateTime?>(json['dateDeleted']),
@@ -216,8 +212,8 @@ class Category extends DataClass implements Insertable<Category> {
     return <String, dynamic>{
       'id': serializer.toJson<int>(id),
       'name': serializer.toJson<String>(name),
-      'maxBudget': serializer.toJson<double?>(maxBudget),
-      'balance': serializer.toJson<double?>(balance),
+      'maxBudget': serializer.toJson<double>(maxBudget),
+      'balance': serializer.toJson<double>(balance),
       'dateCreated': serializer.toJson<DateTime>(dateCreated),
       'dateUpdated': serializer.toJson<DateTime?>(dateUpdated),
       'dateDeleted': serializer.toJson<DateTime?>(dateDeleted),
@@ -227,16 +223,16 @@ class Category extends DataClass implements Insertable<Category> {
   Category copyWith(
           {int? id,
           String? name,
-          Value<double?> maxBudget = const Value.absent(),
-          Value<double?> balance = const Value.absent(),
+          double? maxBudget,
+          double? balance,
           DateTime? dateCreated,
           Value<DateTime?> dateUpdated = const Value.absent(),
           Value<DateTime?> dateDeleted = const Value.absent()}) =>
       Category(
         id: id ?? this.id,
         name: name ?? this.name,
-        maxBudget: maxBudget.present ? maxBudget.value : this.maxBudget,
-        balance: balance.present ? balance.value : this.balance,
+        maxBudget: maxBudget ?? this.maxBudget,
+        balance: balance ?? this.balance,
         dateCreated: dateCreated ?? this.dateCreated,
         dateUpdated: dateUpdated.present ? dateUpdated.value : this.dateUpdated,
         dateDeleted: dateDeleted.present ? dateDeleted.value : this.dateDeleted,
@@ -274,8 +270,8 @@ class Category extends DataClass implements Insertable<Category> {
 class CategoriesCompanion extends UpdateCompanion<Category> {
   final Value<int> id;
   final Value<String> name;
-  final Value<double?> maxBudget;
-  final Value<double?> balance;
+  final Value<double> maxBudget;
+  final Value<double> balance;
   final Value<DateTime> dateCreated;
   final Value<DateTime?> dateUpdated;
   final Value<DateTime?> dateDeleted;
@@ -320,8 +316,8 @@ class CategoriesCompanion extends UpdateCompanion<Category> {
   CategoriesCompanion copyWith(
       {Value<int>? id,
       Value<String>? name,
-      Value<double?>? maxBudget,
-      Value<double?>? balance,
+      Value<double>? maxBudget,
+      Value<double>? balance,
       Value<DateTime>? dateCreated,
       Value<DateTime?>? dateUpdated,
       Value<DateTime?>? dateDeleted}) {

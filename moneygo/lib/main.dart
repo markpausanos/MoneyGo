@@ -2,8 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:moneygo/data/app_database.dart';
 import 'package:moneygo/data/blocs/categories/category_bloc.dart';
+import 'package:moneygo/data/blocs/settings/settings_bloc.dart';
+import 'package:moneygo/data/blocs/sources/source_bloc.dart';
 import 'package:moneygo/data/daos/category_dao.dart';
+import 'package:moneygo/data/daos/source_dao.dart';
 import 'package:moneygo/data/repositories/category_repository.dart';
+import 'package:moneygo/data/repositories/settings_repository.dart';
+import 'package:moneygo/data/repositories/source_repository.dart';
 import 'package:moneygo/routes.dart';
 import 'package:moneygo/ui/widgets/Themes/app_theme.dart';
 import 'package:provider/provider.dart';
@@ -28,9 +33,19 @@ class MyApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         Provider<AppDatabase>(create: (_) => database),
+        BlocProvider<SettingsBloc>(
+          create: (context) => SettingsBloc(
+            settingsRepository: SettingsRepository(),
+          ),
+        ),
         BlocProvider<CategoryBloc>(
           create: (context) => CategoryBloc(
             categoryRepository: CategoryRepository(CategoryDao(context.read())),
+          ),
+        ),
+        BlocProvider<SourceBloc>(
+          create: (context) => SourceBloc(
+            sourceRepository: SourceRepository(SourceDao(context.read())),
           ),
         ),
       ],

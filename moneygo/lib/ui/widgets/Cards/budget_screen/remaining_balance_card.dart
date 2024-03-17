@@ -1,58 +1,70 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:moneygo/data/blocs/settings/settings_bloc.dart';
+import 'package:moneygo/data/blocs/settings/settings_event.dart';
 import 'package:moneygo/ui/widgets/Cards/base_card.dart';
+import 'package:moneygo/ui/widgets/Themes/custom_color_scheme.dart';
 import 'package:moneygo/ui/widgets/Themes/custom_text_scheme.dart';
 
-class RemainingBalanceCard extends StatelessWidget {
-  const RemainingBalanceCard({super.key});
+class RemainingBalanceCard extends StatefulWidget {
+  final bool isVisible;
+  final String currency;
+  const RemainingBalanceCard(
+      {super.key, required this.isVisible, required this.currency});
 
-  static final List<String> months = [
-    'January',
-    'February',
-    'March',
-    'April',
-    'May',
-    'June',
-    'July',
-    'August',
-    'September',
-    'October',
-    'November',
-    'December'
-  ];
+  @override
+  State<RemainingBalanceCard> createState() => _RemainingBalanceCardState();
+}
 
+class _RemainingBalanceCardState extends State<RemainingBalanceCard> {
   @override
   Widget build(BuildContext context) {
     return BaseCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
+          const Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
+              Text(
                 'Remaining Balance',
                 textAlign: TextAlign.left,
-                style: CustomTextStyleScheme.cardTitle,
-              ),
-              Text(
-                '${months[DateTime.now().month - 1]} ${DateTime.now().year}',
-                textAlign: TextAlign.right,
                 style: CustomTextStyleScheme.cardTitle,
               ),
             ],
           ),
           const SizedBox(height: 15),
           Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                '₱',
-                style: CustomTextStyleScheme.pesoSign,
+              Row(
+                children: [
+                  Text(
+                    widget.currency,
+                    style: CustomTextStyleScheme.pesoSign,
+                  ),
+                  const SizedBox(width: 5),
+                  widget.isVisible
+                      ? const Text(
+                          '1,000.00',
+                          style: CustomTextStyleScheme.remainingBalanceText,
+                        )
+                      : const Text(
+                          '*******',
+                          style: CustomTextStyleScheme.remainingBalanceText,
+                        ),
+                ],
               ),
-              const SizedBox(width: 5),
-              const Text(
-                '1,000.00',
-                style: CustomTextStyleScheme.remainingBalanceText,
-              ),
+              IconButton(
+                  onPressed: () {
+                    bool isVisible = !widget.isVisible;
+                    BlocProvider.of<SettingsBloc>(context)
+                        .add(SaveSetting("isVisible", isVisible.toString()));
+                  },
+                  color: CustomColorScheme.appGray,
+                  icon: widget.isVisible
+                      ? const Icon(Icons.visibility)
+                      : const Icon(Icons.visibility_off))
             ],
           ),
         ],

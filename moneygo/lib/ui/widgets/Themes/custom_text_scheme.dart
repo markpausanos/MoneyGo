@@ -8,7 +8,7 @@ class CustomTextStyleScheme {
     fontWeight: FontWeight.bold,
     color: Colors.black,
   );
-  static const TextStyle appBarTitleCategories = TextStyle(
+  static const TextStyle appBarTitleCards = TextStyle(
     fontSize: 20,
     fontWeight: FontWeight.bold,
     color: Colors.white,
@@ -42,12 +42,17 @@ class CustomTextStyleScheme {
     fontWeight: FontWeight.normal,
     color: CustomColorScheme.appGray,
   );
+  static const TextStyle cardViewAll = TextStyle(
+    fontSize: 14,
+    fontWeight: FontWeight.bold,
+    color: Colors.black,
+  );
 
-  static const TextStyle progressBarLabel =
+  static const TextStyle barLabel =
       TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.black);
-  static const TextStyle progressBarBalance =
+  static const TextStyle barBalance =
       TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.black);
-  static TextStyle progressBarBalancePeso = TextStyle(
+  static TextStyle barBalancePeso = TextStyle(
       fontSize: 14,
       fontWeight: FontWeight.w600,
       color: Colors.black,
@@ -57,10 +62,22 @@ class CustomTextStyleScheme {
       fontWeight: FontWeight.normal,
       color: CustomColorScheme.appGray);
 
-  static const TextStyle dialogTitle = appBarTitleCategories;
+  static const TextStyle dialogTitle = appBarTitleCards;
   static const TextStyle dialogBody = TextStyle(
     fontSize: 20,
     fontWeight: FontWeight.bold,
+    color: Colors.black,
+  );
+
+  static const TextStyle emptyText = TextStyle(
+    fontSize: 20,
+    fontWeight: FontWeight.bold,
+    color: Color.fromRGBO(107, 100, 100, 0.5),
+  );
+
+  static const TextStyle bottomSheetButton = TextStyle(
+    fontSize: 20,
+    fontWeight: FontWeight.w600,
     color: Colors.black,
   );
 }

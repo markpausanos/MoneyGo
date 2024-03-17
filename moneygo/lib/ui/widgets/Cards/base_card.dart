@@ -10,7 +10,6 @@ class BaseCard extends StatelessWidget {
     return Card(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       surfaceTintColor: Colors.white,
-      elevation: 5,
       child: Container(
         padding: const EdgeInsets.all(15),
         alignment: Alignment.topLeft,

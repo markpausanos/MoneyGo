@@ -22,9 +22,9 @@ class CategoryRepository {
       await _categoriesDao.getCategoryById(id);
 
   Future<int> insertCategory(CategoriesCompanion category) async {
-    if (category.maxBudget.value == null) {
-      throw Exception('Max budget cannot be null');
-    } else if (category.maxBudget.value! < 0) {
+    if (category.name.value.isEmpty) {
+      throw Exception('Name cannot be empty');
+    } else if (category.maxBudget.value < 0) {
       throw Exception('Max budget cannot be negative');
     }
 
@@ -32,11 +32,27 @@ class CategoryRepository {
   }
 
   Future<bool> updateCategory(Category category) async {
-    if (category.maxBudget == null) {
-      throw Exception('Max budget cannot be null');
-    } else if (category.maxBudget! < 0) {
+    if (category.name.isEmpty) {
+      throw Exception('Name cannot be empty');
+    } else if (category.maxBudget < 0) {
       throw Exception('Max budget cannot be negative');
     }
+
+    var categoryToBeUpdated = await getCategoryById(category.id);
+
+    if (categoryToBeUpdated == null) {
+      throw Exception('Category not found');
+    }
+
+    if (category.balance > category.maxBudget) {
+      category = category.copyWith(balance: category.maxBudget);
+    } else if (category.maxBudget > categoryToBeUpdated.maxBudget) {
+      category = category.copyWith(
+          balance: category.balance +
+              (category.maxBudget - categoryToBeUpdated.maxBudget));
+    }
+
+    category = category.copyWith(dateUpdated: Value(DateTime.now()));
 
     return await _categoriesDao.updateCategory(category);
   }

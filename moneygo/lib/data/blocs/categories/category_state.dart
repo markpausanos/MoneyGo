@@ -34,3 +34,14 @@ class CategoriesSaveSuccess extends CategoryState {
   @override
   List<Object> get props => [name];
 }
+
+class CategoriesUpdateSuccess extends CategoryState {
+  final String name;
+
+  CategoriesUpdateSuccess(this.name);
+
+  @override
+  List<Object> get props => [name];
+}
+
+class CategoriesDeleteSuccess extends CategoryState {}

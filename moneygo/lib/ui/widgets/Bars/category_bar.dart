@@ -2,16 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:moneygo/ui/widgets/Themes/custom_color_scheme.dart';
 import 'package:moneygo/ui/widgets/Themes/custom_text_scheme.dart';
 
-class CategoryRemainingBudget extends StatelessWidget {
+class CategoryBar extends StatelessWidget {
   final String name;
   final double maxValue;
   final double remainingValue;
+  final String currency;
 
-  const CategoryRemainingBudget({
+  const CategoryBar({
     super.key,
     required this.name,
     required this.maxValue,
     required this.remainingValue,
+    required this.currency,
   });
 
   double get percentage => remainingValue / maxValue;
@@ -23,16 +25,18 @@ class CategoryRemainingBudget extends StatelessWidget {
       child: Stack(children: <Widget>[
         SizedBox(
           child: LinearProgressIndicator(
-              value: percentage,
+              value: maxValue == 0 ? 0 : percentage,
               minHeight: 56,
               borderRadius: BorderRadius.circular(10),
-              backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+              backgroundColor: CustomColorScheme.backgroundColor,
               valueColor: AlwaysStoppedAnimation(
-                percentage > 0.75
-                    ? CustomColorScheme.percentageGood
-                    : percentage > 0.5
-                        ? CustomColorScheme.percentageAverage
-                        : CustomColorScheme.percentageBad,
+                maxValue == 0
+                    ? CustomColorScheme.appGray
+                    : percentage > 0.75
+                        ? CustomColorScheme.percentageGood
+                        : percentage > 0.5
+                            ? CustomColorScheme.percentageAverage
+                            : CustomColorScheme.percentageBad,
               )),
         ),
         Padding(
@@ -43,21 +47,28 @@ class CategoryRemainingBudget extends StatelessWidget {
             children: [
               Text(
                 name,
-                style: CustomTextStyleScheme.progressBarLabel,
+                style: CustomTextStyleScheme.barLabel,
               ),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Row(
                     children: [
-                      Text(
-                        '₱',
-                        style: CustomTextStyleScheme.progressBarBalancePeso,
-                      ),
-                      Text(
-                        remainingValue.toStringAsFixed(2),
-                        style: CustomTextStyleScheme.progressBarBalance,
-                      ),
+                      maxValue == 0
+                          ? const Text('Not set',
+                              style: CustomTextStyleScheme.barBalance)
+                          : Row(
+                              children: [
+                                Text(
+                                  currency,
+                                  style: CustomTextStyleScheme.barBalancePeso,
+                                ),
+                                Text(
+                                  remainingValue.toStringAsFixed(2),
+                                  style: CustomTextStyleScheme.barBalance,
+                                ),
+                              ],
+                            ),
                     ],
                   ),
                   const Text(

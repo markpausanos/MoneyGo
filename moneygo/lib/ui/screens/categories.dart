@@ -5,8 +5,10 @@ import 'package:moneygo/data/app_database.dart';
 import 'package:moneygo/data/blocs/categories/category_bloc.dart';
 import 'package:moneygo/data/blocs/categories/category_event.dart';
 import 'package:moneygo/data/blocs/categories/category_state.dart';
-import 'package:moneygo/ui/widgets/CheckBoxWithItem/checkbox_with_item.dart';
+import 'package:moneygo/ui/screens/utils/list_utils.dart';
+import 'package:moneygo/ui/widgets/CheckBoxWithItem/category_checkbox.dart';
 import 'package:moneygo/ui/widgets/IconButton/large_icon_button.dart';
+import 'package:moneygo/ui/widgets/SizedBoxes/dashed_box_with_message.dart';
 import 'package:moneygo/ui/widgets/Themes/custom_color_scheme.dart';
 import 'package:moneygo/ui/widgets/Themes/custom_text_scheme.dart';
 
@@ -49,19 +51,24 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
     return BlocListener<CategoryBloc, CategoryState>(
       listener: (context, state) {
         if (state is CategoriesSaveSuccess) {
-          _showSnackBarAddCategory(state.name);
+          showSnackBarAddOrUpdate(
+              context, 'Category ${state.name} has been added');
+        } else if (state is CategoriesUpdateSuccess) {
+          showSnackBarAddOrUpdate(context, 'Category has been updated');
+        } else if (state is CategoriesDeleteSuccess) {
+          showSnackBarDelete(context, 'Category/ies deleted');
         }
       },
       child: Scaffold(
         backgroundColor: Colors.white,
         appBar: AppBar(
-          backgroundColor: CustomColorScheme.appBarCategories,
+          backgroundColor: CustomColorScheme.appBarCards,
           leading: IconButtonLarge(
               onPressed: () => Navigator.pop(context),
               icon: Icons.arrow_back,
               color: Colors.white),
           title: const Text('Categories',
-              style: CustomTextStyleScheme.appBarTitleCategories),
+              style: CustomTextStyleScheme.appBarTitleCards),
           centerTitle: true,
           actions: [
             IconButtonLarge(
@@ -72,7 +79,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
           ],
         ),
         body: SingleChildScrollView(
-            padding: const EdgeInsets.fromLTRB(25.0, 10.0, 18.0, 100),
+            padding: const EdgeInsets.fromLTRB(25.0, 10.0, 25.0, 0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -80,8 +87,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     AnimatedSwitcher(
-                      duration: const Duration(
-                          milliseconds: 200), // Adjust the duration as needed
+                      duration: const Duration(milliseconds: 200),
                       transitionBuilder:
                           (Widget child, Animation<double> animation) {
                         return FadeTransition(
@@ -92,9 +98,11 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                       child: IconButton(
                           key: Key(containsChecked.toString()),
                           onPressed: () {
-                            containsChecked
-                                ? _unselectAllCategories()
-                                : _selectAllCategories();
+                            categories.isEmpty
+                                ? null
+                                : containsChecked
+                                    ? _unselectAllCategories()
+                                    : _selectAllCategories();
                           },
                           icon: containsChecked
                               ? const Icon(
@@ -105,6 +113,16 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                                   Icons.select_all,
                                   color: CustomColorScheme.appBlue,
                                 )),
+                    ),
+                    Container(
+                      decoration: const BoxDecoration(
+                          borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                          color: CustomColorScheme.headerWithText),
+                      padding: const EdgeInsets.fromLTRB(30, 5, 30, 5),
+                      child: const Text(
+                        "Custom",
+                        style: TextStyle(color: Colors.white),
+                      ),
                     ),
                     AnimatedSwitcher(
                       duration: const Duration(milliseconds: 200),
@@ -142,12 +160,44 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                       categories = state.categories;
                       return _buildCategoryList(state.categories);
                     } else if (state is CategoriesError) {
-                      return Text('Error: ${state.message}');
+                      return DashedWidgetWithMessage(
+                          message: 'Error: ${state.message}');
                     } else {
-                      return const Text('No categories found');
+                      return const DashedWidgetWithMessage(
+                          message: 'Error loading categories');
                     }
                   },
                 ),
+                const SizedBox(height: 20),
+                // Center(
+                //   child: Container(
+                //     decoration: const BoxDecoration(
+                //         borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                //         color: CustomColorScheme.headerWithText),
+                //     padding: const EdgeInsets.fromLTRB(30, 5, 30, 5),
+                //     child: const Text(
+                //       "Savings",
+                //       style: TextStyle(color: Colors.white),
+                //     ),
+                //   ),
+                // ),
+                // const SizedBox(height: 20),
+                // const DashedWidgetWithMessage(message: "No savings found"),
+                // const SizedBox(height: 20),
+                // Center(
+                //   child: Container(
+                //     decoration: const BoxDecoration(
+                //         borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                //         color: CustomColorScheme.headerWithText),
+                //     padding: const EdgeInsets.fromLTRB(30, 5, 30, 5),
+                //     child: const Text(
+                //       "Debts",
+                //       style: TextStyle(color: Colors.white),
+                //     ),
+                //   ),
+                // ),
+
+                // const DashedWidgetWithMessage(message: "No debts found"),
               ],
             )),
       ),
@@ -155,27 +205,30 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
   }
 
   Widget _buildCategoryList(List<Category> categories) {
-    return Column(
-      children: categories.map((category) {
-        return Column(
-          children: [
-            CheckBoxWithItem(
-              isChecked: checkedStates[category.id] ?? false,
-              onChanged: (bool? value) {
-                setState(() {
-                  checkedStates[category.id] = value ?? false;
-                  containsChecked = checkedStates.containsValue(true);
-                });
-              },
-              id: category.id,
-              name: category.name,
-              budget: category.maxBudget ?? 0.0,
-            ),
-            const SizedBox(height: 10),
-          ],
-        );
-      }).toList(),
-    );
+    return categories.isEmpty
+        ? const DashedWidgetWithMessage(message: 'No categories found')
+        : Column(
+            children: categories.map((category) {
+              return Column(
+                children: [
+                  CategoryCheckBox(
+                    id: category.id,
+                    name: category.name,
+                    budget: category.maxBudget ?? 0.0,
+                    isChecked: checkedStates[category.id] ?? false,
+                    onChanged: (bool? value) {
+                      setState(() {
+                        checkedStates[category.id] = value ?? false;
+                        containsChecked = checkedStates.containsValue(true);
+                      });
+                    },
+                    onLongPressed: () => _showUpdateCategoryDialog(category),
+                  ),
+                  const SizedBox(height: 10),
+                ],
+              );
+            }).toList(),
+          );
   }
 
   void _validateForm() {
@@ -186,14 +239,6 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
         _autoValidate = true;
       });
     }
-  }
-
-  void _showSnackBarAddCategory(String categoryName) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      backgroundColor: CustomColorScheme.appGreen,
-      content: Text('Category $categoryName added'),
-      duration: const Duration(seconds: 2),
-    ));
   }
 
   void _selectAllCategories() {
@@ -230,6 +275,22 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
     }
   }
 
+  Future<void> _updateCategory(Category category) async {
+    final String name = _nameController.text;
+    final String budgetString = _budgetController.text;
+
+    final double? budget = double.tryParse(budgetString);
+
+    if (name.isNotEmpty && budget != null) {
+      category = category.copyWith(name: name, maxBudget: budget);
+
+      BlocProvider.of<CategoryBloc>(context).add(UpdateCategory(category));
+
+      _nameController.clear();
+      _budgetController.clear();
+    }
+  }
+
   Future<void> _deleteCategories() async {
     List<int> categoryIdsToDelete = categories
         .where((category) => checkedStates[category.id] ?? false)
@@ -240,105 +301,25 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
       BlocProvider.of<CategoryBloc>(context).add(DeleteCategory(categoryId));
     }
 
-    setState(() {
-      checkedStates.clear();
-      containsChecked = false;
-    });
+    _unselectAllCategories();
   }
 
   Future<void> _showAddCategoryDialog() async {
-    final result = await showDialog<String>(
-      context: context,
-      barrierDismissible: true,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
-          titlePadding: const EdgeInsets.all(0.0),
-          actionsPadding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
-          buttonPadding: const EdgeInsets.all(0.0),
-          title: Container(
-              decoration: const BoxDecoration(
-                color: CustomColorScheme.appGreen,
-                borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(10.0),
-                    topRight: Radius.circular(10.0)),
-              ),
-              child: const Column(
-                children: [
-                  SizedBox(height: 15.0),
-                  Center(
-                    child: Text(
-                      'Add New Category',
-                      style: CustomTextStyleScheme.dialogTitle,
-                    ),
-                  ),
-                  SizedBox(height: 15.0),
-                ],
-              )),
-          content: SingleChildScrollView(
-            child: Form(
-              key: _formKey,
-              autovalidateMode: _autoValidate
-                  ? AutovalidateMode.always
-                  : AutovalidateMode.disabled,
-              child: ListBody(
-                children: <Widget>[
-                  TextFormField(
-                    autofocus: true,
-                    controller: _nameController,
-                    decoration: const InputDecoration(
-                        labelText: 'Name',
-                        errorBorder: OutlineInputBorder(
-                            borderSide:
-                                BorderSide(color: CustomColorScheme.appRed))),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter a name';
-                      }
-                      return null;
-                    },
-                    onFieldSubmitted: (value) {
-                      _validateForm();
-                    },
-                  ),
-                  const SizedBox(height: 20.0),
-                  TextFormField(
-                    controller: _budgetController,
-                    decoration: const InputDecoration(
-                        labelText: 'Budget',
-                        errorBorder: OutlineInputBorder(
-                            borderSide:
-                                BorderSide(color: CustomColorScheme.appRed))),
-                    keyboardType:
-                        const TextInputType.numberWithOptions(decimal: true),
-                    validator: (value) {
-                      if (value == null ||
-                          value.isEmpty ||
-                          double.tryParse(value) == null) {
-                        return 'Please enter a proper budget';
-                      } else if (double.parse(value) <= 0.0) {
-                        return 'Budget must be greater than 0';
-                      }
-                      return null;
-                    },
-                    onFieldSubmitted: (value) {
-                      _validateForm();
-                    },
-                  ),
-                ],
-              ),
-            ),
-          ),
-          actions: <Widget>[
-            TextButton(onPressed: _validateForm, child: const Text('Save'))
-          ],
-        );
-      },
-    );
+    final result = await _showCategoryDialog(title: 'Add Category');
 
     if (result == 'save') {
       await _saveCategory();
+    }
+  }
+
+  Future<void> _showUpdateCategoryDialog(Category category) async {
+    final result = await _showCategoryDialog(
+        title: 'Update Category',
+        name: category.name,
+        budget: category.maxBudget.toString());
+
+    if (result == 'save') {
+      await _updateCategory(category);
     }
   }
 
@@ -424,5 +405,134 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
     if (result ?? false) {
       await _deleteCategories();
     }
+  }
+
+  Future<String?> _showCategoryDialog(
+      {String? title, String? name, String? budget}) async {
+    _nameController.text = name ?? '';
+    _budgetController.text = budget ?? '';
+
+    return await showDialog<String>(
+      context: context,
+      barrierDismissible: true,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
+          titlePadding: const EdgeInsets.all(0.0),
+          actionsPadding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
+          buttonPadding: const EdgeInsets.all(0.0),
+          title: Container(
+              decoration: const BoxDecoration(
+                color: CustomColorScheme.appGreen,
+                borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(10.0),
+                    topRight: Radius.circular(10.0)),
+              ),
+              child: Column(
+                children: [
+                  const SizedBox(height: 15.0),
+                  Center(
+                    child: Text(
+                      title ?? '',
+                      style: CustomTextStyleScheme.dialogTitle,
+                    ),
+                  ),
+                  const SizedBox(height: 15.0),
+                ],
+              )),
+          content: SingleChildScrollView(
+            child: Form(
+              key: _formKey,
+              autovalidateMode: _autoValidate
+                  ? AutovalidateMode.always
+                  : AutovalidateMode.disabled,
+              child: ListBody(
+                children: <Widget>[
+                  TextFormField(
+                    autofocus: true,
+                    controller: _nameController,
+                    decoration: const InputDecoration(
+                        labelText: 'Name',
+                        errorBorder: OutlineInputBorder(
+                            borderSide:
+                                BorderSide(color: CustomColorScheme.appRed))),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please enter a name';
+                      } else if (value.length > 20) {
+                        return 'Must not exceed 20 characters';
+                      }
+                      return null;
+                    },
+                    onFieldSubmitted: (value) {
+                      _validateForm();
+                    },
+                  ),
+                  const SizedBox(height: 20.0),
+                  TextFormField(
+                    controller: _budgetController,
+                    decoration: const InputDecoration(
+                        labelText: 'Budget',
+                        errorBorder: OutlineInputBorder(
+                            borderSide:
+                                BorderSide(color: CustomColorScheme.appRed))),
+                    keyboardType:
+                        const TextInputType.numberWithOptions(decimal: true),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please enter non-empty value';
+                      } else if (double.tryParse(value) == null) {
+                        return 'Please enter a numerical budget';
+                      } else if (double.parse(value) < 0.0) {
+                        return 'Budget must be not be less than 0';
+                      }
+                      return null;
+                    },
+                    onFieldSubmitted: (value) {
+                      _validateForm();
+                    },
+                  ),
+                  const SizedBox(height: 20.0),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      ElevatedButton(
+                        style: ButtonStyle(
+                            backgroundColor: MaterialStateProperty.all(
+                                CustomColorScheme.dialogButtonCancel),
+                            shape: MaterialStateProperty.all(
+                              RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10.0),
+                              ),
+                            )),
+                        onPressed: () => Navigator.of(context).pop('cancel'),
+                        child: const Text('Cancel',
+                            style: TextStyle(color: Colors.black)),
+                      ),
+                      ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                            backgroundColor: CustomColorScheme.dialogButtonSave,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10.0),
+                            ),
+                            side: const BorderSide(
+                                color: CustomColorScheme.appGreen, width: 0.5)),
+                        onPressed: () {
+                          _validateForm();
+                        },
+                        child: const Text('Save',
+                            style:
+                                TextStyle(color: CustomColorScheme.appGreen)),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
   }
 }

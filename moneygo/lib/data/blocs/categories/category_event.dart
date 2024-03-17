@@ -13,7 +13,16 @@ class LoadCategories extends CategoryEvent {}
 class AddCategory extends CategoryEvent {
   final CategoriesCompanion category;
 
-  AddCategory(this.category);
+  const AddCategory(this.category);
+
+  @override
+  List<Object> get props => [category];
+}
+
+class UpdateCategory extends CategoryEvent {
+  final Category category;
+
+  const UpdateCategory(this.category);
 
   @override
   List<Object> get props => [category];
@@ -22,7 +31,7 @@ class AddCategory extends CategoryEvent {
 class DeleteCategory extends CategoryEvent {
   final int categoryId;
 
-  DeleteCategory(this.categoryId);
+  const DeleteCategory(this.categoryId);
 
   @override
   List<Object> get props => [categoryId];
