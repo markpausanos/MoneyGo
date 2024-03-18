@@ -80,4 +80,10 @@ class CustomTextStyleScheme {
     fontWeight: FontWeight.w600,
     color: Colors.black,
   );
+
+  static const TextStyle textFieldText = TextStyle(
+    fontSize: 16,
+    fontWeight: FontWeight.normal,
+    color: Colors.black,
+  );
 }

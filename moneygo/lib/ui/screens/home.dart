@@ -167,7 +167,7 @@ class _HomeScreenState extends State<HomeScreen> {
       builder: (context) {
         return const NewItemBottomSheet(
           buttons: {
-            'Expense': '/expense/new',
+            'Expense': '/transactions/new',
             'Income': '/income/new',
             'Transfer': '/transfer/new',
           },

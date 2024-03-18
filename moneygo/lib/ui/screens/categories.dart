@@ -214,7 +214,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                   CategoryCheckBox(
                     id: category.id,
                     name: category.name,
-                    budget: category.maxBudget ?? 0.0,
+                    budget: category.maxBudget,
                     isChecked: checkedStates[category.id] ?? false,
                     onChanged: (bool? value) {
                       setState(() {
