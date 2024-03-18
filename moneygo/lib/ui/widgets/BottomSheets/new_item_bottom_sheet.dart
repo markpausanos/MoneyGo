@@ -24,7 +24,7 @@ class NewItemBottomSheet extends StatelessWidget {
         children: [
           Container(
             width: double.infinity,
-            padding: const EdgeInsets.all(15),
+            padding: const EdgeInsets.all(10),
             decoration: const BoxDecoration(
                 color: CustomColorScheme.appBlue,
                 borderRadius: BorderRadius.only(
@@ -38,9 +38,9 @@ class NewItemBottomSheet extends StatelessWidget {
               ),
             ),
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 10),
           Padding(
-            padding: const EdgeInsets.fromLTRB(30, 0, 30, 15),
+            padding: const EdgeInsets.fromLTRB(30, 0, 30, 5),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: buttons.entries.map((button) {

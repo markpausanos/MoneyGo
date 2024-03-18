@@ -23,8 +23,6 @@ class BudgetScreen extends StatefulWidget {
 }
 
 class _BudgetScreenState extends State<BudgetScreen> {
-  String _currency = "₱";
-
   @override
   void initState() {
     super.initState();
@@ -39,26 +37,17 @@ class _BudgetScreenState extends State<BudgetScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<SettingsBloc, SettingsState>(
-      listener: (context, state) {
-        if (state is SettingsLoaded) {
-          setState(() {
-            _currency = state.settings["currency"] ?? "₱";
-          });
-        }
-      },
-      child: Column(
-        children: [
-          BudgetPeriodCard(startDate: DateTime.parse("2024-03-03")),
-          _buildSettingsCard(),
-          _buildCategoriesCard(),
-          _buildSourcesCard(),
-        ],
-      ),
+    return Column(
+      children: [
+        BudgetPeriodCard(startDate: DateTime.parse("2024-03-03")),
+        _buildBalanceCard(),
+        _buildCategoriesCard(),
+        _buildSourcesCard(),
+      ],
     );
   }
 
-  Widget _buildSettingsCard() {
+  Widget _buildBalanceCard() {
     return BlocBuilder<SettingsBloc, SettingsState>(builder: (context, state) {
       return _buildBlocStateWidget(state,
           onLoad: const CircularProgressIndicator(),
@@ -66,8 +55,8 @@ class _BudgetScreenState extends State<BudgetScreen> {
           onLoaded: (state) {
             final settings = (state as SettingsLoaded).settings;
             return RemainingBalanceCard(
-                isVisible: settings["isVisible"] == "true",
-                currency: settings["currency"] ?? _currency);
+              isVisible: settings["isVisible"] == "true",
+            );
           });
     });
   }
@@ -79,7 +68,6 @@ class _BudgetScreenState extends State<BudgetScreen> {
           onError: (message) => DashedWidgetWithMessage(message: message),
           onLoaded: (state) => CategoriesCard(
                 categories: (state as CategoriesLoaded).categories,
-                currency: _currency,
               ));
     });
   }
@@ -91,7 +79,6 @@ class _BudgetScreenState extends State<BudgetScreen> {
           onError: (message) => DashedWidgetWithMessage(message: message),
           onLoaded: (state) => SourcesCard(
                 sources: (state as SourcesLoaded).sources,
-                currency: _currency,
               ));
     });
   }

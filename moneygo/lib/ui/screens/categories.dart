@@ -460,8 +460,8 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                     validator: (value) {
                       if (value == null || value.isEmpty) {
                         return 'Please enter a name';
-                      } else if (value.length > 20) {
-                        return 'Must not exceed 20 characters';
+                      } else if (value.length > 15) {
+                        return 'Must not exceed 15 characters';
                       }
                       return null;
                     },
