@@ -5,7 +5,7 @@ import 'package:moneygo/data/app_database.dart';
 import 'package:moneygo/data/blocs/sources/source_bloc.dart';
 import 'package:moneygo/data/blocs/sources/source_event.dart';
 import 'package:moneygo/data/blocs/sources/source_state.dart';
-import 'package:moneygo/ui/screens/utils/list_utils.dart';
+import 'package:moneygo/ui/utils/list_utils.dart';
 import 'package:moneygo/ui/widgets/CheckBoxWithItem/source_checkbox.dart';
 import 'package:moneygo/ui/widgets/IconButton/large_icon_button.dart';
 import 'package:moneygo/ui/widgets/SizedBoxes/dashed_box_with_message.dart';

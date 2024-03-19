@@ -4,14 +4,16 @@ import 'package:moneygo/ui/widgets/Themes/custom_color_scheme.dart';
 class BaseTextField extends StatefulWidget {
   final TextEditingController controller;
   final String labelText;
-  final double? height;
+  final int? maxLines;
+  final String? Function(String?)? validator;
 
   const BaseTextField({
-    Key? key,
+    super.key,
     required this.controller,
     required this.labelText,
-    this.height,
-  }) : super(key: key);
+    this.validator,
+    this.maxLines = 1,
+  });
 
   @override
   State<BaseTextField> createState() => _BaseTextFieldState();
@@ -20,22 +22,16 @@ class BaseTextField extends StatefulWidget {
 class _BaseTextFieldState extends State<BaseTextField> {
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: widget.height,
-      decoration: BoxDecoration(
-        color: CustomColorScheme.backgroundColor,
-        borderRadius: BorderRadius.circular(10),
-      ),
-      child: TextField(
+    return SizedBox(
+      child: TextFormField(
+        validator: widget.validator,
         controller: widget.controller,
-        // Make the textfield size the same as the parent
-        expands: widget.height != null ? true : false,
-        maxLines: widget.height != null ? null : 1,
-        minLines: widget.height != null ? null : 1,
-
+        maxLines: widget.maxLines,
+        keyboardType: TextInputType.multiline,
         textAlign: TextAlign.left,
-        textAlignVertical: TextAlignVertical.top,
         decoration: InputDecoration(
+          filled: true,
+          fillColor: CustomColorScheme.backgroundColor,
           alignLabelWithHint: true,
           border: OutlineInputBorder(
             borderSide: BorderSide.none,
@@ -48,12 +44,20 @@ class _BaseTextFieldState extends State<BaseTextField> {
             ),
             borderRadius: BorderRadius.circular(10),
           ),
+          errorBorder: OutlineInputBorder(
+            borderSide: const BorderSide(color: Colors.red, width: 1.0),
+            borderRadius: BorderRadius.circular(10),
+          ),
+          focusedErrorBorder: OutlineInputBorder(
+            borderSide: const BorderSide(color: Colors.red, width: 1.0),
+            borderRadius: BorderRadius.circular(10),
+          ),
           labelText: widget.labelText,
+          errorStyle: const TextStyle(
+            backgroundColor: Colors.white,
+            color: Colors.red,
+          ),
         ),
-        onChanged: (text) {
-          // Optional: Do something with the text
-          print("Text input: $text");
-        },
       ),
     );
   }

@@ -32,8 +32,9 @@ class BudgetPeriodCard extends StatelessWidget {
                   textAlign: TextAlign.right,
                   style: CustomTextStyleScheme.cardTitle,
                 ),
+                const SizedBox(width: 10),
                 const Icon(
-                  Icons.expand_more,
+                  Icons.refresh,
                   size: 20,
                   color: Colors.black,
                 ),

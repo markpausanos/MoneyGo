@@ -3,7 +3,9 @@ import 'package:intl/intl.dart';
 import 'package:moneygo/ui/widgets/Themes/custom_color_scheme.dart';
 
 class BaseDateTimePicker extends StatefulWidget {
-  const BaseDateTimePicker({super.key});
+  Function(DateTime) onDateTimeChanged;
+
+  BaseDateTimePicker({super.key, required this.onDateTimeChanged});
 
   @override
   State<BaseDateTimePicker> createState() => _BaseDateTimePickerState();
@@ -51,6 +53,8 @@ class _BaseDateTimePickerState extends State<BaseDateTimePicker> {
       _dateController.text =
           DateFormat("MMMM dd, yyyy 'at' hh:mm a").format(updatedDateTime);
     });
+
+    widget.onDateTimeChanged(updatedDateTime);
   }
 
   @override

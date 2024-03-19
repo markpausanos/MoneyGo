@@ -3,15 +3,17 @@ import 'package:moneygo/ui/widgets/Themes/custom_color_scheme.dart';
 import 'package:moneygo/ui/widgets/Themes/custom_text_scheme.dart';
 
 class BaseDropdownFormField extends StatefulWidget {
-  final List<String> dropDownItemList;
-  final String initialValue;
+  final Map<int, String> dropDownItemList;
+  final int? initialValue;
   final String labelText;
+  final Function(int)? onChanged;
 
   const BaseDropdownFormField({
     super.key,
     required this.dropDownItemList,
-    this.initialValue = '',
+    this.initialValue,
     required this.labelText,
+    this.onChanged,
   });
 
   @override
@@ -19,23 +21,25 @@ class BaseDropdownFormField extends StatefulWidget {
 }
 
 class _BaseDropdownFormFieldState extends State<BaseDropdownFormField> {
-  late String _currentSelectedValue;
+  late int _currentSelectedValue;
 
   @override
   void initState() {
     super.initState();
-    if (widget.initialValue.isNotEmpty &&
-        widget.dropDownItemList.contains(widget.initialValue)) {
-      _currentSelectedValue = widget.initialValue;
+    if (widget.initialValue != null &&
+        widget.dropDownItemList.keys.contains(widget.initialValue)) {
+      _currentSelectedValue = widget.initialValue as int;
     } else if (widget.dropDownItemList.isNotEmpty) {
-      _currentSelectedValue = widget.dropDownItemList.first;
+      _currentSelectedValue = widget.dropDownItemList.keys.first;
+    } else {
+      _currentSelectedValue = 0;
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return FormField<String>(
-      builder: (FormFieldState<String> state) {
+    return FormField<int>(
+      builder: (FormFieldState<int> state) {
         return InputDecorator(
           decoration: InputDecoration(
             filled: true,
@@ -48,23 +52,26 @@ class _BaseDropdownFormFieldState extends State<BaseDropdownFormField> {
                 borderSide: BorderSide.none,
                 borderRadius: BorderRadius.circular(10.0)),
           ),
-          isEmpty: _currentSelectedValue == '',
+          isEmpty: _currentSelectedValue == 0,
           child: DropdownButtonHideUnderline(
-            child: DropdownButton<String>(
+            child: DropdownButton<int>(
               value: _currentSelectedValue,
               isDense: true,
-              onChanged: (String? newValue) {
+              onChanged: (int? newValue) {
                 setState(() {
                   _currentSelectedValue =
-                      newValue ?? widget.dropDownItemList.first;
+                      newValue ?? widget.dropDownItemList.keys.first;
                   state.didChange(newValue);
                 });
+                if (widget.onChanged != null) {
+                  widget.onChanged!(_currentSelectedValue);
+                }
               },
-              items: widget.dropDownItemList.map((String value) {
-                return DropdownMenuItem<String>(
-                  value: value,
-                  child:
-                      Text(value, style: CustomTextStyleScheme.textFieldText),
+              items: widget.dropDownItemList.entries.map((entry) {
+                return DropdownMenuItem<int>(
+                  value: entry.key,
+                  child: Text(entry.value,
+                      style: CustomTextStyleScheme.textFieldText),
                 );
               }).toList(),
             ),
