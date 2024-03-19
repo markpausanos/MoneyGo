@@ -6,6 +6,7 @@ import 'package:moneygo/data/blocs/categories/category_bloc.dart';
 import 'package:moneygo/data/blocs/categories/category_event.dart';
 import 'package:moneygo/data/blocs/categories/category_state.dart';
 import 'package:moneygo/ui/screens/utils/list_utils.dart';
+import 'package:moneygo/ui/widgets/Buttons/dialog_button.dart';
 import 'package:moneygo/ui/widgets/CheckBoxWithItem/category_checkbox.dart';
 import 'package:moneygo/ui/widgets/IconButton/large_icon_button.dart';
 import 'package:moneygo/ui/widgets/SizedBoxes/dashed_box_with_message.dart';
@@ -497,33 +498,19 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      ElevatedButton(
-                        style: ButtonStyle(
-                            backgroundColor: MaterialStateProperty.all(
-                                CustomColorScheme.dialogButtonCancel),
-                            shape: MaterialStateProperty.all(
-                              RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10.0),
-                              ),
-                            )),
+                      DialogButton(
                         onPressed: () => Navigator.of(context).pop('cancel'),
-                        child: const Text('Cancel',
-                            style: TextStyle(color: Colors.black)),
+                        text: 'Cancel',
+                        backgroundColor: CustomColorScheme.dialogButtonCancel,
+                        textColor: Colors.black,
+                        // Since there's no border needed for the cancel button, don't pass borderColor or border
                       ),
-                      ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                            backgroundColor: CustomColorScheme.dialogButtonSave,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10.0),
-                            ),
-                            side: const BorderSide(
-                                color: CustomColorScheme.appGreen, width: 0.5)),
-                        onPressed: () {
-                          _validateForm();
-                        },
-                        child: const Text('Save',
-                            style:
-                                TextStyle(color: CustomColorScheme.appGreen)),
+                      DialogButton(
+                        onPressed: _validateForm,
+                        text: 'Save',
+                        backgroundColor: CustomColorScheme.dialogButtonSave,
+                        textColor: CustomColorScheme.appGreen,
+                        borderColor: CustomColorScheme.appGreen,
                       ),
                     ],
                   ),

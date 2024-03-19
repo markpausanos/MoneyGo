@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:moneygo/data/blocs/bases/base_state.dart';
 import 'package:moneygo/data/blocs/categories/category_bloc.dart';
 import 'package:moneygo/data/blocs/categories/category_event.dart';
 import 'package:moneygo/data/blocs/categories/category_state.dart';
+import 'package:moneygo/data/blocs/periods/period_bloc.dart';
+import 'package:moneygo/data/blocs/periods/period_event.dart';
+import 'package:moneygo/data/blocs/periods/period_state.dart';
 import 'package:moneygo/data/blocs/settings/settings_bloc.dart';
 import 'package:moneygo/data/blocs/settings/settings_event.dart';
 import 'package:moneygo/data/blocs/settings/settings_state.dart';
@@ -13,6 +17,7 @@ import 'package:moneygo/ui/widgets/Cards/budget_screen/budget_period_card.dart';
 import 'package:moneygo/ui/widgets/Cards/budget_screen/categories_card.dart';
 import 'package:moneygo/ui/widgets/Cards/budget_screen/remaining_balance_card.dart';
 import 'package:moneygo/ui/widgets/Cards/budget_screen/sources_card.dart';
+import 'package:moneygo/ui/widgets/Loaders/loading_state.dart';
 import 'package:moneygo/ui/widgets/SizedBoxes/dashed_box_with_message.dart';
 
 class BudgetScreen extends StatefulWidget {
@@ -33,18 +38,34 @@ class _BudgetScreenState extends State<BudgetScreen> {
     BlocProvider.of<CategoryBloc>(context).add(LoadCategories());
     BlocProvider.of<SourceBloc>(context).add(LoadSources());
     BlocProvider.of<SettingsBloc>(context).add(LoadSettings());
+    BlocProvider.of<PeriodBloc>(context).add(LoadPeriods());
   }
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
-        BudgetPeriodCard(startDate: DateTime.parse("2024-03-03")),
+        _buildBudgetPeriodCard(),
         _buildBalanceCard(),
         _buildCategoriesCard(),
         _buildSourcesCard(),
       ],
     );
+  }
+
+  Widget _buildBudgetPeriodCard() {
+    return BlocBuilder<PeriodBloc, PeriodState>(builder: (context, state) {
+      return _buildBlocStateWidget(state,
+          onLoad: const Loader(),
+          onError: (message) =>
+              DashedWidgetWithMessage(message: "Hello" + message),
+          onLoaded: (state) {
+            print("Hello inside here");
+            final periods = (state as PeriodsLoaded).periods;
+            return BudgetPeriodCard(
+                startDate: periods[0].startDate, endDate: periods[0].endDate);
+          });
+    });
   }
 
   Widget _buildBalanceCard() {
@@ -64,7 +85,7 @@ class _BudgetScreenState extends State<BudgetScreen> {
   Widget _buildCategoriesCard() {
     return BlocBuilder<CategoryBloc, CategoryState>(builder: (context, state) {
       return _buildBlocStateWidget(state,
-          onLoad: const CircularProgressIndicator(),
+          onLoad: const Loader(),
           onError: (message) => DashedWidgetWithMessage(message: message),
           onLoaded: (state) => CategoriesCard(
                 categories: (state as CategoriesLoaded).categories,
@@ -73,9 +94,9 @@ class _BudgetScreenState extends State<BudgetScreen> {
   }
 
   Widget _buildSourcesCard() {
-    return BlocBuilder<SourceBloc, SourceState>(builder: (context, state) {
+    return BlocBuilder<SourceBloc, BaseState>(builder: (context, state) {
       return _buildBlocStateWidget(state,
-          onLoad: const CircularProgressIndicator(),
+          onLoad: const Loader(),
           onError: (message) => DashedWidgetWithMessage(message: message),
           onLoaded: (state) => SourcesCard(
                 sources: (state as SourcesLoaded).sources,
@@ -102,6 +123,6 @@ class _BudgetScreenState extends State<BudgetScreen> {
         state is SourcesLoaded) {
       return onLoaded(state);
     }
-    return const Text('Unknown state');
+    return const Text(state);
   }
 }

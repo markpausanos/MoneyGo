@@ -1,4 +1,5 @@
 import 'package:drift/drift.dart';
+import 'package:moneygo/data/tables/periods.dart';
 
 @DataClassName('Category')
 class Categories extends Table {
@@ -11,4 +12,6 @@ class Categories extends Table {
   DateTimeColumn get dateUpdated =>
       dateTime().withDefault(currentDateAndTime).nullable()();
   DateTimeColumn get dateDeleted => dateTime().nullable()();
+  IntColumn get periodId => integer()
+      .customConstraint('REFERENCES periods(id) ON DELETE CASCADE NOT NULL')();
 }

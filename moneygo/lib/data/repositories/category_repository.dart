@@ -44,15 +44,12 @@ class CategoryRepository {
       throw Exception('Category not found');
     }
 
-    if (category.balance > category.maxBudget) {
-      category = category.copyWith(balance: category.maxBudget);
-    } else if (category.maxBudget > categoryToBeUpdated.maxBudget) {
-      category = category.copyWith(
-          balance: category.balance +
-              (category.maxBudget - categoryToBeUpdated.maxBudget));
-    }
+    var budgetDifference = category.maxBudget - categoryToBeUpdated.maxBudget;
 
-    category = category.copyWith(dateUpdated: Value(DateTime.now()));
+    category = category.copyWith(
+        balance: category.balance + budgetDifference,
+        dateUpdated: Value(DateTime.now()),
+        periodId: 1);
 
     return await _categoriesDao.updateCategory(category);
   }

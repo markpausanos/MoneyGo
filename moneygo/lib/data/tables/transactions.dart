@@ -1,4 +1,5 @@
 import 'package:drift/drift.dart';
+import 'package:moneygo/data/tables/periods.dart';
 
 @DataClassName('Transaction')
 class Transactions extends Table {
@@ -10,4 +11,6 @@ class Transactions extends Table {
       dateTime().withDefault(currentDateAndTime)();
   DateTimeColumn get dateUpdated =>
       dateTime().withDefault(currentDateAndTime).nullable()();
+  IntColumn get periodId => integer()
+      .customConstraint('REFERENCES periods(id) ON DELETE CASCADE NOT NULL')();
 }

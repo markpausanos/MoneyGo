@@ -76,10 +76,10 @@ class _CategoriesCardState extends State<CategoriesCard> {
                       return Column(
                         children: [
                           CategoryBar(
-                              name: category.name,
-                              maxValue: category.maxBudget,
-                              remainingValue: category.balance,
-            ),
+                            name: category.name,
+                            maxValue: category.maxBudget,
+                            remainingValue: category.balance,
+                          ),
                           const SizedBox(height: 10),
                         ],
                       );

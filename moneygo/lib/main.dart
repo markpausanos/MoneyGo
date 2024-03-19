@@ -2,11 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:moneygo/data/app_database.dart';
 import 'package:moneygo/data/blocs/categories/category_bloc.dart';
+import 'package:moneygo/data/blocs/periods/period_bloc.dart';
 import 'package:moneygo/data/blocs/settings/settings_bloc.dart';
 import 'package:moneygo/data/blocs/sources/source_bloc.dart';
 import 'package:moneygo/data/daos/category_dao.dart';
+import 'package:moneygo/data/daos/period_dao.dart';
 import 'package:moneygo/data/daos/source_dao.dart';
 import 'package:moneygo/data/repositories/category_repository.dart';
+import 'package:moneygo/data/repositories/period_repository.dart';
 import 'package:moneygo/data/repositories/settings_repository.dart';
 import 'package:moneygo/data/repositories/source_repository.dart';
 import 'package:moneygo/routes.dart';
@@ -46,6 +49,11 @@ class MyApp extends StatelessWidget {
         BlocProvider<SourceBloc>(
           create: (context) => SourceBloc(
             sourceRepository: SourceRepository(SourceDao(context.read())),
+          ),
+        ),
+        BlocProvider<PeriodBloc>(
+          create: (context) => PeriodBloc(
+            periodRepository: PeriodRepository(PeriodDao(context.read())),
           ),
         ),
       ],
