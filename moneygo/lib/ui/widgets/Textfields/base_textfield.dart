@@ -6,6 +6,7 @@ class BaseTextField extends StatefulWidget {
   final String labelText;
   final int? maxLines;
   final String? Function(String?)? validator;
+  final TextInputType? keyboardType;
 
   const BaseTextField({
     super.key,
@@ -13,6 +14,7 @@ class BaseTextField extends StatefulWidget {
     required this.labelText,
     this.validator,
     this.maxLines = 1,
+    this.keyboardType,
   });
 
   @override
@@ -27,7 +29,7 @@ class _BaseTextFieldState extends State<BaseTextField> {
         validator: widget.validator,
         controller: widget.controller,
         maxLines: widget.maxLines,
-        keyboardType: TextInputType.multiline,
+        keyboardType: widget.keyboardType ?? TextInputType.multiline,
         textAlign: TextAlign.left,
         decoration: InputDecoration(
           filled: true,

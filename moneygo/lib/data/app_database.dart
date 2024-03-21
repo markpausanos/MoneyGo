@@ -7,6 +7,7 @@ import 'package:moneygo/data/tables/periods.dart';
 import 'package:moneygo/data/tables/sources.dart';
 import 'package:moneygo/data/tables/transactions.dart';
 import 'package:moneygo/data/tables/transfers.dart';
+import 'package:moneygo/utils/transaction_types.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
 import 'dart:io';

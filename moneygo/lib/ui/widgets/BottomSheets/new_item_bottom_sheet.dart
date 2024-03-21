@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:moneygo/routes.dart';
 import 'package:moneygo/ui/widgets/Themes/custom_color_scheme.dart';
 import 'package:moneygo/ui/widgets/Themes/custom_text_scheme.dart';
 
@@ -66,7 +67,11 @@ class NewItemBottomSheet extends StatelessWidget {
                         minimumSize: MaterialStateProperty.all(Size.zero),
                       ),
                       onPressed: () {
-                        Navigator.of(context).pushNamed(button.value);
+                        Navigator.pop(context);
+                        Navigator.push(
+                            context,
+                            AppRoutes.generateRoute(
+                                RouteSettings(name: button.value)));
                       },
                       child: Text(
                         button.key,

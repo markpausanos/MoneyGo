@@ -28,18 +28,18 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
   final _budgetController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   bool _autoValidate = false;
-  int periodId = 2;
+  int? _periodId;
 
-  List<Category> categories = [];
-  Map<int, bool> checkedStates = {};
-  bool containsChecked = false;
+  List<Category> _categories = [];
+  Map<int, bool> _checkedStates = {};
+  bool _containsChecked = false;
 
   @override
   void initState() {
     super.initState();
 
-    for (final category in categories) {
-      checkedStates[category.id] = false;
+    for (final category in _categories) {
+      _checkedStates[category.id] = false;
     }
     BlocProvider.of<CategoryBloc>(context).add(LoadCategories());
     BlocProvider.of<PeriodBloc>(context).add(LoadPeriods());
@@ -69,7 +69,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
       ],
       child: BlocBuilder<PeriodBloc, PeriodState>(builder: (context, state) {
         if (state is PeriodsLoaded) {
-          periodId = state.periods.first.id;
+          _periodId = state.periods.first.id;
 
           return Scaffold(
             backgroundColor: Colors.white,
@@ -108,15 +108,15 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                             );
                           },
                           child: IconButton(
-                              key: Key(containsChecked.toString()),
+                              key: Key(_containsChecked.toString()),
                               onPressed: () {
-                                categories.isEmpty
+                                _categories.isEmpty
                                     ? null
-                                    : containsChecked
+                                    : _containsChecked
                                         ? _unselectAllCategories()
                                         : _selectAllCategories();
                               },
-                              icon: containsChecked
+                              icon: _containsChecked
                                   ? const Icon(
                                       Icons.cancel_rounded,
                                       color: CustomColorScheme.appRed,
@@ -147,11 +147,11 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                             );
                           },
                           child: IconButton(
-                            key: Key(containsChecked.toString()),
-                            onPressed: containsChecked
+                            key: Key(_containsChecked.toString()),
+                            onPressed: _containsChecked
                                 ? _showDeleteConfirmationDialog
                                 : _showAddCategoryDialog,
-                            icon: containsChecked
+                            icon: _containsChecked
                                 ? const Icon(
                                     Icons.delete_rounded,
                                     color: CustomColorScheme.appRed,
@@ -170,7 +170,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                         if (state is CategoriesLoading) {
                           return const CircularProgressIndicator();
                         } else if (state is CategoriesLoaded) {
-                          categories = state.categories;
+                          _categories = state.categories;
                           return _buildCategoryList(state.categories);
                         } else if (state is CategoriesError) {
                           return DashedWidgetWithMessage(
@@ -214,9 +214,8 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                   ],
                 )),
           );
-        } else {
-          return const CircularProgressIndicator();
         }
+        return const CircularProgressIndicator();
       }),
     );
   }
@@ -232,11 +231,11 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                     id: category.id,
                     name: category.name,
                     budget: category.maxBudget,
-                    isChecked: checkedStates[category.id] ?? false,
+                    isChecked: _checkedStates[category.id] ?? false,
                     onChanged: (bool? value) {
                       setState(() {
-                        checkedStates[category.id] = value ?? false;
-                        containsChecked = checkedStates.containsValue(true);
+                        _checkedStates[category.id] = value ?? false;
+                        _containsChecked = _checkedStates.containsValue(true);
                       });
                     },
                     onLongPressed: () => _showUpdateCategoryDialog(category),
@@ -260,19 +259,19 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
 
   void _selectAllCategories() {
     setState(() {
-      for (final category in categories) {
-        checkedStates[category.id] = true;
+      for (final category in _categories) {
+        _checkedStates[category.id] = true;
       }
-      containsChecked = true;
+      _containsChecked = true;
     });
   }
 
   void _unselectAllCategories() {
     setState(() {
-      for (final category in categories) {
-        checkedStates[category.id] = false;
+      for (final category in _categories) {
+        _checkedStates[category.id] = false;
       }
-      containsChecked = false;
+      _containsChecked = false;
     });
   }
 
@@ -281,12 +280,12 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
     final String budgetString = _budgetController.text;
     final double? budget = double.tryParse(budgetString);
 
-    if (name.isNotEmpty && budget != null) {
+    if (name.isNotEmpty && budget != null && _periodId != null) {
       final category = CategoriesCompanion(
           name: Value(name),
           maxBudget: Value(budget),
           balance: Value(budget),
-          periodId: Value(periodId));
+          periodId: Value(_periodId!));
 
       print(category);
 
@@ -314,8 +313,8 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
   }
 
   Future<void> _deleteCategories() async {
-    List<int> categoryIdsToDelete = categories
-        .where((category) => checkedStates[category.id] ?? false)
+    List<int> categoryIdsToDelete = _categories
+        .where((category) => _checkedStates[category.id] ?? false)
         .map((category) => category.id)
         .toList();
 

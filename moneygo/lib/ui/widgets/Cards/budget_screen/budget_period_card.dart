@@ -27,8 +27,8 @@ class BudgetPeriodCard extends StatelessWidget {
               children: [
                 Text(
                   endDate != null
-                      ? '${Utils.getFormattedDate(startDate)} - ${Utils.getFormattedDate(endDate!)}'
-                      : '${Utils.getFormattedDate(startDate)} - TBA',
+                      ? '${Utils.getFormattedDateMMM(startDate)} - ${Utils.getFormattedDateMMM(endDate!)}'
+                      : '${Utils.getFormattedDateMMM(startDate)} - TBA',
                   textAlign: TextAlign.right,
                   style: CustomTextStyleScheme.cardTitle,
                 ),

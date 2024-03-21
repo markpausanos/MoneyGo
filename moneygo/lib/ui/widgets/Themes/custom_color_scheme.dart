@@ -4,6 +4,7 @@ class CustomColorScheme {
   static const Color appBlue = Color.fromRGBO(73, 127, 207, 1);
   static const Color appGreen = Color.fromRGBO(87, 157, 12, 1);
   static const Color appRed = Color.fromRGBO(250, 104, 95, 1);
+  static const Color appOrange = Color.fromRGBO(254, 179, 91, 1);
   static const Color appGray = Color.fromRGBO(107, 100, 100, 1);
 
   static const Color backgroundColor = Color.fromRGBO(241, 241, 241, 1);

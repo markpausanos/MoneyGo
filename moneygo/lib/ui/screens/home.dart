@@ -1,3 +1,4 @@
+import 'package:currency_picker/currency_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -7,6 +8,7 @@ import 'package:moneygo/data/blocs/settings/settings_state.dart';
 import 'package:moneygo/ui/mini_screens/budget_screen.dart';
 import 'package:moneygo/ui/widgets/BottomSheets/new_item_bottom_sheet.dart';
 import 'package:moneygo/ui/widgets/Buttons/navigation_button.dart';
+import 'package:moneygo/ui/widgets/SizedBoxes/dashed_box_with_message.dart';
 import 'package:moneygo/ui/widgets/Themes/custom_color_scheme.dart';
 import 'package:moneygo/ui/widgets/Themes/custom_text_scheme.dart';
 
@@ -28,7 +30,7 @@ class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
   int _previousIndex = -1;
   String _username = 'Default User';
-  String _currency = '₱';
+  String _currency = '\$';
 
   @override
   void initState() {
@@ -76,13 +78,14 @@ class _HomeScreenState extends State<HomeScreen> {
       case 0:
         return const BudgetScreen();
       case 1:
-        return const Text('Savings Screen');
+        return const DashedWidgetWithMessage(
+            message: 'Savings Screen Ongoing!');
       case 2:
-        return const Text('Debt Screen');
+        return const DashedWidgetWithMessage(message: 'Debt Screen Ongoing!');
       case 3:
-        return const Text('Credit Screen');
+        return const DashedWidgetWithMessage(message: 'Credit Screen Ongoing!');
       default:
-        return const Text('Error');
+        return const DashedWidgetWithMessage(message: 'No screen found!');
     }
   }
 
@@ -115,7 +118,7 @@ class _HomeScreenState extends State<HomeScreen> {
               if (state is SettingsLoaded) {
                 setState(() {
                   _username = state.settings['username'] ?? 'Default User';
-                  _currency = state.settings['currency'] ?? '₱';
+                  _currency = state.settings['currency'] ?? '\$';
                 });
               }
             },
@@ -167,7 +170,7 @@ class _HomeScreenState extends State<HomeScreen> {
       builder: (context) {
         return const NewItemBottomSheet(
           buttons: {
-            'Expense': '/transactions/new',
+            'Expense': '/expense/new',
             'Income': '/income/new',
             'Transfer': '/transfer/new',
           },
@@ -266,26 +269,40 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                         const SizedBox(height: 20.0),
                         TextFormField(
-                          style: TextStyle(
-                              fontFamily:
-                                  CustomTextStyleScheme.pesoSign.fontFamily),
-                          controller: _currencyController,
-                          decoration: const InputDecoration(
-                            labelText: 'Currency',
-                            errorBorder: OutlineInputBorder(
-                                borderSide: BorderSide(
-                                    color: CustomColorScheme.appRed)),
-                          ),
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Please enter a currency';
-                            } else if (value.length > 3) {
-                              return 'Must not exceed 3 characters';
-                            }
-                            return null;
-                          },
-                          onFieldSubmitted: (value) => _validateForm(),
-                        ),
+                            style: TextStyle(
+                                fontFamily: CustomTextStyleScheme
+                                    .currencySign.fontFamily),
+                            controller: _currencyController,
+                            decoration: const InputDecoration(
+                              labelText: 'Currency',
+                              errorBorder: OutlineInputBorder(
+                                  borderSide: BorderSide(
+                                      color: CustomColorScheme.appRed)),
+                            ),
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Please enter a currency';
+                              } else if (value.length > 3) {
+                                return 'Must not exceed 3 characters';
+                              }
+                              return null;
+                            },
+                            onFieldSubmitted: (value) => _validateForm(),
+                            readOnly: true,
+                            onTap: () {
+                              showCurrencyPicker(
+                                  context: context,
+                                  showFlag: true,
+                                  showCurrencyName: true,
+                                  showCurrencyCode: true,
+                                  onSelect: (Currency currency) {
+                                    _currencyController.text = currency.symbol;
+                                  },
+                                  theme: CurrencyPickerThemeData(
+                                      currencySignTextStyle:
+                                          CustomTextStyleScheme
+                                              .currencySignDropDown));
+                            }),
                         const SizedBox(height: 20.0),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,

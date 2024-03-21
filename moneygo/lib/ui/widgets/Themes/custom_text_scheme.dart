@@ -30,8 +30,14 @@ class CustomTextStyleScheme {
     fontWeight: FontWeight.bold,
     color: Colors.black,
   );
-  static TextStyle pesoSign = TextStyle(
+  static TextStyle currencySign = TextStyle(
     fontSize: 24,
+    fontWeight: FontWeight.bold,
+    color: Colors.black,
+    fontFamily: GoogleFonts.roboto().fontFamily,
+  );
+  static TextStyle currencySignDropDown = TextStyle(
+    fontSize: 20,
     fontWeight: FontWeight.bold,
     color: Colors.black,
     fontFamily: GoogleFonts.roboto().fontFamily,

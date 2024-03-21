@@ -10,9 +10,7 @@ class SourceRepository {
   Stream<List<Source>> watchAllSources() => _sourceDao.watchAllSources();
 
   Future<List<Source>> getAllSources() async {
-    var sources = await _sourceDao.getAllSources();
-
-    return sources.where((source) => source.dateDeleted == null).toList();
+    return await _sourceDao.getAllSources();
   }
 
   Future<Source?> getSourceById(int id) async =>
@@ -36,21 +34,11 @@ class SourceRepository {
     return await _sourceDao.updateSource(source);
   }
 
-  Future<bool> deleteSource(Source source) {
-    source = source.copyWith(dateDeleted: Value(DateTime.now()));
-
-    return _sourceDao.updateSource(source);
+  Future<int> deleteSource(Source source) async {
+    return await _sourceDao.deleteSource(source);
   }
 
-  Future<bool> deleteSourceById(int id) async {
-    var source = await getSourceById(id);
-
-    if (source == null) {
-      throw Exception('Source not found');
-    }
-
-    source = source.copyWith(dateDeleted: Value(DateTime.now()));
-
-    return await _sourceDao.updateSource(source);
+  Future<int> deleteSourceById(int id) async {
+    return await _sourceDao.deleteSourceById(id);
   }
 }

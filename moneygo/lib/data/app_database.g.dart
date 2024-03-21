@@ -269,12 +269,6 @@ class $CategoriesTable extends Categories
       type: DriftSqlType.dateTime,
       requiredDuringInsert: false,
       defaultValue: currentDateAndTime);
-  static const VerificationMeta _dateDeletedMeta =
-      const VerificationMeta('dateDeleted');
-  @override
-  late final GeneratedColumn<DateTime> dateDeleted = GeneratedColumn<DateTime>(
-      'date_deleted', aliasedName, true,
-      type: DriftSqlType.dateTime, requiredDuringInsert: false);
   static const VerificationMeta _periodIdMeta =
       const VerificationMeta('periodId');
   @override
@@ -284,16 +278,8 @@ class $CategoriesTable extends Categories
       requiredDuringInsert: true,
       $customConstraints: 'REFERENCES periods(id) ON DELETE CASCADE NOT NULL');
   @override
-  List<GeneratedColumn> get $columns => [
-        id,
-        name,
-        maxBudget,
-        balance,
-        dateCreated,
-        dateUpdated,
-        dateDeleted,
-        periodId
-      ];
+  List<GeneratedColumn> get $columns =>
+      [id, name, maxBudget, balance, dateCreated, dateUpdated, periodId];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -333,12 +319,6 @@ class $CategoriesTable extends Categories
           dateUpdated.isAcceptableOrUnknown(
               data['date_updated']!, _dateUpdatedMeta));
     }
-    if (data.containsKey('date_deleted')) {
-      context.handle(
-          _dateDeletedMeta,
-          dateDeleted.isAcceptableOrUnknown(
-              data['date_deleted']!, _dateDeletedMeta));
-    }
     if (data.containsKey('period_id')) {
       context.handle(_periodIdMeta,
           periodId.isAcceptableOrUnknown(data['period_id']!, _periodIdMeta));
@@ -366,8 +346,6 @@ class $CategoriesTable extends Categories
           .read(DriftSqlType.dateTime, data['${effectivePrefix}date_created'])!,
       dateUpdated: attachedDatabase.typeMapping
           .read(DriftSqlType.dateTime, data['${effectivePrefix}date_updated']),
-      dateDeleted: attachedDatabase.typeMapping
-          .read(DriftSqlType.dateTime, data['${effectivePrefix}date_deleted']),
       periodId: attachedDatabase.typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}period_id'])!,
     );
@@ -386,7 +364,6 @@ class Category extends DataClass implements Insertable<Category> {
   final double balance;
   final DateTime dateCreated;
   final DateTime? dateUpdated;
-  final DateTime? dateDeleted;
   final int periodId;
   const Category(
       {required this.id,
@@ -395,7 +372,6 @@ class Category extends DataClass implements Insertable<Category> {
       required this.balance,
       required this.dateCreated,
       this.dateUpdated,
-      this.dateDeleted,
       required this.periodId});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -407,9 +383,6 @@ class Category extends DataClass implements Insertable<Category> {
     map['date_created'] = Variable<DateTime>(dateCreated);
     if (!nullToAbsent || dateUpdated != null) {
       map['date_updated'] = Variable<DateTime>(dateUpdated);
-    }
-    if (!nullToAbsent || dateDeleted != null) {
-      map['date_deleted'] = Variable<DateTime>(dateDeleted);
     }
     map['period_id'] = Variable<int>(periodId);
     return map;
@@ -425,9 +398,6 @@ class Category extends DataClass implements Insertable<Category> {
       dateUpdated: dateUpdated == null && nullToAbsent
           ? const Value.absent()
           : Value(dateUpdated),
-      dateDeleted: dateDeleted == null && nullToAbsent
-          ? const Value.absent()
-          : Value(dateDeleted),
       periodId: Value(periodId),
     );
   }
@@ -442,7 +412,6 @@ class Category extends DataClass implements Insertable<Category> {
       balance: serializer.fromJson<double>(json['balance']),
       dateCreated: serializer.fromJson<DateTime>(json['dateCreated']),
       dateUpdated: serializer.fromJson<DateTime?>(json['dateUpdated']),
-      dateDeleted: serializer.fromJson<DateTime?>(json['dateDeleted']),
       periodId: serializer.fromJson<int>(json['periodId']),
     );
   }
@@ -456,7 +425,6 @@ class Category extends DataClass implements Insertable<Category> {
       'balance': serializer.toJson<double>(balance),
       'dateCreated': serializer.toJson<DateTime>(dateCreated),
       'dateUpdated': serializer.toJson<DateTime?>(dateUpdated),
-      'dateDeleted': serializer.toJson<DateTime?>(dateDeleted),
       'periodId': serializer.toJson<int>(periodId),
     };
   }
@@ -468,7 +436,6 @@ class Category extends DataClass implements Insertable<Category> {
           double? balance,
           DateTime? dateCreated,
           Value<DateTime?> dateUpdated = const Value.absent(),
-          Value<DateTime?> dateDeleted = const Value.absent(),
           int? periodId}) =>
       Category(
         id: id ?? this.id,
@@ -477,7 +444,6 @@ class Category extends DataClass implements Insertable<Category> {
         balance: balance ?? this.balance,
         dateCreated: dateCreated ?? this.dateCreated,
         dateUpdated: dateUpdated.present ? dateUpdated.value : this.dateUpdated,
-        dateDeleted: dateDeleted.present ? dateDeleted.value : this.dateDeleted,
         periodId: periodId ?? this.periodId,
       );
   @override
@@ -489,15 +455,14 @@ class Category extends DataClass implements Insertable<Category> {
           ..write('balance: $balance, ')
           ..write('dateCreated: $dateCreated, ')
           ..write('dateUpdated: $dateUpdated, ')
-          ..write('dateDeleted: $dateDeleted, ')
           ..write('periodId: $periodId')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, name, maxBudget, balance, dateCreated,
-      dateUpdated, dateDeleted, periodId);
+  int get hashCode => Object.hash(
+      id, name, maxBudget, balance, dateCreated, dateUpdated, periodId);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -508,7 +473,6 @@ class Category extends DataClass implements Insertable<Category> {
           other.balance == this.balance &&
           other.dateCreated == this.dateCreated &&
           other.dateUpdated == this.dateUpdated &&
-          other.dateDeleted == this.dateDeleted &&
           other.periodId == this.periodId);
 }
 
@@ -519,7 +483,6 @@ class CategoriesCompanion extends UpdateCompanion<Category> {
   final Value<double> balance;
   final Value<DateTime> dateCreated;
   final Value<DateTime?> dateUpdated;
-  final Value<DateTime?> dateDeleted;
   final Value<int> periodId;
   const CategoriesCompanion({
     this.id = const Value.absent(),
@@ -528,7 +491,6 @@ class CategoriesCompanion extends UpdateCompanion<Category> {
     this.balance = const Value.absent(),
     this.dateCreated = const Value.absent(),
     this.dateUpdated = const Value.absent(),
-    this.dateDeleted = const Value.absent(),
     this.periodId = const Value.absent(),
   });
   CategoriesCompanion.insert({
@@ -538,7 +500,6 @@ class CategoriesCompanion extends UpdateCompanion<Category> {
     this.balance = const Value.absent(),
     this.dateCreated = const Value.absent(),
     this.dateUpdated = const Value.absent(),
-    this.dateDeleted = const Value.absent(),
     required int periodId,
   })  : name = Value(name),
         periodId = Value(periodId);
@@ -549,7 +510,6 @@ class CategoriesCompanion extends UpdateCompanion<Category> {
     Expression<double>? balance,
     Expression<DateTime>? dateCreated,
     Expression<DateTime>? dateUpdated,
-    Expression<DateTime>? dateDeleted,
     Expression<int>? periodId,
   }) {
     return RawValuesInsertable({
@@ -559,7 +519,6 @@ class CategoriesCompanion extends UpdateCompanion<Category> {
       if (balance != null) 'balance': balance,
       if (dateCreated != null) 'date_created': dateCreated,
       if (dateUpdated != null) 'date_updated': dateUpdated,
-      if (dateDeleted != null) 'date_deleted': dateDeleted,
       if (periodId != null) 'period_id': periodId,
     });
   }
@@ -571,7 +530,6 @@ class CategoriesCompanion extends UpdateCompanion<Category> {
       Value<double>? balance,
       Value<DateTime>? dateCreated,
       Value<DateTime?>? dateUpdated,
-      Value<DateTime?>? dateDeleted,
       Value<int>? periodId}) {
     return CategoriesCompanion(
       id: id ?? this.id,
@@ -580,7 +538,6 @@ class CategoriesCompanion extends UpdateCompanion<Category> {
       balance: balance ?? this.balance,
       dateCreated: dateCreated ?? this.dateCreated,
       dateUpdated: dateUpdated ?? this.dateUpdated,
-      dateDeleted: dateDeleted ?? this.dateDeleted,
       periodId: periodId ?? this.periodId,
     );
   }
@@ -606,9 +563,6 @@ class CategoriesCompanion extends UpdateCompanion<Category> {
     if (dateUpdated.present) {
       map['date_updated'] = Variable<DateTime>(dateUpdated.value);
     }
-    if (dateDeleted.present) {
-      map['date_deleted'] = Variable<DateTime>(dateDeleted.value);
-    }
     if (periodId.present) {
       map['period_id'] = Variable<int>(periodId.value);
     }
@@ -624,7 +578,6 @@ class CategoriesCompanion extends UpdateCompanion<Category> {
           ..write('balance: $balance, ')
           ..write('dateCreated: $dateCreated, ')
           ..write('dateUpdated: $dateUpdated, ')
-          ..write('dateDeleted: $dateDeleted, ')
           ..write('periodId: $periodId')
           ..write(')'))
         .toString();
@@ -677,15 +630,9 @@ class $SourcesTable extends Sources with TableInfo<$SourcesTable, Source> {
       type: DriftSqlType.dateTime,
       requiredDuringInsert: false,
       defaultValue: currentDateAndTime);
-  static const VerificationMeta _dateDeletedMeta =
-      const VerificationMeta('dateDeleted');
-  @override
-  late final GeneratedColumn<DateTime> dateDeleted = GeneratedColumn<DateTime>(
-      'date_deleted', aliasedName, true,
-      type: DriftSqlType.dateTime, requiredDuringInsert: false);
   @override
   List<GeneratedColumn> get $columns =>
-      [id, name, balance, dateCreated, dateUpdated, dateDeleted];
+      [id, name, balance, dateCreated, dateUpdated];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -721,12 +668,6 @@ class $SourcesTable extends Sources with TableInfo<$SourcesTable, Source> {
           dateUpdated.isAcceptableOrUnknown(
               data['date_updated']!, _dateUpdatedMeta));
     }
-    if (data.containsKey('date_deleted')) {
-      context.handle(
-          _dateDeletedMeta,
-          dateDeleted.isAcceptableOrUnknown(
-              data['date_deleted']!, _dateDeletedMeta));
-    }
     return context;
   }
 
@@ -746,8 +687,6 @@ class $SourcesTable extends Sources with TableInfo<$SourcesTable, Source> {
           .read(DriftSqlType.dateTime, data['${effectivePrefix}date_created'])!,
       dateUpdated: attachedDatabase.typeMapping
           .read(DriftSqlType.dateTime, data['${effectivePrefix}date_updated']),
-      dateDeleted: attachedDatabase.typeMapping
-          .read(DriftSqlType.dateTime, data['${effectivePrefix}date_deleted']),
     );
   }
 
@@ -763,14 +702,12 @@ class Source extends DataClass implements Insertable<Source> {
   final double balance;
   final DateTime dateCreated;
   final DateTime? dateUpdated;
-  final DateTime? dateDeleted;
   const Source(
       {required this.id,
       required this.name,
       required this.balance,
       required this.dateCreated,
-      this.dateUpdated,
-      this.dateDeleted});
+      this.dateUpdated});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -780,9 +717,6 @@ class Source extends DataClass implements Insertable<Source> {
     map['date_created'] = Variable<DateTime>(dateCreated);
     if (!nullToAbsent || dateUpdated != null) {
       map['date_updated'] = Variable<DateTime>(dateUpdated);
-    }
-    if (!nullToAbsent || dateDeleted != null) {
-      map['date_deleted'] = Variable<DateTime>(dateDeleted);
     }
     return map;
   }
@@ -796,9 +730,6 @@ class Source extends DataClass implements Insertable<Source> {
       dateUpdated: dateUpdated == null && nullToAbsent
           ? const Value.absent()
           : Value(dateUpdated),
-      dateDeleted: dateDeleted == null && nullToAbsent
-          ? const Value.absent()
-          : Value(dateDeleted),
     );
   }
 
@@ -811,7 +742,6 @@ class Source extends DataClass implements Insertable<Source> {
       balance: serializer.fromJson<double>(json['balance']),
       dateCreated: serializer.fromJson<DateTime>(json['dateCreated']),
       dateUpdated: serializer.fromJson<DateTime?>(json['dateUpdated']),
-      dateDeleted: serializer.fromJson<DateTime?>(json['dateDeleted']),
     );
   }
   @override
@@ -823,7 +753,6 @@ class Source extends DataClass implements Insertable<Source> {
       'balance': serializer.toJson<double>(balance),
       'dateCreated': serializer.toJson<DateTime>(dateCreated),
       'dateUpdated': serializer.toJson<DateTime?>(dateUpdated),
-      'dateDeleted': serializer.toJson<DateTime?>(dateDeleted),
     };
   }
 
@@ -832,15 +761,13 @@ class Source extends DataClass implements Insertable<Source> {
           String? name,
           double? balance,
           DateTime? dateCreated,
-          Value<DateTime?> dateUpdated = const Value.absent(),
-          Value<DateTime?> dateDeleted = const Value.absent()}) =>
+          Value<DateTime?> dateUpdated = const Value.absent()}) =>
       Source(
         id: id ?? this.id,
         name: name ?? this.name,
         balance: balance ?? this.balance,
         dateCreated: dateCreated ?? this.dateCreated,
         dateUpdated: dateUpdated.present ? dateUpdated.value : this.dateUpdated,
-        dateDeleted: dateDeleted.present ? dateDeleted.value : this.dateDeleted,
       );
   @override
   String toString() {
@@ -849,15 +776,13 @@ class Source extends DataClass implements Insertable<Source> {
           ..write('name: $name, ')
           ..write('balance: $balance, ')
           ..write('dateCreated: $dateCreated, ')
-          ..write('dateUpdated: $dateUpdated, ')
-          ..write('dateDeleted: $dateDeleted')
+          ..write('dateUpdated: $dateUpdated')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode =>
-      Object.hash(id, name, balance, dateCreated, dateUpdated, dateDeleted);
+  int get hashCode => Object.hash(id, name, balance, dateCreated, dateUpdated);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -866,8 +791,7 @@ class Source extends DataClass implements Insertable<Source> {
           other.name == this.name &&
           other.balance == this.balance &&
           other.dateCreated == this.dateCreated &&
-          other.dateUpdated == this.dateUpdated &&
-          other.dateDeleted == this.dateDeleted);
+          other.dateUpdated == this.dateUpdated);
 }
 
 class SourcesCompanion extends UpdateCompanion<Source> {
@@ -876,14 +800,12 @@ class SourcesCompanion extends UpdateCompanion<Source> {
   final Value<double> balance;
   final Value<DateTime> dateCreated;
   final Value<DateTime?> dateUpdated;
-  final Value<DateTime?> dateDeleted;
   const SourcesCompanion({
     this.id = const Value.absent(),
     this.name = const Value.absent(),
     this.balance = const Value.absent(),
     this.dateCreated = const Value.absent(),
     this.dateUpdated = const Value.absent(),
-    this.dateDeleted = const Value.absent(),
   });
   SourcesCompanion.insert({
     this.id = const Value.absent(),
@@ -891,7 +813,6 @@ class SourcesCompanion extends UpdateCompanion<Source> {
     this.balance = const Value.absent(),
     this.dateCreated = const Value.absent(),
     this.dateUpdated = const Value.absent(),
-    this.dateDeleted = const Value.absent(),
   }) : name = Value(name);
   static Insertable<Source> custom({
     Expression<int>? id,
@@ -899,7 +820,6 @@ class SourcesCompanion extends UpdateCompanion<Source> {
     Expression<double>? balance,
     Expression<DateTime>? dateCreated,
     Expression<DateTime>? dateUpdated,
-    Expression<DateTime>? dateDeleted,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -907,7 +827,6 @@ class SourcesCompanion extends UpdateCompanion<Source> {
       if (balance != null) 'balance': balance,
       if (dateCreated != null) 'date_created': dateCreated,
       if (dateUpdated != null) 'date_updated': dateUpdated,
-      if (dateDeleted != null) 'date_deleted': dateDeleted,
     });
   }
 
@@ -916,15 +835,13 @@ class SourcesCompanion extends UpdateCompanion<Source> {
       Value<String>? name,
       Value<double>? balance,
       Value<DateTime>? dateCreated,
-      Value<DateTime?>? dateUpdated,
-      Value<DateTime?>? dateDeleted}) {
+      Value<DateTime?>? dateUpdated}) {
     return SourcesCompanion(
       id: id ?? this.id,
       name: name ?? this.name,
       balance: balance ?? this.balance,
       dateCreated: dateCreated ?? this.dateCreated,
       dateUpdated: dateUpdated ?? this.dateUpdated,
-      dateDeleted: dateDeleted ?? this.dateDeleted,
     );
   }
 
@@ -946,9 +863,6 @@ class SourcesCompanion extends UpdateCompanion<Source> {
     if (dateUpdated.present) {
       map['date_updated'] = Variable<DateTime>(dateUpdated.value);
     }
-    if (dateDeleted.present) {
-      map['date_deleted'] = Variable<DateTime>(dateDeleted.value);
-    }
     return map;
   }
 
@@ -959,8 +873,7 @@ class SourcesCompanion extends UpdateCompanion<Source> {
           ..write('name: $name, ')
           ..write('balance: $balance, ')
           ..write('dateCreated: $dateCreated, ')
-          ..write('dateUpdated: $dateUpdated, ')
-          ..write('dateDeleted: $dateDeleted')
+          ..write('dateUpdated: $dateUpdated')
           ..write(')'))
         .toString();
   }
@@ -986,6 +899,11 @@ class $TransactionsTable extends Transactions
   late final GeneratedColumn<double> amount = GeneratedColumn<double>(
       'amount', aliasedName, false,
       type: DriftSqlType.double, requiredDuringInsert: true);
+  static const VerificationMeta _titleMeta = const VerificationMeta('title');
+  @override
+  late final GeneratedColumn<String> title = GeneratedColumn<String>(
+      'title', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
   static const VerificationMeta _descriptionMeta =
       const VerificationMeta('description');
   @override
@@ -1021,9 +939,24 @@ class $TransactionsTable extends Transactions
       type: DriftSqlType.int,
       requiredDuringInsert: true,
       $customConstraints: 'REFERENCES periods(id) ON DELETE CASCADE NOT NULL');
+  static const VerificationMeta _typeMeta = const VerificationMeta('type');
   @override
-  List<GeneratedColumn> get $columns =>
-      [id, amount, description, date, dateCreated, dateUpdated, periodId];
+  late final GeneratedColumnWithTypeConverter<TransactionTypes, int> type =
+      GeneratedColumn<int>('type', aliasedName, false,
+              type: DriftSqlType.int, requiredDuringInsert: true)
+          .withConverter<TransactionTypes>($TransactionsTable.$convertertype);
+  @override
+  List<GeneratedColumn> get $columns => [
+        id,
+        amount,
+        title,
+        description,
+        date,
+        dateCreated,
+        dateUpdated,
+        periodId,
+        type
+      ];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -1042,6 +975,12 @@ class $TransactionsTable extends Transactions
           amount.isAcceptableOrUnknown(data['amount']!, _amountMeta));
     } else if (isInserting) {
       context.missing(_amountMeta);
+    }
+    if (data.containsKey('title')) {
+      context.handle(
+          _titleMeta, title.isAcceptableOrUnknown(data['title']!, _titleMeta));
+    } else if (isInserting) {
+      context.missing(_titleMeta);
     }
     if (data.containsKey('description')) {
       context.handle(
@@ -1073,6 +1012,7 @@ class $TransactionsTable extends Transactions
     } else if (isInserting) {
       context.missing(_periodIdMeta);
     }
+    context.handle(_typeMeta, const VerificationResult.success());
     return context;
   }
 
@@ -1086,6 +1026,8 @@ class $TransactionsTable extends Transactions
           .read(DriftSqlType.int, data['${effectivePrefix}id'])!,
       amount: attachedDatabase.typeMapping
           .read(DriftSqlType.double, data['${effectivePrefix}amount'])!,
+      title: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}title'])!,
       description: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}description']),
       date: attachedDatabase.typeMapping
@@ -1096,6 +1038,9 @@ class $TransactionsTable extends Transactions
           .read(DriftSqlType.dateTime, data['${effectivePrefix}date_updated']),
       periodId: attachedDatabase.typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}period_id'])!,
+      type: $TransactionsTable.$convertertype.fromSql(attachedDatabase
+          .typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}type'])!),
     );
   }
 
@@ -1103,29 +1048,37 @@ class $TransactionsTable extends Transactions
   $TransactionsTable createAlias(String alias) {
     return $TransactionsTable(attachedDatabase, alias);
   }
+
+  static JsonTypeConverter2<TransactionTypes, int, int> $convertertype =
+      const EnumIndexConverter<TransactionTypes>(TransactionTypes.values);
 }
 
 class Transaction extends DataClass implements Insertable<Transaction> {
   final int id;
   final double amount;
+  final String title;
   final String? description;
   final DateTime date;
   final DateTime dateCreated;
   final DateTime? dateUpdated;
   final int periodId;
+  final TransactionTypes type;
   const Transaction(
       {required this.id,
       required this.amount,
+      required this.title,
       this.description,
       required this.date,
       required this.dateCreated,
       this.dateUpdated,
-      required this.periodId});
+      required this.periodId,
+      required this.type});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<int>(id);
     map['amount'] = Variable<double>(amount);
+    map['title'] = Variable<String>(title);
     if (!nullToAbsent || description != null) {
       map['description'] = Variable<String>(description);
     }
@@ -1135,6 +1088,10 @@ class Transaction extends DataClass implements Insertable<Transaction> {
       map['date_updated'] = Variable<DateTime>(dateUpdated);
     }
     map['period_id'] = Variable<int>(periodId);
+    {
+      map['type'] =
+          Variable<int>($TransactionsTable.$convertertype.toSql(type));
+    }
     return map;
   }
 
@@ -1142,6 +1099,7 @@ class Transaction extends DataClass implements Insertable<Transaction> {
     return TransactionsCompanion(
       id: Value(id),
       amount: Value(amount),
+      title: Value(title),
       description: description == null && nullToAbsent
           ? const Value.absent()
           : Value(description),
@@ -1151,6 +1109,7 @@ class Transaction extends DataClass implements Insertable<Transaction> {
           ? const Value.absent()
           : Value(dateUpdated),
       periodId: Value(periodId),
+      type: Value(type),
     );
   }
 
@@ -1160,11 +1119,14 @@ class Transaction extends DataClass implements Insertable<Transaction> {
     return Transaction(
       id: serializer.fromJson<int>(json['id']),
       amount: serializer.fromJson<double>(json['amount']),
+      title: serializer.fromJson<String>(json['title']),
       description: serializer.fromJson<String?>(json['description']),
       date: serializer.fromJson<DateTime>(json['date']),
       dateCreated: serializer.fromJson<DateTime>(json['dateCreated']),
       dateUpdated: serializer.fromJson<DateTime?>(json['dateUpdated']),
       periodId: serializer.fromJson<int>(json['periodId']),
+      type: $TransactionsTable.$convertertype
+          .fromJson(serializer.fromJson<int>(json['type'])),
     );
   }
   @override
@@ -1173,125 +1135,152 @@ class Transaction extends DataClass implements Insertable<Transaction> {
     return <String, dynamic>{
       'id': serializer.toJson<int>(id),
       'amount': serializer.toJson<double>(amount),
+      'title': serializer.toJson<String>(title),
       'description': serializer.toJson<String?>(description),
       'date': serializer.toJson<DateTime>(date),
       'dateCreated': serializer.toJson<DateTime>(dateCreated),
       'dateUpdated': serializer.toJson<DateTime?>(dateUpdated),
       'periodId': serializer.toJson<int>(periodId),
+      'type': serializer
+          .toJson<int>($TransactionsTable.$convertertype.toJson(type)),
     };
   }
 
   Transaction copyWith(
           {int? id,
           double? amount,
+          String? title,
           Value<String?> description = const Value.absent(),
           DateTime? date,
           DateTime? dateCreated,
           Value<DateTime?> dateUpdated = const Value.absent(),
-          int? periodId}) =>
+          int? periodId,
+          TransactionTypes? type}) =>
       Transaction(
         id: id ?? this.id,
         amount: amount ?? this.amount,
+        title: title ?? this.title,
         description: description.present ? description.value : this.description,
         date: date ?? this.date,
         dateCreated: dateCreated ?? this.dateCreated,
         dateUpdated: dateUpdated.present ? dateUpdated.value : this.dateUpdated,
         periodId: periodId ?? this.periodId,
+        type: type ?? this.type,
       );
   @override
   String toString() {
     return (StringBuffer('Transaction(')
           ..write('id: $id, ')
           ..write('amount: $amount, ')
+          ..write('title: $title, ')
           ..write('description: $description, ')
           ..write('date: $date, ')
           ..write('dateCreated: $dateCreated, ')
           ..write('dateUpdated: $dateUpdated, ')
-          ..write('periodId: $periodId')
+          ..write('periodId: $periodId, ')
+          ..write('type: $type')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(
-      id, amount, description, date, dateCreated, dateUpdated, periodId);
+  int get hashCode => Object.hash(id, amount, title, description, date,
+      dateCreated, dateUpdated, periodId, type);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is Transaction &&
           other.id == this.id &&
           other.amount == this.amount &&
+          other.title == this.title &&
           other.description == this.description &&
           other.date == this.date &&
           other.dateCreated == this.dateCreated &&
           other.dateUpdated == this.dateUpdated &&
-          other.periodId == this.periodId);
+          other.periodId == this.periodId &&
+          other.type == this.type);
 }
 
 class TransactionsCompanion extends UpdateCompanion<Transaction> {
   final Value<int> id;
   final Value<double> amount;
+  final Value<String> title;
   final Value<String?> description;
   final Value<DateTime> date;
   final Value<DateTime> dateCreated;
   final Value<DateTime?> dateUpdated;
   final Value<int> periodId;
+  final Value<TransactionTypes> type;
   const TransactionsCompanion({
     this.id = const Value.absent(),
     this.amount = const Value.absent(),
+    this.title = const Value.absent(),
     this.description = const Value.absent(),
     this.date = const Value.absent(),
     this.dateCreated = const Value.absent(),
     this.dateUpdated = const Value.absent(),
     this.periodId = const Value.absent(),
+    this.type = const Value.absent(),
   });
   TransactionsCompanion.insert({
     this.id = const Value.absent(),
     required double amount,
+    required String title,
     this.description = const Value.absent(),
     required DateTime date,
     this.dateCreated = const Value.absent(),
     this.dateUpdated = const Value.absent(),
     required int periodId,
+    required TransactionTypes type,
   })  : amount = Value(amount),
+        title = Value(title),
         date = Value(date),
-        periodId = Value(periodId);
+        periodId = Value(periodId),
+        type = Value(type);
   static Insertable<Transaction> custom({
     Expression<int>? id,
     Expression<double>? amount,
+    Expression<String>? title,
     Expression<String>? description,
     Expression<DateTime>? date,
     Expression<DateTime>? dateCreated,
     Expression<DateTime>? dateUpdated,
     Expression<int>? periodId,
+    Expression<int>? type,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (amount != null) 'amount': amount,
+      if (title != null) 'title': title,
       if (description != null) 'description': description,
       if (date != null) 'date': date,
       if (dateCreated != null) 'date_created': dateCreated,
       if (dateUpdated != null) 'date_updated': dateUpdated,
       if (periodId != null) 'period_id': periodId,
+      if (type != null) 'type': type,
     });
   }
 
   TransactionsCompanion copyWith(
       {Value<int>? id,
       Value<double>? amount,
+      Value<String>? title,
       Value<String?>? description,
       Value<DateTime>? date,
       Value<DateTime>? dateCreated,
       Value<DateTime?>? dateUpdated,
-      Value<int>? periodId}) {
+      Value<int>? periodId,
+      Value<TransactionTypes>? type}) {
     return TransactionsCompanion(
       id: id ?? this.id,
       amount: amount ?? this.amount,
+      title: title ?? this.title,
       description: description ?? this.description,
       date: date ?? this.date,
       dateCreated: dateCreated ?? this.dateCreated,
       dateUpdated: dateUpdated ?? this.dateUpdated,
       periodId: periodId ?? this.periodId,
+      type: type ?? this.type,
     );
   }
 
@@ -1303,6 +1292,9 @@ class TransactionsCompanion extends UpdateCompanion<Transaction> {
     }
     if (amount.present) {
       map['amount'] = Variable<double>(amount.value);
+    }
+    if (title.present) {
+      map['title'] = Variable<String>(title.value);
     }
     if (description.present) {
       map['description'] = Variable<String>(description.value);
@@ -1319,6 +1311,10 @@ class TransactionsCompanion extends UpdateCompanion<Transaction> {
     if (periodId.present) {
       map['period_id'] = Variable<int>(periodId.value);
     }
+    if (type.present) {
+      map['type'] =
+          Variable<int>($TransactionsTable.$convertertype.toSql(type.value));
+    }
     return map;
   }
 
@@ -1327,11 +1323,13 @@ class TransactionsCompanion extends UpdateCompanion<Transaction> {
     return (StringBuffer('TransactionsCompanion(')
           ..write('id: $id, ')
           ..write('amount: $amount, ')
+          ..write('title: $title, ')
           ..write('description: $description, ')
           ..write('date: $date, ')
           ..write('dateCreated: $dateCreated, ')
           ..write('dateUpdated: $dateUpdated, ')
-          ..write('periodId: $periodId')
+          ..write('periodId: $periodId, ')
+          ..write('type: $type')
           ..write(')'))
         .toString();
   }
@@ -1368,7 +1366,7 @@ class $TransfersTable extends Transfers
       'from_source_id', aliasedName, true,
       type: DriftSqlType.int,
       requiredDuringInsert: false,
-      $customConstraints: 'REFERENCES sources(id)');
+      $customConstraints: 'REFERENCES sources(id) ON DELETE SET NULL');
   static const VerificationMeta _toSourceIdMeta =
       const VerificationMeta('toSourceId');
   @override
@@ -1376,7 +1374,7 @@ class $TransfersTable extends Transfers
       'to_source_id', aliasedName, true,
       type: DriftSqlType.int,
       requiredDuringInsert: false,
-      $customConstraints: 'REFERENCES sources(id)');
+      $customConstraints: 'REFERENCES sources(id) ON DELETE SET NULL');
   @override
   List<GeneratedColumn> get $columns =>
       [id, transactionId, fromSourceId, toSourceId];
@@ -1636,7 +1634,7 @@ class $IncomesTable extends Incomes with TableInfo<$IncomesTable, Income> {
       'placed_onsource_id', aliasedName, true,
       type: DriftSqlType.int,
       requiredDuringInsert: false,
-      $customConstraints: 'REFERENCES sources(id)');
+      $customConstraints: 'REFERENCES sources(id) ON DELETE SET NULL');
   @override
   List<GeneratedColumn> get $columns => [id, transactionId, placedOnsourceId];
   @override
@@ -1861,7 +1859,7 @@ class $ExpensesTable extends Expenses with TableInfo<$ExpensesTable, Expense> {
       'source_id', aliasedName, true,
       type: DriftSqlType.int,
       requiredDuringInsert: false,
-      $customConstraints: 'REFERENCES sources(id)');
+      $customConstraints: 'REFERENCES sources(id) ON DELETE SET NULL');
   static const VerificationMeta _categoryIdMeta =
       const VerificationMeta('categoryId');
   @override
@@ -1869,7 +1867,7 @@ class $ExpensesTable extends Expenses with TableInfo<$ExpensesTable, Expense> {
       'category_id', aliasedName, true,
       type: DriftSqlType.int,
       requiredDuringInsert: false,
-      $customConstraints: 'REFERENCES categories(id)');
+      $customConstraints: 'REFERENCES categories(id) ON DELETE SET NULL');
   @override
   List<GeneratedColumn> get $columns =>
       [id, transactionId, sourceId, categoryId];
@@ -2143,6 +2141,20 @@ abstract class _$AppDatabase extends GeneratedDatabase {
             ],
           ),
           WritePropagation(
+            on: TableUpdateQuery.onTableName('sources',
+                limitUpdateKind: UpdateKind.delete),
+            result: [
+              TableUpdate('transfers', kind: UpdateKind.update),
+            ],
+          ),
+          WritePropagation(
+            on: TableUpdateQuery.onTableName('sources',
+                limitUpdateKind: UpdateKind.delete),
+            result: [
+              TableUpdate('transfers', kind: UpdateKind.update),
+            ],
+          ),
+          WritePropagation(
             on: TableUpdateQuery.onTableName('transactions',
                 limitUpdateKind: UpdateKind.delete),
             result: [
@@ -2150,10 +2162,31 @@ abstract class _$AppDatabase extends GeneratedDatabase {
             ],
           ),
           WritePropagation(
+            on: TableUpdateQuery.onTableName('sources',
+                limitUpdateKind: UpdateKind.delete),
+            result: [
+              TableUpdate('incomes', kind: UpdateKind.update),
+            ],
+          ),
+          WritePropagation(
             on: TableUpdateQuery.onTableName('transactions',
                 limitUpdateKind: UpdateKind.delete),
             result: [
               TableUpdate('expenses', kind: UpdateKind.delete),
+            ],
+          ),
+          WritePropagation(
+            on: TableUpdateQuery.onTableName('sources',
+                limitUpdateKind: UpdateKind.delete),
+            result: [
+              TableUpdate('expenses', kind: UpdateKind.update),
+            ],
+          ),
+          WritePropagation(
+            on: TableUpdateQuery.onTableName('categories',
+                limitUpdateKind: UpdateKind.delete),
+            result: [
+              TableUpdate('expenses', kind: UpdateKind.update),
             ],
           ),
         ],

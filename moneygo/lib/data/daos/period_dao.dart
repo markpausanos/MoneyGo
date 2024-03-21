@@ -6,7 +6,7 @@ part 'period_dao.g.dart';
 
 @DriftAccessor(tables: [Periods])
 class PeriodDao extends DatabaseAccessor<AppDatabase> with _$PeriodDaoMixin {
-  PeriodDao(AppDatabase db) : super(db);
+  PeriodDao(super.db);
 
   Stream<List<Period>> watchAllPeriods() => select(periods).watch();
 

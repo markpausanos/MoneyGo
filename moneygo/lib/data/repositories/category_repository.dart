@@ -11,11 +11,7 @@ class CategoryRepository {
       _categoriesDao.watchAllCategories();
 
   Future<List<Category>> getAllCategories() async {
-    var categories = await _categoriesDao.getAllCategories();
-
-    return categories
-        .where((category) => category.dateDeleted == null)
-        .toList();
+    return await _categoriesDao.getAllCategories();
   }
 
   Future<Category?> getCategoryById(int id) async =>
@@ -54,21 +50,11 @@ class CategoryRepository {
     return await _categoriesDao.updateCategory(category);
   }
 
-  Future<bool> deleteCategory(Category category) {
-    category = category.copyWith(dateDeleted: Value(DateTime.now()));
-
-    return _categoriesDao.updateCategory(category);
+  Future<int> deleteCategory(Category category) async {
+    return await _categoriesDao.deleteCategory(category);
   }
 
-  Future<bool> deleteCategoryById(int id) async {
-    var category = await getCategoryById(id);
-
-    if (category == null) {
-      throw Exception('Category not found');
-    }
-
-    category = category.copyWith(dateDeleted: Value(DateTime.now()));
-
-    return await _categoriesDao.updateCategory(category);
+  Future<int> deleteCategoryById(int id) async {
+    return await _categoriesDao.deleteCategoryById(id);
   }
 }

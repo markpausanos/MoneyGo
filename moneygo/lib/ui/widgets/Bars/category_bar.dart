@@ -8,12 +8,14 @@ import 'package:moneygo/ui/widgets/Themes/custom_text_scheme.dart';
 import 'package:moneygo/utils/utils.dart';
 
 class CategoryBar extends StatefulWidget {
+  final int id;
   final String name;
   final double maxValue;
   final double remainingValue;
 
   const CategoryBar({
     super.key,
+    required this.id,
     required this.name,
     required this.maxValue,
     required this.remainingValue,
@@ -25,7 +27,13 @@ class CategoryBar extends StatefulWidget {
 
 class _CategoryBarState extends State<CategoryBar> {
   String _currency = '\$';
-  double get percentage => widget.remainingValue / widget.maxValue;
+
+  double get percentage {
+    if (widget.remainingValue > widget.maxValue) {
+      return 1;
+    }
+    return widget.remainingValue / widget.maxValue;
+  }
 
   @override
   void initState() {

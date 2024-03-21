@@ -5,13 +5,19 @@ import 'package:moneygo/data/blocs/categories/category_bloc.dart';
 import 'package:moneygo/data/blocs/periods/period_bloc.dart';
 import 'package:moneygo/data/blocs/settings/settings_bloc.dart';
 import 'package:moneygo/data/blocs/sources/source_bloc.dart';
+import 'package:moneygo/data/blocs/transactions/transaction_bloc.dart';
 import 'package:moneygo/data/daos/category_dao.dart';
+import 'package:moneygo/data/daos/expense_dao.dart';
+import 'package:moneygo/data/daos/income_dao.dart';
 import 'package:moneygo/data/daos/period_dao.dart';
 import 'package:moneygo/data/daos/source_dao.dart';
+import 'package:moneygo/data/daos/transaction_dao.dart';
+import 'package:moneygo/data/daos/transfer_dao.dart';
 import 'package:moneygo/data/repositories/category_repository.dart';
 import 'package:moneygo/data/repositories/period_repository.dart';
 import 'package:moneygo/data/repositories/settings_repository.dart';
 import 'package:moneygo/data/repositories/source_repository.dart';
+import 'package:moneygo/data/repositories/transaction_repository.dart';
 import 'package:moneygo/routes.dart';
 import 'package:moneygo/ui/widgets/Themes/app_theme.dart';
 import 'package:provider/provider.dart';
@@ -56,11 +62,23 @@ class MyApp extends StatelessWidget {
             periodRepository: PeriodRepository(PeriodDao(context.read())),
           ),
         ),
+        BlocProvider<TransactionBloc>(
+          create: (context) => TransactionBloc(
+            transactionRepository: TransactionRepository(
+              TransactionDao(context.read()),
+              ExpenseDao(context.read()),
+              SourceDao(context.read()),
+              CategoryDao(context.read()),
+              IncomeDao(context.read()),
+              TransferDao(context.read()),
+            ),
+          ),
+        ),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
         theme: appTheme,
-        routes: AppRoutes.routes,
+        onGenerateRoute: AppRoutes.generateRoute,
       ),
     );
   }

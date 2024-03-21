@@ -8,11 +8,13 @@ import 'package:moneygo/ui/widgets/Themes/custom_text_scheme.dart';
 import 'package:moneygo/utils/utils.dart';
 
 class SourceBar extends StatefulWidget {
+  final int id;
   final String name;
   final double value;
 
   const SourceBar({
     super.key,
+    required this.id,
     required this.name,
     required this.value,
   });

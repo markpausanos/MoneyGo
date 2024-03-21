@@ -76,6 +76,7 @@ class _CategoriesCardState extends State<CategoriesCard> {
                       return Column(
                         children: [
                           CategoryBar(
+                            id: category.id,
                             name: category.name,
                             maxValue: category.maxBudget,
                             remainingValue: category.balance,

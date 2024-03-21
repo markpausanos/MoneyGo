@@ -7,6 +7,7 @@ class BaseDropdownFormField extends StatefulWidget {
   final int? initialValue;
   final String labelText;
   final Function(int)? onChanged;
+  final String? Function(int?)? validator;
 
   const BaseDropdownFormField({
     super.key,
@@ -14,6 +15,7 @@ class BaseDropdownFormField extends StatefulWidget {
     this.initialValue,
     required this.labelText,
     this.onChanged,
+    this.validator,
   });
 
   @override
@@ -21,63 +23,75 @@ class BaseDropdownFormField extends StatefulWidget {
 }
 
 class _BaseDropdownFormFieldState extends State<BaseDropdownFormField> {
-  late int _currentSelectedValue;
+  int? _currentSelectedValue;
 
   @override
   void initState() {
     super.initState();
-    if (widget.initialValue != null &&
-        widget.dropDownItemList.keys.contains(widget.initialValue)) {
-      _currentSelectedValue = widget.initialValue as int;
-    } else if (widget.dropDownItemList.isNotEmpty) {
-      _currentSelectedValue = widget.dropDownItemList.keys.first;
-    } else {
-      _currentSelectedValue = 0;
-    }
+    // If initialValue is provided and valid, use it, otherwise use null
+    _currentSelectedValue = widget.initialValue != null &&
+            widget.dropDownItemList.containsKey(widget.initialValue)
+        ? widget.initialValue
+        : widget.dropDownItemList.isNotEmpty
+            ? widget.dropDownItemList.keys.first
+            : null;
   }
 
   @override
   Widget build(BuildContext context) {
-    return FormField<int>(
-      builder: (FormFieldState<int> state) {
-        return InputDecorator(
-          decoration: InputDecoration(
-            filled: true,
-            fillColor: CustomColorScheme.backgroundColor,
-            labelStyle: CustomTextStyleScheme.textFieldText,
-            errorStyle:
-                CustomTextStyleScheme.textFieldText.copyWith(color: Colors.red),
-            labelText: widget.labelText,
-            border: OutlineInputBorder(
-                borderSide: BorderSide.none,
-                borderRadius: BorderRadius.circular(10.0)),
+    return DropdownButtonFormField<int>(
+      value: _currentSelectedValue,
+      isDense: true,
+      onChanged: widget.dropDownItemList.isNotEmpty
+          ? (int? newValue) {
+              setState(() {
+                _currentSelectedValue = newValue;
+              });
+              if (widget.onChanged != null && newValue != null) {
+                widget.onChanged!(newValue);
+              }
+            }
+          : null,
+      validator: widget.validator,
+      items: widget.dropDownItemList.isNotEmpty
+          ? widget.dropDownItemList.entries.map((entry) {
+              return DropdownMenuItem<int>(
+                value: entry.key,
+                child: Text(entry.value,
+                    style: CustomTextStyleScheme.textFieldText),
+              );
+            }).toList()
+          : null,
+      decoration: InputDecoration(
+        filled: true,
+        fillColor: CustomColorScheme.backgroundColor,
+        labelStyle: CustomTextStyleScheme.textFieldText,
+        errorStyle: const TextStyle(
+          backgroundColor:
+              Colors.white, // Set the background color for the error text
+          color: Colors.red,
+        ),
+        labelText: widget.labelText,
+        border: OutlineInputBorder(
+          borderSide: BorderSide.none,
+          borderRadius: BorderRadius.circular(10),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderSide: const BorderSide(
+            color: CustomColorScheme.appBlue,
+            width: 1.0,
           ),
-          isEmpty: _currentSelectedValue == 0,
-          child: DropdownButtonHideUnderline(
-            child: DropdownButton<int>(
-              value: _currentSelectedValue,
-              isDense: true,
-              onChanged: (int? newValue) {
-                setState(() {
-                  _currentSelectedValue =
-                      newValue ?? widget.dropDownItemList.keys.first;
-                  state.didChange(newValue);
-                });
-                if (widget.onChanged != null) {
-                  widget.onChanged!(_currentSelectedValue);
-                }
-              },
-              items: widget.dropDownItemList.entries.map((entry) {
-                return DropdownMenuItem<int>(
-                  value: entry.key,
-                  child: Text(entry.value,
-                      style: CustomTextStyleScheme.textFieldText),
-                );
-              }).toList(),
-            ),
-          ),
-        );
-      },
+          borderRadius: BorderRadius.circular(10),
+        ),
+        errorBorder: OutlineInputBorder(
+          borderSide: const BorderSide(color: Colors.red, width: 1.0),
+          borderRadius: BorderRadius.circular(10),
+        ),
+        focusedErrorBorder: OutlineInputBorder(
+          borderSide: const BorderSide(color: Colors.red, width: 1.0),
+          borderRadius: BorderRadius.circular(10),
+        ),
+      ),
     );
   }
 }

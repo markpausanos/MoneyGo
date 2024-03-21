@@ -6,7 +6,7 @@ part 'source_dao.g.dart';
 
 @DriftAccessor(tables: [Sources])
 class SourceDao extends DatabaseAccessor<AppDatabase> with _$SourceDaoMixin {
-  SourceDao(AppDatabase db) : super(db);
+  SourceDao(super.db);
 
   Stream<List<Source>> watchAllSources() => select(sources).watch();
 

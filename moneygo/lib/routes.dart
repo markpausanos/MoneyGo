@@ -1,15 +1,30 @@
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 import 'package:moneygo/ui/screens/categories.dart';
 import 'package:moneygo/ui/screens/home.dart';
-import 'package:moneygo/ui/screens/new_transaction.dart';
+import 'package:moneygo/ui/screens/new_expense.dart';
+import 'package:moneygo/ui/screens/new_income.dart';
+import 'package:moneygo/ui/screens/new_transfer.dart';
 import 'package:moneygo/ui/screens/sources.dart';
 
 class AppRoutes {
-  static Map<String, WidgetBuilder> routes = {
-    '/': (context) => const HomeScreen(),
-    '/home': (context) => const HomeScreen(),
-    '/categories': (context) => const CategoriesScreen(),
-    '/sources': (context) => const SourcesScreen(),
-    '/transactions/new': (context) => const NewTransactionScreen(),
-  };
+  static Route<dynamic> generateRoute(RouteSettings settings) {
+    switch (settings.name) {
+      case '/':
+        return MaterialPageRoute(builder: (_) => const HomeScreen());
+      case '/home':
+        return MaterialPageRoute(builder: (_) => const HomeScreen());
+      case '/categories':
+        return MaterialPageRoute(builder: (_) => const CategoriesScreen());
+      case '/sources':
+        return MaterialPageRoute(builder: (_) => const SourcesScreen());
+      case '/expense/new':
+        return MaterialPageRoute(builder: (_) => const NewExpenseScreen());
+      case '/income/new':
+        return MaterialPageRoute(builder: (_) => const NewIncomeScreen());
+      case '/transfer/new':
+        return MaterialPageRoute(builder: (_) => const NewTransferScreen());
+      default:
+        return MaterialPageRoute(builder: (_) => const HomeScreen());
+    }
+  }
 }

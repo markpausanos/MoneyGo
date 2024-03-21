@@ -9,5 +9,4 @@ class Sources extends Table {
       dateTime().withDefault(currentDateAndTime)();
   DateTimeColumn get dateUpdated =>
       dateTime().withDefault(currentDateAndTime).nullable()();
-  DateTimeColumn get dateDeleted => dateTime().nullable()();
 }

@@ -8,8 +8,10 @@ class Expenses extends Table {
   IntColumn get id => integer().autoIncrement()();
   IntColumn get transactionId => integer().customConstraint(
       'REFERENCES transactions(id) ON DELETE CASCADE NOT NULL')();
-  IntColumn get sourceId =>
-      integer().customConstraint('REFERENCES sources(id)').nullable()();
-  IntColumn get categoryId =>
-      integer().customConstraint('REFERENCES categories(id)').nullable()();
+  IntColumn get sourceId => integer()
+      .customConstraint('REFERENCES sources(id) ON DELETE SET NULL')
+      .nullable()();
+  IntColumn get categoryId => integer()
+      .customConstraint('REFERENCES categories(id) ON DELETE SET NULL')
+      .nullable()();
 }

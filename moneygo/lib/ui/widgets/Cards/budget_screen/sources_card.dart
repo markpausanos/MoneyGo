@@ -54,9 +54,11 @@ class _SourcesCardState extends State<SourcesCard> {
                   return Column(
                     children: [
                       SourceBar(
+                        id: source.id,
                         name: source.name,
                         value: source.balance,
                       ),
+                      const SizedBox(height: 10),
                     ],
                   );
                 }).toList(),
