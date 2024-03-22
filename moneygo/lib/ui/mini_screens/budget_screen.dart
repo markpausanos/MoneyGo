@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:moneygo/data/app_database.dart';
 import 'package:moneygo/data/blocs/categories/category_bloc.dart';
 import 'package:moneygo/data/blocs/categories/category_event.dart';
 import 'package:moneygo/data/blocs/categories/category_state.dart';
@@ -50,26 +51,13 @@ class _BudgetScreenState extends State<BudgetScreen> {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        _buildBudgetPeriodCard(),
+        const BudgetPeriodCard(),
         _buildBalanceCard(),
         _buildCategoriesCard(),
         _buildSourcesCard(),
         _buildTransactionsCard(),
       ],
     );
-  }
-
-  Widget _buildBudgetPeriodCard() {
-    return BlocBuilder<PeriodBloc, PeriodState>(builder: (context, state) {
-      return buildBlocStateWidget(state,
-          onLoad: const Loader(),
-          onError: (message) => DashedWidgetWithMessage(message: message),
-          onLoaded: (state) {
-            final periods = (state as PeriodsLoaded).periods;
-            return BudgetPeriodCard(
-                startDate: periods[0].startDate, endDate: periods[0].endDate);
-          });
-    });
   }
 
   Widget _buildBalanceCard() {
@@ -103,7 +91,6 @@ class _BudgetScreenState extends State<BudgetScreen> {
           onLoad: const Loader(),
           onError: (message) => DashedWidgetWithMessage(message: message),
           onLoaded: (state) {
-            print("Hello sources");
             return SourcesCard(
               sources: (state as SourcesLoaded).sources,
             );
@@ -117,15 +104,8 @@ class _BudgetScreenState extends State<BudgetScreen> {
       return buildBlocStateWidget(state,
           onLoad: const Loader(),
           onError: (message) => DashedWidgetWithMessage(message: message),
-          onLoaded: (state) {
-            var transactionsMap = (state as TransactionsLoaded).transactions;
-
-            for (var transaction in transactionsMap.values) {
-              print(transaction);
-
-            }
-            return TransactionsCard(transactionsMap: transactionsMap);
-          });
+          onLoaded: (state) => TransactionsCard(
+              transactionsMap: (state as TransactionsLoaded).transactions));
     });
   }
 }

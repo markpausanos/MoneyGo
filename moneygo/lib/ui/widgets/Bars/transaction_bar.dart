@@ -1,29 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:moneygo/data/app_database.dart';
 import 'package:moneygo/data/blocs/settings/settings_bloc.dart';
 import 'package:moneygo/data/blocs/settings/settings_event.dart';
 import 'package:moneygo/data/blocs/settings/settings_state.dart';
+import 'package:moneygo/data/models/expense_model.dart';
+import 'package:moneygo/data/models/income_model.dart';
+import 'package:moneygo/data/models/interfaces/transaction_subtype.dart';
+import 'package:moneygo/data/models/transfer_model.dart';
+import 'package:moneygo/ui/widgets/Themes/custom_color_scheme.dart';
 import 'package:moneygo/ui/widgets/Themes/custom_text_scheme.dart';
+import 'package:moneygo/utils/transaction_types.dart';
 import 'package:moneygo/utils/utils.dart';
 
 class TransactionBar extends StatefulWidget {
-  final int id;
-  final String title;
-  final DateTime date;
-  final double amount;
-  final String description;
-  final String? sign;
-  final Color color;
+  final Transaction transaction;
+  final TransactionType transactionType;
 
   const TransactionBar(
-      {super.key,
-      required this.id,
-      required this.title,
-      required this.date,
-      required this.amount,
-      required this.description,
-      required this.color,
-      this.sign});
+      {super.key, required this.transaction, required this.transactionType});
 
   @override
   State<TransactionBar> createState() => _TransactionBarState();
@@ -66,12 +61,12 @@ class _TransactionBarState extends State<TransactionBar> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            widget.title,
+                            widget.transaction.title,
                             style: CustomTextStyleScheme.barLabel,
                           ),
                           // Date in MMM dd, yyyy format
                           Text(
-                            Utils.getFormattedDateFull(widget.date),
+                            Utils.getFormattedDateFull(widget.transaction.date),
                             style: CustomTextStyleScheme.progressBarText,
                           ),
                         ],
@@ -82,28 +77,36 @@ class _TransactionBarState extends State<TransactionBar> {
                           Row(
                             children: [
                               Text(
-                                widget.sign ?? '',
-                                style: CustomTextStyleScheme.barLabel
-                                    .copyWith(color: widget.color),
+                                _getSign(widget.transaction) ?? '',
+                                style: CustomTextStyleScheme.barLabel.copyWith(
+                                    color: _getColor(widget.transaction,
+                                        widget.transactionType)),
                               ),
                               Text(
                                 _currency,
                                 style: CustomTextStyleScheme.barLabel.copyWith(
-                                    color: widget.color,
+                                    color: _getColor(widget.transaction,
+                                        widget.transactionType),
                                     fontFamily: CustomTextStyleScheme
                                         .barBalancePeso.fontFamily),
                               ),
                               Text(
-                                Utils.formatNumber(widget.amount),
-                                style: CustomTextStyleScheme.barLabel
-                                    .copyWith(color: widget.color),
-                              ),
+                                  Utils.formatNumber(widget.transaction.amount),
+                                  style:
+                                      CustomTextStyleScheme.barLabel.copyWith(
+                                    color: _getColor(widget.transaction,
+                                        widget.transactionType),
+                                  )),
                             ],
                           ),
                           Text(
-                            widget.description.length > 15
-                                ? '${widget.description.substring(0, 15)}...'
-                                : widget.description,
+                            _getDescription(widget.transaction,
+                                            widget.transactionType)
+                                        .length >
+                                    20
+                                ? '${_getDescription(widget.transaction, widget.transactionType).substring(0, 20)}...'
+                                : _getDescription(
+                                    widget.transaction, widget.transactionType),
                             style: CustomTextStyleScheme.progressBarText,
                           ),
                         ],
@@ -117,5 +120,61 @@ class _TransactionBarState extends State<TransactionBar> {
         );
       },
     );
+  }
+
+  String? _getSign(Transaction transaction) {
+    if (transaction.type == TransactionTypes.transfer) {
+      return null;
+    } else if (transaction.type == TransactionTypes.expense) {
+      return transaction.amount > 0 ? "-" : "+";
+    } else if (transaction.type == TransactionTypes.income) {
+      return "+";
+    }
+    return null;
+  }
+
+  String _getDescription(
+      Transaction transaction, TransactionType transactionType) {
+    String description = "Unknown Transaction Type";
+
+    if (transactionType is ExpenseModel) {
+      String sourceName = transactionType.source?.name ?? "";
+      String categoryName =
+          transactionType.category?.name ?? "";
+
+      description = transaction.amount > 0
+          ? "$categoryName using $sourceName"
+          : "Refund for $categoryName to $sourceName";
+    } else if (transactionType is IncomeModel) {
+      String placedOnSourceText =
+          transactionType.placedOnSource?.name ?? "Inexistent Source";
+
+      description = "To $placedOnSourceText";
+    } else if (transactionType is TransferModel) {
+      String fromSourceName =
+          transactionType.fromSource?.name ?? "Inexistent Source";
+      String toSourceName =
+          transactionType.toSource?.name ?? "Inexistent Source";
+
+      description = "$fromSourceName to $toSourceName";
+    }
+
+    return description;
+  }
+
+  Color _getColor(Transaction transaction, TransactionType transactionType) {
+    Color color = Colors.black;
+
+    if (transactionType is ExpenseModel) {
+      color = transaction.amount < 0
+          ? CustomColorScheme.appGreen
+          : CustomColorScheme.appRed;
+    } else if (transactionType is IncomeModel) {
+      color = CustomColorScheme.appGreen;
+    } else if (transactionType is TransferModel) {
+      color = CustomColorScheme.appOrange;
+    }
+
+    return color;
   }
 }

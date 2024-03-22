@@ -931,14 +931,6 @@ class $TransactionsTable extends Transactions
       type: DriftSqlType.dateTime,
       requiredDuringInsert: false,
       defaultValue: currentDateAndTime);
-  static const VerificationMeta _periodIdMeta =
-      const VerificationMeta('periodId');
-  @override
-  late final GeneratedColumn<int> periodId = GeneratedColumn<int>(
-      'period_id', aliasedName, false,
-      type: DriftSqlType.int,
-      requiredDuringInsert: true,
-      $customConstraints: 'REFERENCES periods(id) ON DELETE CASCADE NOT NULL');
   static const VerificationMeta _typeMeta = const VerificationMeta('type');
   @override
   late final GeneratedColumnWithTypeConverter<TransactionTypes, int> type =
@@ -946,17 +938,8 @@ class $TransactionsTable extends Transactions
               type: DriftSqlType.int, requiredDuringInsert: true)
           .withConverter<TransactionTypes>($TransactionsTable.$convertertype);
   @override
-  List<GeneratedColumn> get $columns => [
-        id,
-        amount,
-        title,
-        description,
-        date,
-        dateCreated,
-        dateUpdated,
-        periodId,
-        type
-      ];
+  List<GeneratedColumn> get $columns =>
+      [id, amount, title, description, date, dateCreated, dateUpdated, type];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -1006,12 +989,6 @@ class $TransactionsTable extends Transactions
           dateUpdated.isAcceptableOrUnknown(
               data['date_updated']!, _dateUpdatedMeta));
     }
-    if (data.containsKey('period_id')) {
-      context.handle(_periodIdMeta,
-          periodId.isAcceptableOrUnknown(data['period_id']!, _periodIdMeta));
-    } else if (isInserting) {
-      context.missing(_periodIdMeta);
-    }
     context.handle(_typeMeta, const VerificationResult.success());
     return context;
   }
@@ -1036,8 +1013,6 @@ class $TransactionsTable extends Transactions
           .read(DriftSqlType.dateTime, data['${effectivePrefix}date_created'])!,
       dateUpdated: attachedDatabase.typeMapping
           .read(DriftSqlType.dateTime, data['${effectivePrefix}date_updated']),
-      periodId: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}period_id'])!,
       type: $TransactionsTable.$convertertype.fromSql(attachedDatabase
           .typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}type'])!),
@@ -1061,7 +1036,6 @@ class Transaction extends DataClass implements Insertable<Transaction> {
   final DateTime date;
   final DateTime dateCreated;
   final DateTime? dateUpdated;
-  final int periodId;
   final TransactionTypes type;
   const Transaction(
       {required this.id,
@@ -1071,7 +1045,6 @@ class Transaction extends DataClass implements Insertable<Transaction> {
       required this.date,
       required this.dateCreated,
       this.dateUpdated,
-      required this.periodId,
       required this.type});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -1087,7 +1060,6 @@ class Transaction extends DataClass implements Insertable<Transaction> {
     if (!nullToAbsent || dateUpdated != null) {
       map['date_updated'] = Variable<DateTime>(dateUpdated);
     }
-    map['period_id'] = Variable<int>(periodId);
     {
       map['type'] =
           Variable<int>($TransactionsTable.$convertertype.toSql(type));
@@ -1108,7 +1080,6 @@ class Transaction extends DataClass implements Insertable<Transaction> {
       dateUpdated: dateUpdated == null && nullToAbsent
           ? const Value.absent()
           : Value(dateUpdated),
-      periodId: Value(periodId),
       type: Value(type),
     );
   }
@@ -1124,7 +1095,6 @@ class Transaction extends DataClass implements Insertable<Transaction> {
       date: serializer.fromJson<DateTime>(json['date']),
       dateCreated: serializer.fromJson<DateTime>(json['dateCreated']),
       dateUpdated: serializer.fromJson<DateTime?>(json['dateUpdated']),
-      periodId: serializer.fromJson<int>(json['periodId']),
       type: $TransactionsTable.$convertertype
           .fromJson(serializer.fromJson<int>(json['type'])),
     );
@@ -1140,7 +1110,6 @@ class Transaction extends DataClass implements Insertable<Transaction> {
       'date': serializer.toJson<DateTime>(date),
       'dateCreated': serializer.toJson<DateTime>(dateCreated),
       'dateUpdated': serializer.toJson<DateTime?>(dateUpdated),
-      'periodId': serializer.toJson<int>(periodId),
       'type': serializer
           .toJson<int>($TransactionsTable.$convertertype.toJson(type)),
     };
@@ -1154,7 +1123,6 @@ class Transaction extends DataClass implements Insertable<Transaction> {
           DateTime? date,
           DateTime? dateCreated,
           Value<DateTime?> dateUpdated = const Value.absent(),
-          int? periodId,
           TransactionTypes? type}) =>
       Transaction(
         id: id ?? this.id,
@@ -1164,7 +1132,6 @@ class Transaction extends DataClass implements Insertable<Transaction> {
         date: date ?? this.date,
         dateCreated: dateCreated ?? this.dateCreated,
         dateUpdated: dateUpdated.present ? dateUpdated.value : this.dateUpdated,
-        periodId: periodId ?? this.periodId,
         type: type ?? this.type,
       );
   @override
@@ -1177,15 +1144,14 @@ class Transaction extends DataClass implements Insertable<Transaction> {
           ..write('date: $date, ')
           ..write('dateCreated: $dateCreated, ')
           ..write('dateUpdated: $dateUpdated, ')
-          ..write('periodId: $periodId, ')
           ..write('type: $type')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, amount, title, description, date,
-      dateCreated, dateUpdated, periodId, type);
+  int get hashCode => Object.hash(
+      id, amount, title, description, date, dateCreated, dateUpdated, type);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -1197,7 +1163,6 @@ class Transaction extends DataClass implements Insertable<Transaction> {
           other.date == this.date &&
           other.dateCreated == this.dateCreated &&
           other.dateUpdated == this.dateUpdated &&
-          other.periodId == this.periodId &&
           other.type == this.type);
 }
 
@@ -1209,7 +1174,6 @@ class TransactionsCompanion extends UpdateCompanion<Transaction> {
   final Value<DateTime> date;
   final Value<DateTime> dateCreated;
   final Value<DateTime?> dateUpdated;
-  final Value<int> periodId;
   final Value<TransactionTypes> type;
   const TransactionsCompanion({
     this.id = const Value.absent(),
@@ -1219,7 +1183,6 @@ class TransactionsCompanion extends UpdateCompanion<Transaction> {
     this.date = const Value.absent(),
     this.dateCreated = const Value.absent(),
     this.dateUpdated = const Value.absent(),
-    this.periodId = const Value.absent(),
     this.type = const Value.absent(),
   });
   TransactionsCompanion.insert({
@@ -1230,12 +1193,10 @@ class TransactionsCompanion extends UpdateCompanion<Transaction> {
     required DateTime date,
     this.dateCreated = const Value.absent(),
     this.dateUpdated = const Value.absent(),
-    required int periodId,
     required TransactionTypes type,
   })  : amount = Value(amount),
         title = Value(title),
         date = Value(date),
-        periodId = Value(periodId),
         type = Value(type);
   static Insertable<Transaction> custom({
     Expression<int>? id,
@@ -1245,7 +1206,6 @@ class TransactionsCompanion extends UpdateCompanion<Transaction> {
     Expression<DateTime>? date,
     Expression<DateTime>? dateCreated,
     Expression<DateTime>? dateUpdated,
-    Expression<int>? periodId,
     Expression<int>? type,
   }) {
     return RawValuesInsertable({
@@ -1256,7 +1216,6 @@ class TransactionsCompanion extends UpdateCompanion<Transaction> {
       if (date != null) 'date': date,
       if (dateCreated != null) 'date_created': dateCreated,
       if (dateUpdated != null) 'date_updated': dateUpdated,
-      if (periodId != null) 'period_id': periodId,
       if (type != null) 'type': type,
     });
   }
@@ -1269,7 +1228,6 @@ class TransactionsCompanion extends UpdateCompanion<Transaction> {
       Value<DateTime>? date,
       Value<DateTime>? dateCreated,
       Value<DateTime?>? dateUpdated,
-      Value<int>? periodId,
       Value<TransactionTypes>? type}) {
     return TransactionsCompanion(
       id: id ?? this.id,
@@ -1279,7 +1237,6 @@ class TransactionsCompanion extends UpdateCompanion<Transaction> {
       date: date ?? this.date,
       dateCreated: dateCreated ?? this.dateCreated,
       dateUpdated: dateUpdated ?? this.dateUpdated,
-      periodId: periodId ?? this.periodId,
       type: type ?? this.type,
     );
   }
@@ -1308,9 +1265,6 @@ class TransactionsCompanion extends UpdateCompanion<Transaction> {
     if (dateUpdated.present) {
       map['date_updated'] = Variable<DateTime>(dateUpdated.value);
     }
-    if (periodId.present) {
-      map['period_id'] = Variable<int>(periodId.value);
-    }
     if (type.present) {
       map['type'] =
           Variable<int>($TransactionsTable.$convertertype.toSql(type.value));
@@ -1328,7 +1282,6 @@ class TransactionsCompanion extends UpdateCompanion<Transaction> {
           ..write('date: $date, ')
           ..write('dateCreated: $dateCreated, ')
           ..write('dateUpdated: $dateUpdated, ')
-          ..write('periodId: $periodId, ')
           ..write('type: $type')
           ..write(')'))
         .toString();
@@ -1363,18 +1316,18 @@ class $TransfersTable extends Transfers
       const VerificationMeta('fromSourceId');
   @override
   late final GeneratedColumn<int> fromSourceId = GeneratedColumn<int>(
-      'from_source_id', aliasedName, true,
+      'from_source_id', aliasedName, false,
       type: DriftSqlType.int,
-      requiredDuringInsert: false,
-      $customConstraints: 'REFERENCES sources(id) ON DELETE SET NULL');
+      requiredDuringInsert: true,
+      $customConstraints: 'REFERENCES sources(id) ON DELETE CASCADE NOT NULL');
   static const VerificationMeta _toSourceIdMeta =
       const VerificationMeta('toSourceId');
   @override
   late final GeneratedColumn<int> toSourceId = GeneratedColumn<int>(
-      'to_source_id', aliasedName, true,
+      'to_source_id', aliasedName, false,
       type: DriftSqlType.int,
-      requiredDuringInsert: false,
-      $customConstraints: 'REFERENCES sources(id) ON DELETE SET NULL');
+      requiredDuringInsert: true,
+      $customConstraints: 'REFERENCES sources(id) ON DELETE CASCADE NOT NULL');
   @override
   List<GeneratedColumn> get $columns =>
       [id, transactionId, fromSourceId, toSourceId];
@@ -1404,12 +1357,16 @@ class $TransfersTable extends Transfers
           _fromSourceIdMeta,
           fromSourceId.isAcceptableOrUnknown(
               data['from_source_id']!, _fromSourceIdMeta));
+    } else if (isInserting) {
+      context.missing(_fromSourceIdMeta);
     }
     if (data.containsKey('to_source_id')) {
       context.handle(
           _toSourceIdMeta,
           toSourceId.isAcceptableOrUnknown(
               data['to_source_id']!, _toSourceIdMeta));
+    } else if (isInserting) {
+      context.missing(_toSourceIdMeta);
     }
     return context;
   }
@@ -1425,9 +1382,9 @@ class $TransfersTable extends Transfers
       transactionId: attachedDatabase.typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}transaction_id'])!,
       fromSourceId: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}from_source_id']),
+          .read(DriftSqlType.int, data['${effectivePrefix}from_source_id'])!,
       toSourceId: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}to_source_id']),
+          .read(DriftSqlType.int, data['${effectivePrefix}to_source_id'])!,
     );
   }
 
@@ -1440,24 +1397,20 @@ class $TransfersTable extends Transfers
 class Transfer extends DataClass implements Insertable<Transfer> {
   final int id;
   final int transactionId;
-  final int? fromSourceId;
-  final int? toSourceId;
+  final int fromSourceId;
+  final int toSourceId;
   const Transfer(
       {required this.id,
       required this.transactionId,
-      this.fromSourceId,
-      this.toSourceId});
+      required this.fromSourceId,
+      required this.toSourceId});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<int>(id);
     map['transaction_id'] = Variable<int>(transactionId);
-    if (!nullToAbsent || fromSourceId != null) {
-      map['from_source_id'] = Variable<int>(fromSourceId);
-    }
-    if (!nullToAbsent || toSourceId != null) {
-      map['to_source_id'] = Variable<int>(toSourceId);
-    }
+    map['from_source_id'] = Variable<int>(fromSourceId);
+    map['to_source_id'] = Variable<int>(toSourceId);
     return map;
   }
 
@@ -1465,12 +1418,8 @@ class Transfer extends DataClass implements Insertable<Transfer> {
     return TransfersCompanion(
       id: Value(id),
       transactionId: Value(transactionId),
-      fromSourceId: fromSourceId == null && nullToAbsent
-          ? const Value.absent()
-          : Value(fromSourceId),
-      toSourceId: toSourceId == null && nullToAbsent
-          ? const Value.absent()
-          : Value(toSourceId),
+      fromSourceId: Value(fromSourceId),
+      toSourceId: Value(toSourceId),
     );
   }
 
@@ -1480,8 +1429,8 @@ class Transfer extends DataClass implements Insertable<Transfer> {
     return Transfer(
       id: serializer.fromJson<int>(json['id']),
       transactionId: serializer.fromJson<int>(json['transactionId']),
-      fromSourceId: serializer.fromJson<int?>(json['fromSourceId']),
-      toSourceId: serializer.fromJson<int?>(json['toSourceId']),
+      fromSourceId: serializer.fromJson<int>(json['fromSourceId']),
+      toSourceId: serializer.fromJson<int>(json['toSourceId']),
     );
   }
   @override
@@ -1490,22 +1439,18 @@ class Transfer extends DataClass implements Insertable<Transfer> {
     return <String, dynamic>{
       'id': serializer.toJson<int>(id),
       'transactionId': serializer.toJson<int>(transactionId),
-      'fromSourceId': serializer.toJson<int?>(fromSourceId),
-      'toSourceId': serializer.toJson<int?>(toSourceId),
+      'fromSourceId': serializer.toJson<int>(fromSourceId),
+      'toSourceId': serializer.toJson<int>(toSourceId),
     };
   }
 
   Transfer copyWith(
-          {int? id,
-          int? transactionId,
-          Value<int?> fromSourceId = const Value.absent(),
-          Value<int?> toSourceId = const Value.absent()}) =>
+          {int? id, int? transactionId, int? fromSourceId, int? toSourceId}) =>
       Transfer(
         id: id ?? this.id,
         transactionId: transactionId ?? this.transactionId,
-        fromSourceId:
-            fromSourceId.present ? fromSourceId.value : this.fromSourceId,
-        toSourceId: toSourceId.present ? toSourceId.value : this.toSourceId,
+        fromSourceId: fromSourceId ?? this.fromSourceId,
+        toSourceId: toSourceId ?? this.toSourceId,
       );
   @override
   String toString() {
@@ -1533,8 +1478,8 @@ class Transfer extends DataClass implements Insertable<Transfer> {
 class TransfersCompanion extends UpdateCompanion<Transfer> {
   final Value<int> id;
   final Value<int> transactionId;
-  final Value<int?> fromSourceId;
-  final Value<int?> toSourceId;
+  final Value<int> fromSourceId;
+  final Value<int> toSourceId;
   const TransfersCompanion({
     this.id = const Value.absent(),
     this.transactionId = const Value.absent(),
@@ -1544,9 +1489,11 @@ class TransfersCompanion extends UpdateCompanion<Transfer> {
   TransfersCompanion.insert({
     this.id = const Value.absent(),
     required int transactionId,
-    this.fromSourceId = const Value.absent(),
-    this.toSourceId = const Value.absent(),
-  }) : transactionId = Value(transactionId);
+    required int fromSourceId,
+    required int toSourceId,
+  })  : transactionId = Value(transactionId),
+        fromSourceId = Value(fromSourceId),
+        toSourceId = Value(toSourceId);
   static Insertable<Transfer> custom({
     Expression<int>? id,
     Expression<int>? transactionId,
@@ -1564,8 +1511,8 @@ class TransfersCompanion extends UpdateCompanion<Transfer> {
   TransfersCompanion copyWith(
       {Value<int>? id,
       Value<int>? transactionId,
-      Value<int?>? fromSourceId,
-      Value<int?>? toSourceId}) {
+      Value<int>? fromSourceId,
+      Value<int>? toSourceId}) {
     return TransfersCompanion(
       id: id ?? this.id,
       transactionId: transactionId ?? this.transactionId,
@@ -1631,10 +1578,10 @@ class $IncomesTable extends Incomes with TableInfo<$IncomesTable, Income> {
       const VerificationMeta('placedOnsourceId');
   @override
   late final GeneratedColumn<int> placedOnsourceId = GeneratedColumn<int>(
-      'placed_onsource_id', aliasedName, true,
+      'placed_onsource_id', aliasedName, false,
       type: DriftSqlType.int,
-      requiredDuringInsert: false,
-      $customConstraints: 'REFERENCES sources(id) ON DELETE SET NULL');
+      requiredDuringInsert: true,
+      $customConstraints: 'REFERENCES sources(id) ON DELETE CASCADE NOT NULL');
   @override
   List<GeneratedColumn> get $columns => [id, transactionId, placedOnsourceId];
   @override
@@ -1663,6 +1610,8 @@ class $IncomesTable extends Incomes with TableInfo<$IncomesTable, Income> {
           _placedOnsourceIdMeta,
           placedOnsourceId.isAcceptableOrUnknown(
               data['placed_onsource_id']!, _placedOnsourceIdMeta));
+    } else if (isInserting) {
+      context.missing(_placedOnsourceIdMeta);
     }
     return context;
   }
@@ -1677,8 +1626,8 @@ class $IncomesTable extends Incomes with TableInfo<$IncomesTable, Income> {
           .read(DriftSqlType.int, data['${effectivePrefix}id'])!,
       transactionId: attachedDatabase.typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}transaction_id'])!,
-      placedOnsourceId: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}placed_onsource_id']),
+      placedOnsourceId: attachedDatabase.typeMapping.read(
+          DriftSqlType.int, data['${effectivePrefix}placed_onsource_id'])!,
     );
   }
 
@@ -1691,17 +1640,17 @@ class $IncomesTable extends Incomes with TableInfo<$IncomesTable, Income> {
 class Income extends DataClass implements Insertable<Income> {
   final int id;
   final int transactionId;
-  final int? placedOnsourceId;
+  final int placedOnsourceId;
   const Income(
-      {required this.id, required this.transactionId, this.placedOnsourceId});
+      {required this.id,
+      required this.transactionId,
+      required this.placedOnsourceId});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<int>(id);
     map['transaction_id'] = Variable<int>(transactionId);
-    if (!nullToAbsent || placedOnsourceId != null) {
-      map['placed_onsource_id'] = Variable<int>(placedOnsourceId);
-    }
+    map['placed_onsource_id'] = Variable<int>(placedOnsourceId);
     return map;
   }
 
@@ -1709,9 +1658,7 @@ class Income extends DataClass implements Insertable<Income> {
     return IncomesCompanion(
       id: Value(id),
       transactionId: Value(transactionId),
-      placedOnsourceId: placedOnsourceId == null && nullToAbsent
-          ? const Value.absent()
-          : Value(placedOnsourceId),
+      placedOnsourceId: Value(placedOnsourceId),
     );
   }
 
@@ -1721,7 +1668,7 @@ class Income extends DataClass implements Insertable<Income> {
     return Income(
       id: serializer.fromJson<int>(json['id']),
       transactionId: serializer.fromJson<int>(json['transactionId']),
-      placedOnsourceId: serializer.fromJson<int?>(json['placedOnsourceId']),
+      placedOnsourceId: serializer.fromJson<int>(json['placedOnsourceId']),
     );
   }
   @override
@@ -1730,20 +1677,15 @@ class Income extends DataClass implements Insertable<Income> {
     return <String, dynamic>{
       'id': serializer.toJson<int>(id),
       'transactionId': serializer.toJson<int>(transactionId),
-      'placedOnsourceId': serializer.toJson<int?>(placedOnsourceId),
+      'placedOnsourceId': serializer.toJson<int>(placedOnsourceId),
     };
   }
 
-  Income copyWith(
-          {int? id,
-          int? transactionId,
-          Value<int?> placedOnsourceId = const Value.absent()}) =>
+  Income copyWith({int? id, int? transactionId, int? placedOnsourceId}) =>
       Income(
         id: id ?? this.id,
         transactionId: transactionId ?? this.transactionId,
-        placedOnsourceId: placedOnsourceId.present
-            ? placedOnsourceId.value
-            : this.placedOnsourceId,
+        placedOnsourceId: placedOnsourceId ?? this.placedOnsourceId,
       );
   @override
   String toString() {
@@ -1769,7 +1711,7 @@ class Income extends DataClass implements Insertable<Income> {
 class IncomesCompanion extends UpdateCompanion<Income> {
   final Value<int> id;
   final Value<int> transactionId;
-  final Value<int?> placedOnsourceId;
+  final Value<int> placedOnsourceId;
   const IncomesCompanion({
     this.id = const Value.absent(),
     this.transactionId = const Value.absent(),
@@ -1778,8 +1720,9 @@ class IncomesCompanion extends UpdateCompanion<Income> {
   IncomesCompanion.insert({
     this.id = const Value.absent(),
     required int transactionId,
-    this.placedOnsourceId = const Value.absent(),
-  }) : transactionId = Value(transactionId);
+    required int placedOnsourceId,
+  })  : transactionId = Value(transactionId),
+        placedOnsourceId = Value(placedOnsourceId);
   static Insertable<Income> custom({
     Expression<int>? id,
     Expression<int>? transactionId,
@@ -1795,7 +1738,7 @@ class IncomesCompanion extends UpdateCompanion<Income> {
   IncomesCompanion copyWith(
       {Value<int>? id,
       Value<int>? transactionId,
-      Value<int?>? placedOnsourceId}) {
+      Value<int>? placedOnsourceId}) {
     return IncomesCompanion(
       id: id ?? this.id,
       transactionId: transactionId ?? this.transactionId,
@@ -1856,10 +1799,10 @@ class $ExpensesTable extends Expenses with TableInfo<$ExpensesTable, Expense> {
       const VerificationMeta('sourceId');
   @override
   late final GeneratedColumn<int> sourceId = GeneratedColumn<int>(
-      'source_id', aliasedName, true,
+      'source_id', aliasedName, false,
       type: DriftSqlType.int,
-      requiredDuringInsert: false,
-      $customConstraints: 'REFERENCES sources(id) ON DELETE SET NULL');
+      requiredDuringInsert: true,
+      $customConstraints: 'REFERENCES sources(id) ON DELETE CASCADE NOT NULL');
   static const VerificationMeta _categoryIdMeta =
       const VerificationMeta('categoryId');
   @override
@@ -1895,6 +1838,8 @@ class $ExpensesTable extends Expenses with TableInfo<$ExpensesTable, Expense> {
     if (data.containsKey('source_id')) {
       context.handle(_sourceIdMeta,
           sourceId.isAcceptableOrUnknown(data['source_id']!, _sourceIdMeta));
+    } else if (isInserting) {
+      context.missing(_sourceIdMeta);
     }
     if (data.containsKey('category_id')) {
       context.handle(
@@ -1916,7 +1861,7 @@ class $ExpensesTable extends Expenses with TableInfo<$ExpensesTable, Expense> {
       transactionId: attachedDatabase.typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}transaction_id'])!,
       sourceId: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}source_id']),
+          .read(DriftSqlType.int, data['${effectivePrefix}source_id'])!,
       categoryId: attachedDatabase.typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}category_id']),
     );
@@ -1931,21 +1876,19 @@ class $ExpensesTable extends Expenses with TableInfo<$ExpensesTable, Expense> {
 class Expense extends DataClass implements Insertable<Expense> {
   final int id;
   final int transactionId;
-  final int? sourceId;
+  final int sourceId;
   final int? categoryId;
   const Expense(
       {required this.id,
       required this.transactionId,
-      this.sourceId,
+      required this.sourceId,
       this.categoryId});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<int>(id);
     map['transaction_id'] = Variable<int>(transactionId);
-    if (!nullToAbsent || sourceId != null) {
-      map['source_id'] = Variable<int>(sourceId);
-    }
+    map['source_id'] = Variable<int>(sourceId);
     if (!nullToAbsent || categoryId != null) {
       map['category_id'] = Variable<int>(categoryId);
     }
@@ -1956,9 +1899,7 @@ class Expense extends DataClass implements Insertable<Expense> {
     return ExpensesCompanion(
       id: Value(id),
       transactionId: Value(transactionId),
-      sourceId: sourceId == null && nullToAbsent
-          ? const Value.absent()
-          : Value(sourceId),
+      sourceId: Value(sourceId),
       categoryId: categoryId == null && nullToAbsent
           ? const Value.absent()
           : Value(categoryId),
@@ -1971,7 +1912,7 @@ class Expense extends DataClass implements Insertable<Expense> {
     return Expense(
       id: serializer.fromJson<int>(json['id']),
       transactionId: serializer.fromJson<int>(json['transactionId']),
-      sourceId: serializer.fromJson<int?>(json['sourceId']),
+      sourceId: serializer.fromJson<int>(json['sourceId']),
       categoryId: serializer.fromJson<int?>(json['categoryId']),
     );
   }
@@ -1981,7 +1922,7 @@ class Expense extends DataClass implements Insertable<Expense> {
     return <String, dynamic>{
       'id': serializer.toJson<int>(id),
       'transactionId': serializer.toJson<int>(transactionId),
-      'sourceId': serializer.toJson<int?>(sourceId),
+      'sourceId': serializer.toJson<int>(sourceId),
       'categoryId': serializer.toJson<int?>(categoryId),
     };
   }
@@ -1989,12 +1930,12 @@ class Expense extends DataClass implements Insertable<Expense> {
   Expense copyWith(
           {int? id,
           int? transactionId,
-          Value<int?> sourceId = const Value.absent(),
+          int? sourceId,
           Value<int?> categoryId = const Value.absent()}) =>
       Expense(
         id: id ?? this.id,
         transactionId: transactionId ?? this.transactionId,
-        sourceId: sourceId.present ? sourceId.value : this.sourceId,
+        sourceId: sourceId ?? this.sourceId,
         categoryId: categoryId.present ? categoryId.value : this.categoryId,
       );
   @override
@@ -2023,7 +1964,7 @@ class Expense extends DataClass implements Insertable<Expense> {
 class ExpensesCompanion extends UpdateCompanion<Expense> {
   final Value<int> id;
   final Value<int> transactionId;
-  final Value<int?> sourceId;
+  final Value<int> sourceId;
   final Value<int?> categoryId;
   const ExpensesCompanion({
     this.id = const Value.absent(),
@@ -2034,9 +1975,10 @@ class ExpensesCompanion extends UpdateCompanion<Expense> {
   ExpensesCompanion.insert({
     this.id = const Value.absent(),
     required int transactionId,
-    this.sourceId = const Value.absent(),
+    required int sourceId,
     this.categoryId = const Value.absent(),
-  }) : transactionId = Value(transactionId);
+  })  : transactionId = Value(transactionId),
+        sourceId = Value(sourceId);
   static Insertable<Expense> custom({
     Expression<int>? id,
     Expression<int>? transactionId,
@@ -2054,7 +1996,7 @@ class ExpensesCompanion extends UpdateCompanion<Expense> {
   ExpensesCompanion copyWith(
       {Value<int>? id,
       Value<int>? transactionId,
-      Value<int?>? sourceId,
+      Value<int>? sourceId,
       Value<int?>? categoryId}) {
     return ExpensesCompanion(
       id: id ?? this.id,
@@ -2127,13 +2069,6 @@ abstract class _$AppDatabase extends GeneratedDatabase {
             ],
           ),
           WritePropagation(
-            on: TableUpdateQuery.onTableName('periods',
-                limitUpdateKind: UpdateKind.delete),
-            result: [
-              TableUpdate('transactions', kind: UpdateKind.delete),
-            ],
-          ),
-          WritePropagation(
             on: TableUpdateQuery.onTableName('transactions',
                 limitUpdateKind: UpdateKind.delete),
             result: [
@@ -2144,14 +2079,14 @@ abstract class _$AppDatabase extends GeneratedDatabase {
             on: TableUpdateQuery.onTableName('sources',
                 limitUpdateKind: UpdateKind.delete),
             result: [
-              TableUpdate('transfers', kind: UpdateKind.update),
+              TableUpdate('transfers', kind: UpdateKind.delete),
             ],
           ),
           WritePropagation(
             on: TableUpdateQuery.onTableName('sources',
                 limitUpdateKind: UpdateKind.delete),
             result: [
-              TableUpdate('transfers', kind: UpdateKind.update),
+              TableUpdate('transfers', kind: UpdateKind.delete),
             ],
           ),
           WritePropagation(
@@ -2165,7 +2100,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
             on: TableUpdateQuery.onTableName('sources',
                 limitUpdateKind: UpdateKind.delete),
             result: [
-              TableUpdate('incomes', kind: UpdateKind.update),
+              TableUpdate('incomes', kind: UpdateKind.delete),
             ],
           ),
           WritePropagation(
@@ -2179,7 +2114,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
             on: TableUpdateQuery.onTableName('sources',
                 limitUpdateKind: UpdateKind.delete),
             result: [
-              TableUpdate('expenses', kind: UpdateKind.update),
+              TableUpdate('expenses', kind: UpdateKind.delete),
             ],
           ),
           WritePropagation(

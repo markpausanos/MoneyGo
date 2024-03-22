@@ -14,6 +14,7 @@ class CategoryCheckBox extends StatefulWidget {
   final bool isChecked;
   final ValueChanged<bool?> onChanged;
   final VoidCallback onLongPressed;
+  final VoidCallback onTap;
 
   const CategoryCheckBox(
       {super.key,
@@ -22,7 +23,8 @@ class CategoryCheckBox extends StatefulWidget {
       required this.onChanged,
       required this.name,
       required this.budget,
-      required this.onLongPressed});
+      required this.onLongPressed,
+      required this.onTap});
 
   @override
   State<CategoryCheckBox> createState() => _CategoryCheckBoxState();
@@ -60,9 +62,10 @@ class _CategoryCheckBoxState extends State<CategoryCheckBox> {
           Expanded(
               flex: 14,
               child: InkWell(
-                borderRadius: BorderRadius.circular(10),
+                borderRadius: BorderRadius.circular(12),
                 splashColor: CustomColorScheme.appGray,
                 onLongPress: widget.onLongPressed,
+                onTap: widget.onTap,
                 child: Padding(
                   padding: const EdgeInsets.all(2.0),
                   child: Container(

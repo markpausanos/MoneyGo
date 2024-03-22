@@ -16,9 +16,13 @@ class PeriodDao extends DatabaseAccessor<AppDatabase> with _$PeriodDaoMixin {
       await (select(periods)..where((tbl) => tbl.id.equals(id)))
           .getSingleOrNull();
 
-  Future<Period?> getLatestPeriod() async =>
-      await (select(periods)..orderBy([(tbl) => OrderingTerm.desc(tbl.id)]))
-          .getSingleOrNull();
+  Future<Period?> getLatestPeriod() async {
+    final query = select(periods)
+      ..orderBy([(tbl) => OrderingTerm.desc(tbl.id)])
+      ..limit(1);
+
+    return await query.getSingleOrNull();
+  }
 
   Future<int> insertPeriod(PeriodsCompanion period) async =>
       await into(periods).insert(period);

@@ -1,17 +1,28 @@
 import 'package:drift/drift.dart';
 import 'package:moneygo/data/app_database.dart';
 import 'package:moneygo/data/daos/category_dao.dart';
+import 'package:moneygo/data/daos/period_dao.dart';
 
 class CategoryRepository {
   final CategoryDao _categoriesDao;
+  final PeriodDao _periodDao;
 
-  CategoryRepository(this._categoriesDao);
+  CategoryRepository(this._categoriesDao, this._periodDao);
 
   Stream<List<Category>> watchAllCategories() =>
       _categoriesDao.watchAllCategories();
 
   Future<List<Category>> getAllCategories() async {
-    return await _categoriesDao.getAllCategories();
+    var categories = await _categoriesDao.getAllCategories();
+    var latestPeriod = await _periodDao.getLatestPeriod();
+
+    if (latestPeriod != null) {
+      categories = categories
+          .where((category) => category.periodId == latestPeriod.id)
+          .toList();
+    }
+
+    return categories;
   }
 
   Future<Category?> getCategoryById(int id) async =>

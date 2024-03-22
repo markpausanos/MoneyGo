@@ -35,7 +35,6 @@ class _NewTransferScreenState extends State<NewTransferScreen> {
   DateTime _selectedDateTime = DateTime.now();
   int? _selectedFromSourceId;
   int? _selectedToSourceId;
-  int? _periodId;
   bool _stayOnPage = false;
 
   @override
@@ -73,95 +72,87 @@ class _NewTransferScreenState extends State<NewTransferScreen> {
           }
         },
         child: Scaffold(
-          backgroundColor: Colors.white,
-          appBar: AppBar(
-            backgroundColor: CustomColorScheme.appBarCards,
-            leading: IconButtonLarge(
-                onPressed: () => Navigator.popAndPushNamed(context, "/home"),
-                icon: Icons.arrow_back,
-                color: Colors.white),
-            title: const Text('Transfer Details',
-                style: CustomTextStyleScheme.appBarTitleCards),
-            centerTitle: true,
-          ),
-          body: BlocBuilder<PeriodBloc, PeriodState>(builder: (context, state) {
-            if (state is PeriodsLoaded) {
-              _periodId = state.periods.first.id;
-
-              return SingleChildScrollView(
-                padding: const EdgeInsets.fromLTRB(35, 30, 35, 30),
-                child: Form(
-                  key: _formKey,
-                  child: Column(
-                    children: [
-                      BaseDateTimePicker(onDateTimeChanged: _onDateTimeChanged),
-                      const SizedBox(height: 25),
-                      BaseTextField(
-                        controller: _titleController,
-                        labelText: "Name",
-                        validator: _validateName,
-                      ),
-                      const SizedBox(height: 25),
-                      BaseTextField(
-                        controller: _amountController,
-                        labelText: "Amount",
-                        validator: _validateAmount,
-                        keyboardType: const TextInputType.numberWithOptions(
-                            decimal: true),
-                      ),
-                      const SizedBox(height: 25),
-                      _buildSourceFromDropdown(),
-                      const SizedBox(height: 25),
-                      _buildSourceToDropdown(),
-                      const SizedBox(height: 25),
-                      BaseTextField(
-                        controller: _descriptionController,
-                        labelText: "Description",
-                        maxLines: 10,
-                      ),
-                      const SizedBox(height: 25),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Row(
-                            children: [
-                              Switch(
-                                value: _stayOnPage,
-                                onChanged: (value) {
-                                  setState(() {
-                                    _stayOnPage = value;
-                                  });
-                                },
-                                activeColor: CustomColorScheme.appGreen,
-                                inactiveTrackColor:
-                                    CustomColorScheme.backgroundColor,
-                                trackOutlineColor: MaterialStateProperty.all(
-                                    CustomColorScheme.appGray),
-                                trackOutlineWidth:
-                                    const MaterialStatePropertyAll(0.5),
-                              ),
-                              const SizedBox(width: 3),
-                              const Text(
-                                "Stay on page",
-                              ),
-                            ],
-                          ),
-                          DialogButton(
-                            onPressed: _onSaveTransfer,
-                            text: "Save Transfer",
-                            backgroundColor: CustomColorScheme.appGreenLight,
-                            textColor: CustomColorScheme.appGreen,
-                          ),
-                        ],
-                      )
-                    ],
-                  ),
+            backgroundColor: Colors.white,
+            appBar: AppBar(
+              backgroundColor: CustomColorScheme.appBarCards,
+              leading: IconButtonLarge(
+                  onPressed: () => Navigator.popAndPushNamed(context, "/home"),
+                  icon: Icons.arrow_back,
+                  color: Colors.white),
+              title: const Text('Transfer Details',
+                  style: CustomTextStyleScheme.appBarTitleCards),
+              centerTitle: true,
+            ),
+            body: SingleChildScrollView(
+              padding: const EdgeInsets.fromLTRB(35, 30, 35, 30),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  children: [
+                    BaseDateTimePicker(onDateTimeChanged: _onDateTimeChanged),
+                    const SizedBox(height: 25),
+                    BaseTextField(
+                      controller: _titleController,
+                      labelText: "Name",
+                      validator: _validateName,
+                    ),
+                    const SizedBox(height: 25),
+                    BaseTextField(
+                      controller: _amountController,
+                      labelText: "Amount",
+                      validator: _validateAmount,
+                      keyboardType:
+                          const TextInputType.numberWithOptions(decimal: true),
+                    ),
+                    const SizedBox(height: 25),
+                    _buildSourceFromDropdown(),
+                    const SizedBox(height: 25),
+                    _buildSourceToDropdown(),
+                    const SizedBox(height: 25),
+                    BaseTextField(
+                      controller: _descriptionController,
+                      labelText: "Description",
+                      maxLines: 10,
+                    ),
+                    const SizedBox(height: 25),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Row(
+                          children: [
+                            Switch(
+                              value: _stayOnPage,
+                              onChanged: (value) {
+                                setState(() {
+                                  _stayOnPage = value;
+                                });
+                              },
+                              activeColor: CustomColorScheme.appGreen,
+                              inactiveTrackColor:
+                                  CustomColorScheme.backgroundColor,
+                              trackOutlineColor: MaterialStateProperty.all(
+                                  CustomColorScheme.appGray),
+                              trackOutlineWidth:
+                                  const MaterialStatePropertyAll(0.5),
+                            ),
+                            const SizedBox(width: 3),
+                            const Text(
+                              "Stay on page",
+                            ),
+                          ],
+                        ),
+                        DialogButton(
+                          onPressed: _onSaveTransfer,
+                          text: "Save Transfer",
+                          backgroundColor: CustomColorScheme.appGreenLight,
+                          textColor: CustomColorScheme.appGreen,
+                        ),
+                      ],
+                    )
+                  ],
                 ),
-              );
-            }
-            return const CircularProgressIndicator();
-          }),
-        ));
+              ),
+            )));
   }
 
   Widget _buildSourceFromDropdown() {
@@ -280,18 +271,11 @@ class _NewTransferScreenState extends State<NewTransferScreen> {
       int sourceToId = _selectedToSourceId!;
       DateTime selectedDate = _selectedDateTime;
 
-      if (_periodId == null) {
-        return;
-      }
-
-      int periodId = _periodId!;
-
       final transaction = TransactionsCompanion(
           title: Value(title),
           amount: Value(double.parse(amount)),
           description: Value(description),
           date: Value(selectedDate),
-          periodId: Value(periodId),
           type: const Value(TransactionTypes.transfer));
 
       final transfer = TransfersCompanion(

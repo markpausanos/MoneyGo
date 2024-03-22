@@ -49,7 +49,8 @@ class MyApp extends StatelessWidget {
         ),
         BlocProvider<CategoryBloc>(
           create: (context) => CategoryBloc(
-            categoryRepository: CategoryRepository(CategoryDao(context.read())),
+            categoryRepository: CategoryRepository(
+                CategoryDao(context.read()), PeriodDao(context.read())),
           ),
         ),
         BlocProvider<SourceBloc>(
@@ -59,7 +60,8 @@ class MyApp extends StatelessWidget {
         ),
         BlocProvider<PeriodBloc>(
           create: (context) => PeriodBloc(
-            periodRepository: PeriodRepository(PeriodDao(context.read())),
+            periodRepository: PeriodRepository(
+                PeriodDao(context.read()), CategoryDao(context.read())),
           ),
         ),
         BlocProvider<TransactionBloc>(

@@ -6,6 +6,7 @@ import 'package:moneygo/data/blocs/settings/settings_bloc.dart';
 import 'package:moneygo/data/blocs/settings/settings_event.dart';
 import 'package:moneygo/data/blocs/settings/settings_state.dart';
 import 'package:moneygo/ui/mini_screens/budget_screen.dart';
+import 'package:moneygo/ui/utils/state_widget.dart';
 import 'package:moneygo/ui/widgets/BottomSheets/new_item_bottom_sheet.dart';
 import 'package:moneygo/ui/widgets/Buttons/navigation_button.dart';
 import 'package:moneygo/ui/widgets/SizedBoxes/dashed_box_with_message.dart';
@@ -99,9 +100,19 @@ class _HomeScreenState extends State<HomeScreen> {
             icon: const Icon(Icons.exit_to_app_rounded),
             onPressed: () => SystemNavigator.pop(),
           ),
-          title: Text(
-            _username,
-            style: Theme.of(context).textTheme.titleMedium,
+          title: BlocBuilder<SettingsBloc, SettingsState>(
+            builder: (context, state) => buildBlocStateWidget(state,
+                onLoad: const CircularProgressIndicator(),
+                onError: (message) => const Text('Error loading settings'),
+                onLoaded: (state) {
+                  final settings = (state as SettingsLoaded).settings;
+                  _username = settings['username'] ?? 'Default User';
+                  _currency = settings['currency'] ?? '\$';
+                  return Text(
+                    _username,
+                    style: Theme.of(context).textTheme.titleMedium,
+                  );
+                }),
           ),
           titleSpacing: 0,
           backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -113,35 +124,26 @@ class _HomeScreenState extends State<HomeScreen> {
                 icon: const Icon(Icons.settings))
           ],
         ),
-        body: BlocConsumer<SettingsBloc, SettingsState>(
-            listener: (context, state) {
-              if (state is SettingsLoaded) {
-                setState(() {
-                  _username = state.settings['username'] ?? 'Default User';
-                  _currency = state.settings['currency'] ?? '\$';
-                });
-              }
-            },
-            builder: (context, state) => SingleChildScrollView(
-                  padding: const EdgeInsets.fromLTRB(18.0, 10.0, 18.0, 100),
-                  child: Column(
-                    children: [
-                      SizedBox(
-                        height: 35,
-                        child: ListView(
-                          controller: _scrollController,
-                          scrollDirection: Axis.horizontal,
-                          children: buttonTitles
-                              .map((title) => _buildNavigationButton(
-                                  title, buttonTitles.indexOf(title)))
-                              .toList(),
-                        ),
-                      ),
-                      const SizedBox(height: 10),
-                      _getCurrentScreen()
-                    ],
-                  ),
-                )),
+        body: SingleChildScrollView(
+          padding: const EdgeInsets.fromLTRB(18.0, 10.0, 18.0, 100),
+          child: Column(
+            children: [
+              SizedBox(
+                height: 35,
+                child: ListView(
+                  controller: _scrollController,
+                  scrollDirection: Axis.horizontal,
+                  children: buttonTitles
+                      .map((title) => _buildNavigationButton(
+                          title, buttonTitles.indexOf(title)))
+                      .toList(),
+                ),
+              ),
+              const SizedBox(height: 10),
+              _getCurrentScreen()
+            ],
+          ),
+        ),
         floatingActionButton: SizedBox(
           width: 80,
           height: 80,

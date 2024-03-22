@@ -39,12 +39,13 @@ class TransactionRepository {
         var expense =
             await _expenseDao.getExpenseByTransactionId(transaction.id);
 
-        if (expense == null) continue;
-
-        Source? expenseSource;
-        if (expense.sourceId != null) {
-          expenseSource = await _sourceDao.getSourceById(expense.sourceId!);
+        if (expense == null) {
+          _transactionDao.deleteTransactionById(transaction.id);
+          continue;
         }
+
+        Source? expenseSource =
+            await _sourceDao.getSourceById(expense.sourceId!);
 
         Category? expenseCategory;
         if (expense.categoryId != null) {
@@ -63,14 +64,13 @@ class TransactionRepository {
       } else if (transaction.type == TransactionTypes.income) {
         var income = await _incomeDao.getIncomeByTransactionId(transaction.id);
 
-        if (income == null) continue;
-
-        Source? placedOnsource;
-
-        if (income.placedOnsourceId != null) {
-          placedOnsource =
-              await _sourceDao.getSourceById(income.placedOnsourceId!);
+        if (income == null) {
+          _transactionDao.deleteTransactionById(transaction.id);
+          continue;
         }
+
+        Source? placedOnsource =
+            await _sourceDao.getSourceById(income.placedOnsourceId!);
 
         var incomeModel = IncomeModel(
           id: income.id,
@@ -83,18 +83,14 @@ class TransactionRepository {
         var transfer =
             await _transferDao.getTransferByTransactionId(transaction.id);
 
-        if (transfer == null) continue;
-
-        Source? fromSource;
-        Source? toSource;
-
-        if (transfer.fromSourceId != null) {
-          fromSource = await _sourceDao.getSourceById(transfer.fromSourceId!);
+        if (transfer == null) {
+          _transactionDao.deleteTransactionById(transaction.id);
+          continue;
         }
 
-        if (transfer.toSourceId != null) {
-          toSource = await _sourceDao.getSourceById(transfer.toSourceId!);
-        }
+        Source? fromSource =
+            await _sourceDao.getSourceById(transfer.fromSourceId);
+        Source? toSource = await _sourceDao.getSourceById(transfer.toSourceId);
 
         var transferModel = TransferModel(
           id: transfer.id,
@@ -121,12 +117,12 @@ class TransactionRepository {
     if (transaction.type == TransactionTypes.expense) {
       var expense = await _expenseDao.getExpenseByTransactionId(id);
 
-      if (expense == null) return null;
-
-      Source? expenseSource;
-      if (expense.sourceId != null) {
-        expenseSource = await _sourceDao.getSourceById(expense.sourceId!);
+      if (expense == null) {
+        _transactionDao.deleteTransactionById(id);
+        return null;
       }
+
+      Source? expenseSource = await _sourceDao.getSourceById(expense.sourceId);
 
       Category? expenseCategory;
       if (expense.categoryId != null) {
@@ -143,14 +139,13 @@ class TransactionRepository {
     } else if (transaction.type == TransactionTypes.income) {
       var income = await _incomeDao.getIncomeByTransactionId(id);
 
-      if (income == null) return null;
-
-      Source? placedOnsource;
-
-      if (income.placedOnsourceId != null) {
-        placedOnsource =
-            await _sourceDao.getSourceById(income.placedOnsourceId!);
+      if (income == null) {
+        _transactionDao.deleteTransactionById(id);
+        return null;
       }
+
+      Source? placedOnsource =
+          await _sourceDao.getSourceById(income.placedOnsourceId!);
 
       return IncomeModel(
         id: income.id,
@@ -160,18 +155,14 @@ class TransactionRepository {
     } else if (transaction.type == TransactionTypes.transfer) {
       var transfer = await _transferDao.getTransferByTransactionId(id);
 
-      if (transfer == null) return null;
-
-      Source? fromSource;
-      Source? toSource;
-
-      if (transfer.fromSourceId != null) {
-        fromSource = await _sourceDao.getSourceById(transfer.fromSourceId!);
+      if (transfer == null) {
+        _transactionDao.deleteTransactionById(id);
+        return null;
       }
 
-      if (transfer.toSourceId != null) {
-        toSource = await _sourceDao.getSourceById(transfer.toSourceId!);
-      }
+      Source? fromSource =
+          await _sourceDao.getSourceById(transfer.fromSourceId);
+      Source? toSource = await _sourceDao.getSourceById(transfer.toSourceId);
 
       return TransferModel(
         id: transfer.id,
@@ -189,10 +180,7 @@ class TransactionRepository {
 
     if (expense == null) return null;
 
-    Source? expenseSource;
-    if (expense.sourceId != null) {
-      expenseSource = await _sourceDao.getSourceById(expense.sourceId!);
-    }
+    Source? expenseSource = await _sourceDao.getSourceById(expense.sourceId!);
 
     Category? expenseCategory;
     if (expense.categoryId != null) {
@@ -218,15 +206,13 @@ class TransactionRepository {
       Source? source;
       Category? category;
 
-      if (expense.sourceId.value != null) {
-        source = await _sourceDao.getSourceById(expense.sourceId.value!);
+      source = await _sourceDao.getSourceById(expense.sourceId.value!);
 
-        if (source != null) {
-          source = source.copyWith(
-            balance: source.balance - transaction.amount.value,
-          );
-          await _sourceDao.updateSource(source);
-        }
+      if (source != null) {
+        source = source.copyWith(
+          balance: source.balance - transaction.amount.value,
+        );
+        await _sourceDao.updateSource(source);
       }
 
       if (expense.categoryId.value != null) {
@@ -253,20 +239,15 @@ class TransactionRepository {
 
     int success = await _incomeDao.insertIncome(income);
 
-    print(success);
-
     if (success > 0) {
-      Source? source;
+      Source? source =
+          await _sourceDao.getSourceById(income.placedOnsourceId.value!);
 
-      if (income.placedOnsourceId.value != null) {
-        source = await _sourceDao.getSourceById(income.placedOnsourceId.value!);
-
-        if (source != null) {
-          source = source.copyWith(
-            balance: source.balance + transaction.amount.value,
-          );
-          await _sourceDao.updateSource(source);
-        }
+      if (source != null) {
+        source = source.copyWith(
+          balance: source.balance + transaction.amount.value,
+        );
+        await _sourceDao.updateSource(source);
       }
     }
 
@@ -285,27 +266,22 @@ class TransactionRepository {
       Source? fromSource;
       Source? toSource;
 
-      if (transfer.fromSourceId.value != null) {
-        fromSource =
-            await _sourceDao.getSourceById(transfer.fromSourceId.value!);
+      fromSource = await _sourceDao.getSourceById(transfer.fromSourceId.value!);
 
-        if (fromSource != null) {
-          fromSource = fromSource.copyWith(
-            balance: fromSource.balance - transaction.amount.value,
-          );
-          await _sourceDao.updateSource(fromSource);
-        }
+      if (fromSource != null) {
+        fromSource = fromSource.copyWith(
+          balance: fromSource.balance - transaction.amount.value,
+        );
+        await _sourceDao.updateSource(fromSource);
       }
 
-      if (transfer.toSourceId.value != null) {
-        toSource = await _sourceDao.getSourceById(transfer.toSourceId.value!);
+      toSource = await _sourceDao.getSourceById(transfer.toSourceId.value!);
 
-        if (toSource != null) {
-          toSource = toSource.copyWith(
-            balance: toSource.balance + transaction.amount.value,
-          );
-          await _sourceDao.updateSource(toSource);
-        }
+      if (toSource != null) {
+        toSource = toSource.copyWith(
+          balance: toSource.balance + transaction.amount.value,
+        );
+        await _sourceDao.updateSource(toSource);
       }
     }
 

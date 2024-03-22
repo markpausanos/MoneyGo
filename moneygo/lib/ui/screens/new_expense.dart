@@ -38,7 +38,6 @@ class _NewExpenseScreenState extends State<NewExpenseScreen> {
   DateTime _selectedDateTime = DateTime.now();
   int? _selectedSourceId;
   int? _selectedCategoryId;
-  int? _periodId;
   bool _stayOnPage = false;
 
   @override
@@ -77,95 +76,87 @@ class _NewExpenseScreenState extends State<NewExpenseScreen> {
           }
         },
         child: Scaffold(
-          backgroundColor: Colors.white,
-          appBar: AppBar(
-            backgroundColor: CustomColorScheme.appBarCards,
-            leading: IconButtonLarge(
-                onPressed: () => Navigator.popAndPushNamed(context, "/home"),
-                icon: Icons.arrow_back,
-                color: Colors.white),
-            title: const Text('Expense Details',
-                style: CustomTextStyleScheme.appBarTitleCards),
-            centerTitle: true,
-          ),
-          body: BlocBuilder<PeriodBloc, PeriodState>(builder: (context, state) {
-            if (state is PeriodsLoaded) {
-              _periodId = state.periods.first.id;
-
-              return SingleChildScrollView(
-                padding: const EdgeInsets.fromLTRB(35, 30, 35, 30),
-                child: Form(
-                  key: _formKey,
-                  child: Column(
-                    children: [
-                      BaseDateTimePicker(onDateTimeChanged: _onDateTimeChanged),
-                      const SizedBox(height: 25),
-                      BaseTextField(
-                        controller: _titleController,
-                        labelText: "Name",
-                        validator: _validateName,
-                      ),
-                      const SizedBox(height: 25),
-                      BaseTextField(
-                        controller: _amountController,
-                        labelText: "Amount",
-                        validator: _validateAmount,
-                        keyboardType: const TextInputType.numberWithOptions(
-                            decimal: true),
-                      ),
-                      const SizedBox(height: 25),
-                      _buildSourceDropdown(),
-                      const SizedBox(height: 25),
-                      _buildCategoryDropdown(),
-                      const SizedBox(height: 25),
-                      BaseTextField(
-                        controller: _descriptionController,
-                        labelText: "Description",
-                        maxLines: 10,
-                      ),
-                      const SizedBox(height: 25),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Row(
-                            children: [
-                              Switch(
-                                value: _stayOnPage,
-                                onChanged: (value) {
-                                  setState(() {
-                                    _stayOnPage = value;
-                                  });
-                                },
-                                activeColor: CustomColorScheme.appGreen,
-                                inactiveTrackColor:
-                                    CustomColorScheme.backgroundColor,
-                                trackOutlineColor: MaterialStateProperty.all(
-                                    CustomColorScheme.appGray),
-                                trackOutlineWidth:
-                                    const MaterialStatePropertyAll(0.5),
-                              ),
-                              const SizedBox(width: 3),
-                              const Text(
-                                "Stay on page",
-                              ),
-                            ],
-                          ),
-                          DialogButton(
-                            onPressed: _onSaveExpense,
-                            text: "Save Expense",
-                            backgroundColor: CustomColorScheme.appGreenLight,
-                            textColor: CustomColorScheme.appGreen,
-                          ),
-                        ],
-                      )
-                    ],
-                  ),
+            backgroundColor: Colors.white,
+            appBar: AppBar(
+              backgroundColor: CustomColorScheme.appBarCards,
+              leading: IconButtonLarge(
+                  onPressed: () => Navigator.popAndPushNamed(context, "/home"),
+                  icon: Icons.arrow_back,
+                  color: Colors.white),
+              title: const Text('Expense Details',
+                  style: CustomTextStyleScheme.appBarTitleCards),
+              centerTitle: true,
+            ),
+            body: SingleChildScrollView(
+              padding: const EdgeInsets.fromLTRB(35, 30, 35, 30),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  children: [
+                    BaseDateTimePicker(onDateTimeChanged: _onDateTimeChanged),
+                    const SizedBox(height: 25),
+                    BaseTextField(
+                      controller: _titleController,
+                      labelText: "Name",
+                      validator: _validateName,
+                    ),
+                    const SizedBox(height: 25),
+                    BaseTextField(
+                      controller: _amountController,
+                      labelText: "Amount",
+                      validator: _validateAmount,
+                      keyboardType:
+                          const TextInputType.numberWithOptions(decimal: true),
+                    ),
+                    const SizedBox(height: 25),
+                    _buildSourceDropdown(),
+                    const SizedBox(height: 25),
+                    _buildCategoryDropdown(),
+                    const SizedBox(height: 25),
+                    BaseTextField(
+                      controller: _descriptionController,
+                      labelText: "Description",
+                      maxLines: 10,
+                    ),
+                    const SizedBox(height: 25),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Row(
+                          children: [
+                            Switch(
+                              value: _stayOnPage,
+                              onChanged: (value) {
+                                setState(() {
+                                  _stayOnPage = value;
+                                });
+                              },
+                              activeColor: CustomColorScheme.appGreen,
+                              inactiveTrackColor:
+                                  CustomColorScheme.backgroundColor,
+                              trackOutlineColor: MaterialStateProperty.all(
+                                  CustomColorScheme.appGray),
+                              trackOutlineWidth:
+                                  const MaterialStatePropertyAll(0.5),
+                            ),
+                            const SizedBox(width: 3),
+                            const Text(
+                              "Stay on page",
+                            ),
+                          ],
+                        ),
+                        DialogButton(
+                          onPressed: _onSaveExpense,
+                          text: "Save Expense",
+                          backgroundColor: CustomColorScheme.appGreenLight,
+                          textColor: CustomColorScheme.appGreen,
+                        ),
+                      ],
+                    )
+                  ],
                 ),
-              );
-            }
-            return const CircularProgressIndicator();
-          }),
-        ));
+              ),
+            )));
   }
 
   Widget _buildSourceDropdown() {
@@ -199,17 +190,14 @@ class _NewExpenseScreenState extends State<NewExpenseScreen> {
           for (var category in state.categories) category.id: category.name
         };
 
-        _selectedCategoryId ??=
-            categoryMap.isNotEmpty ? categoryMap.keys.first : null;
-
+        categoryMap[0] = "None";
         return BaseDropdownFormField(
           dropDownItemList: categoryMap,
-          initialValue: _selectedCategoryId,
+          initialValue: null,
           onChanged: (int? id) {
-            if (id != null) _onCategoryChanged(id);
+            _onCategoryChanged(id);
           },
           labelText: "Category",
-          validator: _validateDropDown,
         );
       } else {
         return const CircularProgressIndicator();
@@ -256,9 +244,12 @@ class _NewExpenseScreenState extends State<NewExpenseScreen> {
     });
   }
 
-  void _onCategoryChanged(int id) {
+  void _onCategoryChanged(int? id) {
     setState(() {
       _selectedCategoryId = id;
+      if (id == 0 || id == null) {
+        _selectedCategoryId = null;
+      }
     });
   }
 
@@ -269,26 +260,20 @@ class _NewExpenseScreenState extends State<NewExpenseScreen> {
       String amount = _amountController.text;
       String description = _descriptionController.text;
       int sourceId = _selectedSourceId!;
-      int categoryId = _selectedCategoryId!;
+      int categoryId = _selectedCategoryId ?? 0;
       DateTime selectedDate = _selectedDateTime;
-
-      if (_periodId == null) {
-        return;
-      }
-
-      int periodId = _periodId!;
 
       final transaction = TransactionsCompanion(
           title: Value(title),
           amount: Value(double.parse(amount)),
           description: Value(description),
           date: Value(selectedDate),
-          periodId: Value(periodId),
           type: const Value(TransactionTypes.expense));
 
       // Create a new expense object
       final expense = ExpensesCompanion(
-          sourceId: Value(sourceId), categoryId: Value(categoryId));
+          sourceId: Value(sourceId),
+          categoryId: categoryId == 0 ? const Value(null) : Value(categoryId));
 
       BlocProvider.of<TransactionBloc>(context)
           .add(AddExpenseTransaction(transaction, expense));

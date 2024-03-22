@@ -34,7 +34,6 @@ class _NewIncomeScreenState extends State<NewIncomeScreen> {
 
   DateTime _selectedDateTime = DateTime.now();
   int? _selectedSourceId;
-  int? _periodId;
   bool _stayOnPage = false;
 
   @override
@@ -72,93 +71,85 @@ class _NewIncomeScreenState extends State<NewIncomeScreen> {
           }
         },
         child: Scaffold(
-          backgroundColor: Colors.white,
-          appBar: AppBar(
-            backgroundColor: CustomColorScheme.appBarCards,
-            leading: IconButtonLarge(
-                onPressed: () => Navigator.popAndPushNamed(context, "/home"),
-                icon: Icons.arrow_back,
-                color: Colors.white),
-            title: const Text('Income Details',
-                style: CustomTextStyleScheme.appBarTitleCards),
-            centerTitle: true,
-          ),
-          body: BlocBuilder<PeriodBloc, PeriodState>(builder: (context, state) {
-            if (state is PeriodsLoaded) {
-              _periodId = state.periods.first.id;
-
-              return SingleChildScrollView(
-                padding: const EdgeInsets.fromLTRB(35, 30, 35, 30),
-                child: Form(
-                  key: _formKey,
-                  child: Column(
-                    children: [
-                      BaseDateTimePicker(onDateTimeChanged: _onDateTimeChanged),
-                      const SizedBox(height: 25),
-                      BaseTextField(
-                        controller: _titleController,
-                        labelText: "Name",
-                        validator: _validateName,
-                      ),
-                      const SizedBox(height: 25),
-                      BaseTextField(
-                        controller: _amountController,
-                        labelText: "Amount",
-                        validator: _validateAmount,
-                        keyboardType: const TextInputType.numberWithOptions(
-                            decimal: true),
-                      ),
-                      const SizedBox(height: 25),
-                      _buildSourceDropdown(),
-                      const SizedBox(height: 25),
-                      BaseTextField(
-                        controller: _descriptionController,
-                        labelText: "Description",
-                        maxLines: 10,
-                      ),
-                      const SizedBox(height: 25),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Row(
-                            children: [
-                              Switch(
-                                value: _stayOnPage,
-                                onChanged: (value) {
-                                  setState(() {
-                                    _stayOnPage = value;
-                                  });
-                                },
-                                activeColor: CustomColorScheme.appGreen,
-                                inactiveTrackColor:
-                                    CustomColorScheme.backgroundColor,
-                                trackOutlineColor: MaterialStateProperty.all(
-                                    CustomColorScheme.appGray),
-                                trackOutlineWidth:
-                                    const MaterialStatePropertyAll(0.5),
-                              ),
-                              const SizedBox(width: 3),
-                              const Text(
-                                "Stay on page",
-                              ),
-                            ],
-                          ),
-                          DialogButton(
-                            onPressed: _onSaveIncome,
-                            text: "Save Income",
-                            backgroundColor: CustomColorScheme.appGreenLight,
-                            textColor: CustomColorScheme.appGreen,
-                          ),
-                        ],
-                      )
-                    ],
-                  ),
+            backgroundColor: Colors.white,
+            appBar: AppBar(
+              backgroundColor: CustomColorScheme.appBarCards,
+              leading: IconButtonLarge(
+                  onPressed: () => Navigator.popAndPushNamed(context, "/home"),
+                  icon: Icons.arrow_back,
+                  color: Colors.white),
+              title: const Text('Income Details',
+                  style: CustomTextStyleScheme.appBarTitleCards),
+              centerTitle: true,
+            ),
+            body: SingleChildScrollView(
+              padding: const EdgeInsets.fromLTRB(35, 30, 35, 30),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  children: [
+                    BaseDateTimePicker(onDateTimeChanged: _onDateTimeChanged),
+                    const SizedBox(height: 25),
+                    BaseTextField(
+                      controller: _titleController,
+                      labelText: "Name",
+                      validator: _validateName,
+                    ),
+                    const SizedBox(height: 25),
+                    BaseTextField(
+                      controller: _amountController,
+                      labelText: "Amount",
+                      validator: _validateAmount,
+                      keyboardType:
+                          const TextInputType.numberWithOptions(decimal: true),
+                    ),
+                    const SizedBox(height: 25),
+                    _buildSourceDropdown(),
+                    const SizedBox(height: 25),
+                    BaseTextField(
+                      controller: _descriptionController,
+                      labelText: "Description",
+                      maxLines: 10,
+                    ),
+                    const SizedBox(height: 25),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Row(
+                          children: [
+                            Switch(
+                              value: _stayOnPage,
+                              onChanged: (value) {
+                                setState(() {
+                                  _stayOnPage = value;
+                                });
+                              },
+                              activeColor: CustomColorScheme.appGreen,
+                              inactiveTrackColor:
+                                  CustomColorScheme.backgroundColor,
+                              trackOutlineColor: MaterialStateProperty.all(
+                                  CustomColorScheme.appGray),
+                              trackOutlineWidth:
+                                  const MaterialStatePropertyAll(0.5),
+                            ),
+                            const SizedBox(width: 3),
+                            const Text(
+                              "Stay on page",
+                            ),
+                          ],
+                        ),
+                        DialogButton(
+                          onPressed: _onSaveIncome,
+                          text: "Save Income",
+                          backgroundColor: CustomColorScheme.appGreenLight,
+                          textColor: CustomColorScheme.appGreen,
+                        ),
+                      ],
+                    )
+                  ],
                 ),
-              );
-            }
-            return const CircularProgressIndicator();
-          }),
-        ));
+              ),
+            )));
   }
 
   Widget _buildSourceDropdown() {
@@ -168,11 +159,9 @@ class _NewIncomeScreenState extends State<NewIncomeScreen> {
           for (var source in state.sources) source.id: source.name
         };
 
-        _selectedSourceId ??=
-            sourceMap.isNotEmpty ? sourceMap.keys.first : null;
         return BaseDropdownFormField(
           dropDownItemList: sourceMap,
-          initialValue: _selectedSourceId,
+          initialValue: null,
           onChanged: (int? id) {
             if (id != null) _onSourceChanged(id);
           },
@@ -233,19 +222,12 @@ class _NewIncomeScreenState extends State<NewIncomeScreen> {
       int sourceId = _selectedSourceId!;
       DateTime selectedDate = _selectedDateTime;
 
-      if (_periodId == null) {
-        return;
-      }
-
-      int periodId = _periodId!;
-
       // Create a new transaction object
       final transaction = TransactionsCompanion(
           title: Value(title),
           amount: Value(double.parse(amount)),
           description: Value(description),
           date: Value(selectedDate),
-          periodId: Value(periodId),
           type: const Value(TransactionTypes.income));
 
       // Create a new expense object

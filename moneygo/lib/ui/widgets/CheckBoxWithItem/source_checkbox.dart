@@ -1,3 +1,5 @@
+import 'dart:ffi';
+
 import 'package:flutter/material.dart';
 import 'package:moneygo/ui/widgets/Themes/custom_color_scheme.dart';
 import 'package:moneygo/ui/widgets/Themes/custom_text_scheme.dart';
@@ -8,6 +10,7 @@ class SourceCheckBox extends StatefulWidget {
   final bool isChecked;
   final ValueChanged<bool?> onChanged;
   final VoidCallback onLongPressed;
+  final VoidCallback onTap;
 
   const SourceCheckBox(
       {super.key,
@@ -15,7 +18,8 @@ class SourceCheckBox extends StatefulWidget {
       required this.name,
       required this.isChecked,
       required this.onChanged,
-      required this.onLongPressed});
+      required this.onLongPressed,
+      required this.onTap});
 
   @override
   State<SourceCheckBox> createState() => _SourceCheckBoxState();
@@ -38,9 +42,10 @@ class _SourceCheckBoxState extends State<SourceCheckBox> {
         child: SizedBox(
           height: 60,
           child: InkWell(
-            borderRadius: BorderRadius.circular(10),
+            borderRadius: BorderRadius.circular(12),
             splashColor: CustomColorScheme.appGray,
             onLongPress: widget.onLongPressed,
+            onTap: widget.onTap,
             child: Padding(
               padding: const EdgeInsets.all(2.0),
               child: Container(

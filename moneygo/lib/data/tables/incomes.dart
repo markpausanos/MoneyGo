@@ -8,6 +8,5 @@ class Incomes extends Table {
   IntColumn get transactionId => integer().customConstraint(
       'REFERENCES transactions(id) ON DELETE CASCADE NOT NULL')();
   IntColumn get placedOnsourceId => integer()
-      .customConstraint('REFERENCES sources(id) ON DELETE SET NULL')
-      .nullable()();
+      .customConstraint('REFERENCES sources(id) ON DELETE CASCADE NOT NULL')();
 }

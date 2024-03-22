@@ -8,6 +8,7 @@ import 'package:moneygo/data/blocs/sources/source_state.dart';
 import 'package:moneygo/ui/utils/list_utils.dart';
 import 'package:moneygo/ui/widgets/CheckBoxWithItem/source_checkbox.dart';
 import 'package:moneygo/ui/widgets/IconButton/large_icon_button.dart';
+import 'package:moneygo/ui/widgets/Loaders/loading_state.dart';
 import 'package:moneygo/ui/widgets/SizedBoxes/dashed_box_with_message.dart';
 import 'package:moneygo/ui/widgets/Themes/custom_color_scheme.dart';
 import 'package:moneygo/ui/widgets/Themes/custom_text_scheme.dart';
@@ -137,7 +138,7 @@ class _SourcesScreenState extends State<SourcesScreen> {
                 BlocBuilder<SourceBloc, SourceState>(
                   builder: (context, state) {
                     if (state is SourcesLoading) {
-                      return const Center(child: CircularProgressIndicator());
+                      return const Center(child: Loader());
                     } else if (state is SourcesLoaded) {
                       sources = state.sources;
                       return _buildSourceList(sources);
@@ -160,21 +161,26 @@ class _SourcesScreenState extends State<SourcesScreen> {
     return sources.isEmpty
         ? const DashedWidgetWithMessage(message: "No sources found")
         : Column(
-            children: sources.map((category) {
+            children: sources.map((source) {
             return Column(
               children: [
                 SourceCheckBox(
-                  key: Key(category.id.toString()),
-                  id: category.id,
-                  name: category.name,
-                  isChecked: checkedStates[category.id] ?? false,
+                  key: Key(source.id.toString()),
+                  id: source.id,
+                  name: source.name,
+                  isChecked: checkedStates[source.id] ?? false,
                   onChanged: (bool? value) {
                     setState(() {
-                      checkedStates[category.id] = value ?? false;
+                      checkedStates[source.id] = value ?? false;
                       containsChecked = checkedStates.containsValue(true);
                     });
                   },
-                  onLongPressed: () => _showUpdateSourceDialog(category),
+                  onLongPressed: () => _showUpdateSourceDialog(source),
+                  onTap: () => setState(() {
+                    checkedStates[source.id] =
+                        !(checkedStates[source.id] ?? false);
+                    containsChecked = checkedStates.containsValue(true);
+                  }),
                 ),
                 const SizedBox(height: 10),
               ],
@@ -295,7 +301,7 @@ class _SourcesScreenState extends State<SourcesScreen> {
           content: const SingleChildScrollView(
             child: Center(
               child: Text(
-                  'Are you sure you want to delete the selected sources?',
+                  'This action will delete related transactions. Are you sure you want to delete the selected sources?',
                   style: CustomTextStyleScheme.dialogBody,
                   textAlign: TextAlign.center),
             ),

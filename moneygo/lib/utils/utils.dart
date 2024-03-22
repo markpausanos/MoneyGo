@@ -47,6 +47,10 @@ class Utils {
     return '${getMonthFull(date.month)} ${date.day}, ${date.year}';
   }
 
+  static String getFormattedDateShort(DateTime date) {
+    return '${date.month.toString().padLeft(2, '0')}/${date.day.toString().padLeft(2, '0')}/${date.year}';
+  }
+
   static String formatNumber(double number) {
     final formatter = NumberFormat('#,##0.00');
     if (number >= 1000000000) {

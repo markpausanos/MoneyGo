@@ -8,9 +8,7 @@ class Transfers extends Table {
   IntColumn get transactionId => integer().customConstraint(
       'REFERENCES transactions(id) ON DELETE CASCADE NOT NULL')();
   IntColumn get fromSourceId => integer()
-      .customConstraint('REFERENCES sources(id) ON DELETE SET NULL')
-      .nullable()();
+      .customConstraint('REFERENCES sources(id) ON DELETE CASCADE NOT NULL')();
   IntColumn get toSourceId => integer()
-      .customConstraint('REFERENCES sources(id) ON DELETE SET NULL')
-      .nullable()();
+      .customConstraint('REFERENCES sources(id) ON DELETE CASCADE NOT NULL')();
 }

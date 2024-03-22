@@ -6,7 +6,6 @@ import 'package:moneygo/data/blocs/settings/settings_state.dart';
 import 'package:moneygo/data/blocs/sources/source_bloc.dart';
 import 'package:moneygo/data/blocs/sources/source_event.dart';
 import 'package:moneygo/data/blocs/sources/source_state.dart';
-import 'package:moneygo/data/tables/sources.dart';
 import 'package:moneygo/ui/widgets/Cards/base_card.dart';
 import 'package:moneygo/ui/widgets/Themes/custom_color_scheme.dart';
 import 'package:moneygo/ui/widgets/Themes/custom_text_scheme.dart';

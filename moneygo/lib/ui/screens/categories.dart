@@ -239,6 +239,13 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                       });
                     },
                     onLongPressed: () => _showUpdateCategoryDialog(category),
+                    onTap: () {
+                      setState(() {
+                        _checkedStates[category.id] =
+                            !(_checkedStates[category.id] ?? false);
+                        _containsChecked = _checkedStates.containsValue(true);
+                      });
+                    },
                   ),
                   const SizedBox(height: 10),
                 ],
@@ -286,8 +293,6 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
           maxBudget: Value(budget),
           balance: Value(budget),
           periodId: Value(_periodId!));
-
-      print(category);
 
       BlocProvider.of<CategoryBloc>(context).add(AddCategory(category));
 

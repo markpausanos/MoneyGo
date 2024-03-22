@@ -53,11 +53,23 @@ class _BaseDropdownFormFieldState extends State<BaseDropdownFormField> {
       validator: widget.validator,
       items: widget.dropDownItemList.isNotEmpty
           ? widget.dropDownItemList.entries.map((entry) {
-              return DropdownMenuItem<int>(
-                value: entry.key,
-                child: Text(entry.value,
-                    style: CustomTextStyleScheme.textFieldText),
-              );
+              return entry.key == 0
+                  ? DropdownMenuItem<int>(
+                      value: entry.key,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text("No Category",
+                              style: CustomTextStyleScheme.textFieldText
+                                  .copyWith(color: CustomColorScheme.appGray)),
+                        ],
+                      ),
+                    )
+                  : DropdownMenuItem<int>(
+                      value: entry.key,
+                      child: Text(entry.value,
+                          style: CustomTextStyleScheme.textFieldText),
+                    );
             }).toList()
           : null,
       decoration: InputDecoration(

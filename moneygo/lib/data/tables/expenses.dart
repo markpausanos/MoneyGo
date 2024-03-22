@@ -9,8 +9,7 @@ class Expenses extends Table {
   IntColumn get transactionId => integer().customConstraint(
       'REFERENCES transactions(id) ON DELETE CASCADE NOT NULL')();
   IntColumn get sourceId => integer()
-      .customConstraint('REFERENCES sources(id) ON DELETE SET NULL')
-      .nullable()();
+      .customConstraint('REFERENCES sources(id) ON DELETE CASCADE NOT NULL')();
   IntColumn get categoryId => integer()
       .customConstraint('REFERENCES categories(id) ON DELETE SET NULL')
       .nullable()();
