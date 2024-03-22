@@ -89,10 +89,13 @@ class _TransactionsCardState extends State<TransactionsCard> {
                 }).toList(),
               ),
         if (_displayedTransactionsMap.length < widget.transactionsMap.length)
-          Center(
-            child: IconButton(
-              onPressed: _loadMoreTransactions,
-              icon: const Icon(Icons.arrow_downward),
+          InkWell(
+            onTap: _loadMoreTransactions,
+            child: Center(
+              child: IconButton(
+                onPressed: _loadMoreTransactions,
+                icon: const Icon(Icons.arrow_drop_down),
+              ),
             ),
           ),
       ],

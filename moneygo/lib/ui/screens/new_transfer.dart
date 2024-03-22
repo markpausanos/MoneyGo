@@ -195,14 +195,9 @@ class _NewTransferScreenState extends State<NewTransferScreen> {
           for (var source in state.sources) source.id: source.name
         };
 
-        // Handling case when _selectedToSourceId is null or not in sourceMap
-        if (sourceMap.keys.contains(_selectedToSourceId) == false) {
-          _selectedToSourceId = null;
-        }
-
         return BaseDropdownFormField(
           dropDownItemList: sourceMap,
-          initialValue: _selectedToSourceId,
+          initialValue: _selectedFromSourceId! + 1,
           onChanged: (int? id) {
             if (id != null) _onSourceToChanged(id);
           },

@@ -76,7 +76,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
             appBar: AppBar(
               backgroundColor: CustomColorScheme.appBarCards,
               leading: IconButtonLarge(
-                  onPressed: () => Navigator.pop(context),
+                  onPressed: () => Navigator.popAndPushNamed(context, "/home"),
                   icon: Icons.arrow_back,
                   color: Colors.white),
               title: const Text('Categories',

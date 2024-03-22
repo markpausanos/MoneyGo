@@ -32,9 +32,7 @@ class _BaseDropdownFormFieldState extends State<BaseDropdownFormField> {
     _currentSelectedValue = widget.initialValue != null &&
             widget.dropDownItemList.containsKey(widget.initialValue)
         ? widget.initialValue
-        : widget.dropDownItemList.isNotEmpty
-            ? widget.dropDownItemList.keys.first
-            : null;
+        : null;
   }
 
   @override
