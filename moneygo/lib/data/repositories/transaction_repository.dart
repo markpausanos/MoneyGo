@@ -326,7 +326,7 @@ class TransactionRepository {
       await _sourceDao.updateSource(newSource);
     } else if (oldTransaction.amount != transaction.amount) {
       oldSource = oldSource.copyWith(
-        balance: oldSource.balance - oldTransaction.amount + transaction.amount,
+        balance: oldSource.balance + oldTransaction.amount - transaction.amount,
       );
       await _sourceDao.updateSource(oldSource);
     }

@@ -174,8 +174,12 @@ class _NewIncomeScreenState extends State<NewIncomeScreen> {
   }
 
   String? _validateName(String? value) {
-    if (value == null || value.isEmpty) {
-      return "Name cannot be empty";
+    if (value == null) {
+      return "Name cannot be null";
+    } else if (value.length > 15) {
+      return "Name must be less than 15 characters";
+    } else if (value.isEmpty) {
+      _titleController.text = "Unnamed";
     }
     return null;
   }

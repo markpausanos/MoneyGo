@@ -48,7 +48,19 @@ class Utils {
   }
 
   static String getFormattedDateShort(DateTime date) {
-    return '${date.month.toString().padLeft(2, '0')}/${date.day.toString().padLeft(2, '0')}/${date.year}';
+    return '${date.month.toString().padLeft(2, '0')}/${date.day.toString().padLeft(2, '0')}/${date.year % 100}';
+  }
+
+  static String getRemainingDays(DateTime startDate, DateTime endDate) {
+    final difference = endDate.difference(startDate).inDays;
+
+    if (difference == 1) {
+      return '1 day remaining';
+    } else if (difference > 1) {
+      return '$difference days remaining';
+    } else {
+      return 'Ends today';
+    }
   }
 
   static String formatNumber(double number) {

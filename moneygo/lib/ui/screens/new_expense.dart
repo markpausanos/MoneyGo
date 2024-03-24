@@ -104,7 +104,6 @@ class _NewExpenseScreenState extends State<NewExpenseScreen> {
                         builder: (context, state) {
                       if (state is PeriodsLoaded) {
                         _currentPeriod = state.period;
-      
                       }
                       return BaseDateTimePicker(
                         onDateTimeChanged: _onDateTimeChanged,
@@ -226,7 +225,7 @@ class _NewExpenseScreenState extends State<NewExpenseScreen> {
 
   String? _validateDate(String? dateTime) {
     Category? selectedCategory = _categoryMap[_selectedCategoryId];
-  
+
     if (selectedCategory != null && dateTime != null) {
       if (_currentPeriod != null) {
         DateFormat format = DateFormat("MMMM dd, yyyy 'at' hh:mm a");
@@ -242,8 +241,12 @@ class _NewExpenseScreenState extends State<NewExpenseScreen> {
   }
 
   String? _validateName(String? value) {
-    if (value == null || value.isEmpty) {
-      return "Name cannot be empty";
+    if (value == null) {
+      return "Name cannot be null";
+    } else if (value.length > 15) {
+      return "Name must be less than 15 characters";
+    } else if (value.isEmpty) {
+      _titleController.text = "Unnamed";
     }
     return null;
   }
@@ -314,7 +317,7 @@ class _NewExpenseScreenState extends State<NewExpenseScreen> {
       final expense = ExpensesCompanion(
           sourceId: Value(sourceId),
           categoryId: categoryId == 0 ? const Value(null) : Value(categoryId));
-          
+
       BlocProvider.of<TransactionBloc>(context)
           .add(AddTransaction(transaction, expense));
 

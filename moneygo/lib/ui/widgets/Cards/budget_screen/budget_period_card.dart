@@ -1,5 +1,7 @@
 import 'package:drift/drift.dart' hide Column;
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:moneygo/data/app_database.dart';
 import 'package:moneygo/data/blocs/categories/category_bloc.dart';
@@ -88,28 +90,31 @@ class _BudgetPeriodCardState extends State<BudgetPeriodCard> {
                             showDuration: const Duration(seconds: 5),
                             child: Text(
                               _currentPeriod!.endDate != null
-                                  ? '${Utils.getFormattedDateShort(_currentPeriod!.startDate)} - ${Utils.getFormattedDateShort(_currentPeriod!.endDate!)}'
-                                  : '${Utils.getFormattedDateShort(_currentPeriod!.startDate)} - TBA',
+                                  ? Utils.getRemainingDays(
+                                      _currentPeriod!.startDate,
+                                      _currentPeriod!.endDate!)
+                                  : 'TBA days remaining',
                               textAlign: TextAlign.right,
-                              style: CustomTextStyleScheme.cardTitle,
+                              style: CustomTextStyleScheme.cardTitle.copyWith(
+                                color: Colors.black,
+                              ),
                             ),
                           ),
-                          const SizedBox(width: 10),
-                          SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: IconButton(
-                              iconSize: 20,
-                              padding: const EdgeInsets.only(right: 5),
-                              onPressed: () => _showDialog(
-                                  title: "Edit Period",
-                                  endTime: _currentPeriod!.endDate),
-                              icon: const Icon(
-                                Icons.edit_calendar_outlined,
-                              ),
-                              tooltip: "Edit the Period's End Date",
+                          const SizedBox(
+                            width: 5,
+                          ),
+                          InkWell(
+                            borderRadius: BorderRadius.circular(10),
+                            onTap: () {
+                              _showDialog(
+                                  title: 'Edit Budget Period',
+                                  endTime: _currentPeriod!.endDate);
+                            },
+                            child: const Icon(
+                              Icons.edit_calendar_outlined,
+                              size: 20,
                             ),
-                          )
+                          ),
                         ],
                       ),
                     ],
@@ -131,7 +136,7 @@ class _BudgetPeriodCardState extends State<BudgetPeriodCard> {
   }
 
   String _getCurrentDateTooltipMessage() {
-    return 'Start Date: ${Utils.getFormattedDateShort(_currentPeriod!.startDate)} 00:00:00\nEnd Date: ${_currentPeriod!.endDate != null ? '${Utils.getFormattedDateShort(_currentPeriod!.endDate!)}23:59:59' : 'TBA'}\n\nClick the edit icon to change the end date of the period.';
+    return 'Start Date: ${Utils.getFormattedDateShort(_currentPeriod!.startDate)} 00:00:00\nEnd Date: ${_currentPeriod!.endDate != null ? '${Utils.getFormattedDateShort(_currentPeriod!.endDate!)} 23:59:59' : 'TBA'}\n\nClick the edit icon to change the end date of the period.';
   }
 
   void _savePeriod() {

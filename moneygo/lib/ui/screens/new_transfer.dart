@@ -73,7 +73,7 @@ class _NewTransferScreenState extends State<NewTransferScreen> {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(state.message),
-                duration: Duration(seconds: 2),
+                duration: const Duration(seconds: 2),
                 backgroundColor: CustomColorScheme.appRed,
               ),
             );
@@ -213,8 +213,12 @@ class _NewTransferScreenState extends State<NewTransferScreen> {
   }
 
   String? _validateName(String? value) {
-    if (value == null || value.isEmpty) {
-      return "Name cannot be empty";
+    if (value == null) {
+      return "Name cannot be null";
+    } else if (value.length > 15) {
+      return "Name must be less than 15 characters";
+    } else if (value.isEmpty) {
+      _titleController.text = "Unnamed";
     }
     return null;
   }

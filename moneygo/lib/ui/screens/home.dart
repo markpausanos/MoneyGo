@@ -5,6 +5,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:moneygo/data/blocs/settings/settings_bloc.dart';
 import 'package:moneygo/data/blocs/settings/settings_event.dart';
 import 'package:moneygo/data/blocs/settings/settings_state.dart';
+import 'package:moneygo/data/blocs/sources/source_bloc.dart';
+import 'package:moneygo/data/blocs/sources/source_state.dart';
 import 'package:moneygo/ui/mini_screens/budget_screen.dart';
 import 'package:moneygo/ui/utils/screen_utils.dart';
 import 'package:moneygo/ui/widgets/BottomSheets/new_item_bottom_sheet.dart';
@@ -21,6 +23,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  final ScrollController _scrollController = ScrollController();
   final PageController _pageController = PageController();
 
   final _formKey = GlobalKey<FormState>();
@@ -41,6 +44,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   void dispose() {
+    _scrollController.dispose();
     _nameController.dispose();
     _currencyController.dispose();
     super.dispose();
@@ -48,7 +52,13 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    List<String> buttonTitles = ['Budget', 'Savings', 'Debt', 'Credit'];
+    List<String> buttonTitles = [
+      'Budget',
+      'Savings',
+      'Debt',
+      'Credit',
+      'Notes'
+    ];
 
     return Scaffold(
         appBar: AppBar(
@@ -87,6 +97,7 @@ class _HomeScreenState extends State<HomeScreen> {
               SizedBox(
                 height: 35,
                 child: ListView(
+                  controller: _scrollController,
                   scrollDirection: Axis.horizontal,
                   children: buttonTitles
                       .map((title) => _buildNavigationButton(
@@ -99,9 +110,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: PageView(
                   controller: _pageController,
                   onPageChanged: (index) {
-                    setState(() {
-                      _selectedIndex = index;
-                    });
+                    _selectButton(index);
                   },
                   children: [
                     _wrapChildrenWithScrollView(const BudgetScreen()),
@@ -111,6 +120,8 @@ class _HomeScreenState extends State<HomeScreen> {
                         message: 'Debt Screen Ongoing!'),
                     const DashedWidgetWithMessage(
                         message: 'Credit Screen Ongoing!'),
+                    const DashedWidgetWithMessage(
+                        message: 'Notes Screen Ongoing!'),
                   ],
                 ),
               ),
@@ -127,23 +138,43 @@ class _HomeScreenState extends State<HomeScreen> {
             width: 80,
             height: 80,
             child: FittedBox(
-              child: FloatingActionButton(
-                elevation: 10,
-                onPressed: () => _showBottomSheet(context),
-                backgroundColor: Theme.of(context).colorScheme.primary,
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(50.0)),
-                child: const Icon(Icons.add),
-              ),
+              child: BlocBuilder<SourceBloc, SourceState>(
+                  builder: (context, state) {
+                if (state is SourcesLoading) {
+                  return const CircularProgressIndicator();
+                } else if (state is SourcesError) {
+                  return const Icon(Icons.error);
+                } else {
+                  var sources = (state as SourcesLoaded).sources;
+
+                  return FloatingActionButton(
+                    elevation: 10,
+                    onPressed: () =>
+                        _showBottomSheet(context, sources.length > 1),
+                    backgroundColor: Theme.of(context).colorScheme.primary,
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(50.0)),
+                    child: const Icon(Icons.add),
+                  );
+                }
+              }),
             ),
           ),
         ));
   }
 
   void _selectButton(int index) {
-    _pageController.animateToPage(
-      index,
-      duration: const Duration(milliseconds: 300),
+    _pageController.jumpToPage(index);
+
+    setState(() {
+      _selectedIndex = index;
+    });
+
+    double offset = (_selectedIndex) * 50;
+
+    _scrollController.animateTo(
+      offset,
+      duration: const Duration(milliseconds: 100),
       curve: Curves.easeInOut,
     );
   }
@@ -154,7 +185,9 @@ class _HomeScreenState extends State<HomeScreen> {
       child: NavigationButton(
         title: title,
         isSelected: _selectedIndex == index,
-        onPressed: () => _selectButton(index),
+        onPressed: () => _selectButton(
+          index,
+        ),
       ),
     );
   }
@@ -167,22 +200,28 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  void _showBottomSheet(BuildContext context) {
+  void _showBottomSheet(BuildContext context, bool transferVisible) {
     if (_selectedIndex == 0) {
-      _showBottomSheetBudgetScreen(context);
+      _showBottomSheetBudgetScreen(context, transferVisible);
     }
   }
 
-  void _showBottomSheetBudgetScreen(BuildContext context) {
+  void _showBottomSheetBudgetScreen(
+      BuildContext context, bool transferVisible) {
+    var buttons = {
+      'Expense': '/expense/new',
+      'Income': '/income/new',
+    };
+
+    if (transferVisible) {
+      buttons['Transfer'] = '/transfer/new';
+    }
+
     showModalBottomSheet(
       context: context,
       builder: (context) {
-        return const NewItemBottomSheet(
-          buttons: {
-            'Expense': '/expense/new',
-            'Income': '/income/new',
-            'Transfer': '/transfer/new',
-          },
+        return NewItemBottomSheet(
+          buttons: buttons,
         );
       },
     );

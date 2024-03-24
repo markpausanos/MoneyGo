@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:moneygo/data/app_database.dart';
 import 'package:moneygo/data/models/expense_model.dart';
 import 'package:moneygo/data/models/income_model.dart';
-import 'package:moneygo/data/models/interfaces/transaction_subtype.dart';
 import 'package:moneygo/data/models/transfer_model.dart';
 import 'package:moneygo/ui/screens/categories.dart';
 import 'package:moneygo/ui/screens/edit_expense.dart';

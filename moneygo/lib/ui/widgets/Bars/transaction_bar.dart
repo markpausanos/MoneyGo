@@ -89,7 +89,9 @@ class _TransactionBarState extends State<TransactionBar> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              widget.transaction.title,
+                              widget.transaction.title.length > 15
+                                  ? '${widget.transaction.title.substring(0, 15)}...'
+                                  : widget.transaction.title,
                               style: CustomTextStyleScheme.barLabel,
                             ),
                             // Date in MMM dd, yyyy format
@@ -135,8 +137,8 @@ class _TransactionBarState extends State<TransactionBar> {
                               _getDescription(widget.transaction,
                                               widget.transactionType)
                                           .length >
-                                      20
-                                  ? '${_getDescription(widget.transaction, widget.transactionType).substring(0, 20)}...'
+                                      15
+                                  ? '${_getDescription(widget.transaction, widget.transactionType).substring(0, 15)}...'
                                   : _getDescription(widget.transaction,
                                       widget.transactionType),
                               style: CustomTextStyleScheme.progressBarText,
