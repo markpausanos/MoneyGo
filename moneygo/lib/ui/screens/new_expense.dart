@@ -104,7 +104,7 @@ class _NewExpenseScreenState extends State<NewExpenseScreen> {
                         builder: (context, state) {
                       if (state is PeriodsLoaded) {
                         _currentPeriod = state.period;
-                        print(_currentPeriod);
+      
                       }
                       return BaseDateTimePicker(
                         onDateTimeChanged: _onDateTimeChanged,
@@ -226,14 +226,11 @@ class _NewExpenseScreenState extends State<NewExpenseScreen> {
 
   String? _validateDate(String? dateTime) {
     Category? selectedCategory = _categoryMap[_selectedCategoryId];
-    print(selectedCategory);
+  
     if (selectedCategory != null && dateTime != null) {
       if (_currentPeriod != null) {
         DateFormat format = DateFormat("MMMM dd, yyyy 'at' hh:mm a");
         DateTime dateTimeParsed = format.parse(dateTime);
-        print(dateTimeParsed);
-        print(_currentPeriod!.startDate);
-        print(_currentPeriod!.endDate);
         if (dateTimeParsed.isBefore(_currentPeriod!.startDate) ||
             (_currentPeriod!.endDate != null &&
                 dateTimeParsed.isAfter(_currentPeriod!.endDate!))) {
@@ -313,14 +310,11 @@ class _NewExpenseScreenState extends State<NewExpenseScreen> {
           date: Value(selectedDate),
           type: const Value(TransactionTypes.expense));
 
-      print(transaction);
-
       // Create a new expense object
       final expense = ExpensesCompanion(
           sourceId: Value(sourceId),
           categoryId: categoryId == 0 ? const Value(null) : Value(categoryId));
-
-      print(expense);
+          
       BlocProvider.of<TransactionBloc>(context)
           .add(AddTransaction(transaction, expense));
 

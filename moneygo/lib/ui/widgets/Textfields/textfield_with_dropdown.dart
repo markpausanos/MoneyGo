@@ -8,6 +8,7 @@ class BaseDropdownFormField extends StatefulWidget {
   final String labelText;
   final Function(int)? onChanged;
   final String? Function(int?)? validator;
+  final bool isReadOnly;
 
   const BaseDropdownFormField({
     super.key,
@@ -16,6 +17,7 @@ class BaseDropdownFormField extends StatefulWidget {
     required this.labelText,
     this.onChanged,
     this.validator,
+    this.isReadOnly = false,
   });
 
   @override
@@ -40,16 +42,18 @@ class _BaseDropdownFormFieldState extends State<BaseDropdownFormField> {
     return DropdownButtonFormField<int>(
       value: _currentSelectedValue,
       isDense: true,
-      onChanged: widget.dropDownItemList.isNotEmpty
-          ? (int? newValue) {
-              setState(() {
-                _currentSelectedValue = newValue;
-              });
-              if (widget.onChanged != null && newValue != null) {
-                widget.onChanged!(newValue);
-              }
-            }
-          : null,
+      onChanged: widget.isReadOnly
+          ? null
+          : widget.dropDownItemList.isNotEmpty
+              ? (int? newValue) {
+                  setState(() {
+                    _currentSelectedValue = newValue;
+                  });
+                  if (widget.onChanged != null && newValue != null) {
+                    widget.onChanged!(newValue);
+                  }
+                }
+              : null,
       validator: widget.validator,
       items: widget.dropDownItemList.isNotEmpty
           ? widget.dropDownItemList.entries.map((entry) {

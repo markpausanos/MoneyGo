@@ -69,6 +69,15 @@ class _NewTransferScreenState extends State<NewTransferScreen> {
               Navigator.popAndPushNamed(context, "/home");
             }
           }
+          if (state is TransactionsError) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(state.message),
+                duration: Duration(seconds: 2),
+                backgroundColor: CustomColorScheme.appRed,
+              ),
+            );
+          }
         },
         child: Scaffold(
             backgroundColor: Colors.white,
@@ -185,9 +194,12 @@ class _NewTransferScreenState extends State<NewTransferScreen> {
           for (var source in state.sources) source.id: source.name
         };
 
+        _selectedToSourceId ??=
+            sourceMap.isNotEmpty ? sourceMap.keys.elementAt(1) : null;
+
         return BaseDropdownFormField(
           dropDownItemList: sourceMap,
-          initialValue: _selectedFromSourceId! + 1,
+          initialValue: _selectedToSourceId,
           onChanged: (int? id) {
             if (id != null) _onSourceToChanged(id);
           },
@@ -256,9 +268,6 @@ class _NewTransferScreenState extends State<NewTransferScreen> {
   void _onSourceFromChanged(int id) {
     setState(() {
       _selectedFromSourceId = id;
-      if (_selectedFromSourceId == _selectedToSourceId) {
-        _selectedToSourceId = null;
-      }
     });
   }
 
@@ -273,8 +282,8 @@ class _NewTransferScreenState extends State<NewTransferScreen> {
       String title = _titleController.text;
       String amount = _amountController.text;
       String description = _descriptionController.text;
-      int sourceFromId = _selectedFromSourceId!;
-      int sourceToId = _selectedToSourceId!;
+      int sourceFromId = _selectedFromSourceId ?? 0;
+      int sourceToId = _selectedToSourceId ?? 0;
       DateTime selectedDate = _selectedDateTime;
 
       final transaction = TransactionsCompanion(

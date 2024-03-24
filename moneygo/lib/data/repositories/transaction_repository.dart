@@ -37,7 +37,6 @@ class TransactionRepository {
     var transactionsMap = <Transaction, TransactionType>{};
 
     for (var transaction in transactionsSorted) {
-      print(transaction);
       switch (transaction.type) {
         case TransactionTypes.expense:
           var expenseModel = await _getExpenseModelByTransaction(transaction);
@@ -237,7 +236,7 @@ class TransactionRepository {
       Source? fromSource;
       Source? toSource;
 
-      fromSource = await _sourceDao.getSourceById(transfer.fromSourceId.value!);
+      fromSource = await _sourceDao.getSourceById(transfer.fromSourceId.value);
 
       if (fromSource != null) {
         fromSource = fromSource.copyWith(
@@ -246,7 +245,7 @@ class TransactionRepository {
         await _sourceDao.updateSource(fromSource);
       }
 
-      toSource = await _sourceDao.getSourceById(transfer.toSourceId.value!);
+      toSource = await _sourceDao.getSourceById(transfer.toSourceId.value);
 
       if (toSource != null) {
         toSource = toSource.copyWith(
@@ -310,6 +309,7 @@ class TransactionRepository {
 
     if (oldSource == null || newSource == null) return false;
 
+    // Update sources
     if (oldSource.id != newSource.id) {
       oldSource = oldSource.copyWith(
         balance: oldSource.balance + oldTransaction.amount,
@@ -318,10 +318,20 @@ class TransactionRepository {
         balance: newSource.balance - transaction.amount,
       );
 
+      oldExpense = oldExpense.copyWith(
+        sourceId: newExpense.source.id,
+      );
+
       await _sourceDao.updateSource(oldSource);
       await _sourceDao.updateSource(newSource);
+    } else if (oldTransaction.amount != transaction.amount) {
+      oldSource = oldSource.copyWith(
+        balance: oldSource.balance - oldTransaction.amount + transaction.amount,
+      );
+      await _sourceDao.updateSource(oldSource);
     }
 
+    // Update categories
     if (oldExpense.categoryId != newExpense.category?.id) {
       if (oldExpense.categoryId != null) {
         oldCategory =
@@ -348,9 +358,18 @@ class TransactionRepository {
       }
 
       oldExpense = oldExpense.copyWith(
-        sourceId: newExpense.source.id,
         categoryId: Value(newExpense.category?.id),
       );
+    } else if (oldExpense.categoryId == newExpense.category?.id &&
+        oldExpense.categoryId != null) {
+      oldCategory = await _categoryDao.getCategoryById(oldExpense.categoryId!);
+      if (oldCategory != null) {
+        oldCategory = oldCategory.copyWith(
+          balance:
+              oldCategory.balance + oldTransaction.amount - transaction.amount,
+        );
+        await _categoryDao.updateCategory(oldCategory);
+      }
     }
 
     return await _expenseDao.updateExpense(oldExpense);
@@ -405,9 +424,9 @@ class TransactionRepository {
     Source? oldToSource =
         await _sourceDao.getSourceById(oldTransfer.toSourceId);
     Source? newFromSource =
-        await _sourceDao.getSourceById(newTransfer.fromSource!.id);
+        await _sourceDao.getSourceById(newTransfer.fromSource.id);
     Source? newToSource =
-        await _sourceDao.getSourceById(newTransfer.toSource!.id);
+        await _sourceDao.getSourceById(newTransfer.toSource.id);
 
     if (oldFromSource == null || oldToSource == null) return false;
     if (newFromSource == null || newToSource == null) return false;
@@ -424,6 +443,15 @@ class TransactionRepository {
       await _sourceDao.updateSource(newFromSource);
     }
 
+    if (oldFromSource.id == newFromSource.id &&
+        oldTransaction.amount != transaction.amount) {
+      double amountDifference = transaction.amount - oldTransaction.amount;
+      oldFromSource = oldFromSource.copyWith(
+        balance: oldFromSource.balance - amountDifference,
+      );
+      await _sourceDao.updateSource(oldFromSource);
+    }
+
     if (oldToSource.id != newToSource.id) {
       oldToSource = oldToSource.copyWith(
         balance: oldToSource.balance - oldTransaction.amount,
@@ -434,12 +462,21 @@ class TransactionRepository {
 
       await _sourceDao.updateSource(oldToSource);
       await _sourceDao.updateSource(newToSource);
-
-      oldTransfer = oldTransfer.copyWith(
-        fromSourceId: newTransfer.fromSource!.id,
-        toSourceId: newTransfer.toSource!.id,
-      );
     }
+
+    if (oldToSource.id == newToSource.id &&
+        oldTransaction.amount != transaction.amount) {
+      double amountDifference = transaction.amount - oldTransaction.amount;
+      oldToSource = oldToSource.copyWith(
+        balance: oldToSource.balance + amountDifference,
+      );
+      await _sourceDao.updateSource(oldToSource);
+    }
+
+    oldTransfer = oldTransfer.copyWith(
+      fromSourceId: newTransfer.fromSource.id,
+      toSourceId: newTransfer.toSource.id,
+    );
 
     return await _transferDao.updateTransfer(oldTransfer);
   }

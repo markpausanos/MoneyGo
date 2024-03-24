@@ -276,7 +276,6 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
     final String budgetString = _budgetController.text;
     final double? budget = double.tryParse(budgetString);
 
-    print("Im here!");
     if (name.isNotEmpty && budget != null) {
       final category = CategoriesCompanion(
         name: Value(name),

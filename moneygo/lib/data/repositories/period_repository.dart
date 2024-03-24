@@ -92,17 +92,6 @@ class PeriodRepository {
       ));
     }
 
-    print("After insert");
-
-    categories = await _categoryDao.getAllCategories();
-
-    categories =
-        categories.where((category) => category.periodId == id).toList();
-
-    for (var category in categories) {
-      print(category);
-    }
-
     return id;
   }
 

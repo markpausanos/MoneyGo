@@ -16,7 +16,6 @@ class PeriodBloc extends Bloc<PeriodEvent, PeriodState> {
   void _onLoadPeriods(LoadPeriods event, Emitter<PeriodState> emit) async {
     try {
       final period = await periodRepository.getLatestPeriod();
-      print("Hello loaded");
       emit(PeriodsLoaded(period));
     } catch (e) {
       emit(PeriodsError(e.toString()));

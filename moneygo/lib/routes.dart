@@ -3,9 +3,11 @@ import 'package:moneygo/data/app_database.dart';
 import 'package:moneygo/data/models/expense_model.dart';
 import 'package:moneygo/data/models/income_model.dart';
 import 'package:moneygo/data/models/interfaces/transaction_subtype.dart';
+import 'package:moneygo/data/models/transfer_model.dart';
 import 'package:moneygo/ui/screens/categories.dart';
 import 'package:moneygo/ui/screens/edit_expense.dart';
 import 'package:moneygo/ui/screens/edit_income.dart';
+import 'package:moneygo/ui/screens/edit_transfer.dart';
 import 'package:moneygo/ui/screens/home.dart';
 import 'package:moneygo/ui/screens/new_expense.dart';
 import 'package:moneygo/ui/screens/new_income.dart';
@@ -53,6 +55,16 @@ class AppRoutes {
 
       case '/transfer/new':
         return MaterialPageRoute(builder: (_) => const NewTransferScreen());
+      case '/transfer/edit':
+        final Map<String, dynamic> args =
+            settings.arguments as Map<String, dynamic>;
+        return MaterialPageRoute(
+          builder: (_) => EditTransferScreen(
+            transaction: args['transaction'] as Transaction,
+            transfer: args['transfer'] as TransferModel,
+            previousRoute: args['previousRoute'] as String?,
+          ),
+        );
 
       case '/transactions':
         return MaterialPageRoute(builder: (_) => const TransactionsScreen());

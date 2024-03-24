@@ -71,10 +71,10 @@ class _EditTransferScreenState extends State<EditTransferScreen> {
   Widget build(BuildContext context) {
     return BlocListener<TransactionBloc, TransactionState>(
         listener: (context, state) {
-          if (state is TransactionsSaveSuccess) {
+          if (state is TransactionsUpdateSuccess) {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
-                content: Text('Transfer saved successfully'),
+                content: Text('Transfer updated successfully'),
                 duration: Duration(seconds: 2),
                 backgroundColor: CustomColorScheme.appGreen,
               ),
@@ -102,7 +102,7 @@ class _EditTransferScreenState extends State<EditTransferScreen> {
                   onPressed: () => Navigator.popAndPushNamed(context, "/home"),
                   icon: Icons.arrow_back,
                   color: Colors.white),
-              title: const Text('New Transfer',
+              title: const Text('Edit Transfer Details',
                   style: CustomTextStyleScheme.appBarTitleCards),
               centerTitle: true,
               actions: [
@@ -169,15 +169,14 @@ class _EditTransferScreenState extends State<EditTransferScreen> {
           for (var source in state.sources) source.id: source.name
         };
 
-        _selectedFromSourceId ??=
-            sourceMap.isNotEmpty ? sourceMap.keys.first : null;
         return BaseDropdownFormField(
+          isReadOnly: true,
           dropDownItemList: sourceMap,
           initialValue: _selectedFromSourceId,
           onChanged: (int? id) {
             if (id != null) _onSourceFromChanged(id);
           },
-          labelText: "Source From",
+          labelText: "Source From (Not Editable)",
           validator: _validateDropDownSourceFrom,
         );
       } else {
@@ -195,7 +194,7 @@ class _EditTransferScreenState extends State<EditTransferScreen> {
 
         return BaseDropdownFormField(
           dropDownItemList: sourceMap,
-          initialValue: _selectedFromSourceId! + 1,
+          initialValue: _selectedToSourceId,
           onChanged: (int? id) {
             if (id != null) _onSourceToChanged(id);
           },
@@ -297,9 +296,8 @@ class _EditTransferScreenState extends State<EditTransferScreen> {
         toSource: widget.transfer.toSource.copyWith(id: toSourceId),
       );
 
-      BlocProvider.of<TransactionBloc>(context).add(
-        UpdateTransaction(transaction, transfer),
-      );
+      BlocProvider.of<TransactionBloc>(context)
+          .add(UpdateTransaction(transaction, transfer));
     }
   }
 
