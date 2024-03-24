@@ -59,7 +59,7 @@ class _BaseDropdownFormFieldState extends State<BaseDropdownFormField> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text("No Category",
+                          Text("None",
                               style: CustomTextStyleScheme.textFieldText
                                   .copyWith(color: CustomColorScheme.appGray)),
                         ],

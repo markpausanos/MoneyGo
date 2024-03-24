@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:moneygo/data/app_database.dart';
+import 'package:moneygo/data/models/interfaces/transaction_subtype.dart';
 
 abstract class TransactionEvent extends Equatable {
   @override
@@ -10,41 +11,40 @@ abstract class TransactionEvent extends Equatable {
 
 class LoadTransactions extends TransactionEvent {}
 
-class AddExpenseTransaction extends TransactionEvent {
+class AddTransaction extends TransactionEvent {
   final TransactionsCompanion transaction;
-  final ExpensesCompanion expense;
+  final dynamic transactionType;
 
-  const AddExpenseTransaction(this.transaction, this.expense);
+  const AddTransaction(this.transaction, this.transactionType);
 
   @override
-  List<Object> get props => [transaction, expense];
-}
-
-class AddIncomeTransaction extends TransactionEvent {
-  final TransactionsCompanion transaction;
-  final IncomesCompanion income;
-
-  const AddIncomeTransaction(this.transaction, this.income);
-
-  @override
-  List<Object> get props => [transaction, income];
-}
-
-class AddTransferTransaction extends TransactionEvent {
-  final TransactionsCompanion transaction;
-  final TransfersCompanion transfer;
-
-  const AddTransferTransaction(this.transaction, this.transfer);
-
-  @override
-  List<Object> get props => [transaction, transfer];
+  List<Object> get props => [transaction];
 }
 
 class UpdateTransaction extends TransactionEvent {
   final Transaction transaction;
+  final TransactionType transactionType;
 
-  const UpdateTransaction(this.transaction);
+  const UpdateTransaction(this.transaction, this.transactionType);
 
   @override
   List<Object> get props => [transaction];
+}
+
+class DeleteTransaction extends TransactionEvent {
+  final Transaction transaction;
+
+  const DeleteTransaction(this.transaction);
+
+  @override
+  List<Object> get props => [transaction];
+}
+
+class DeleteTransactionBySource extends TransactionEvent {
+  final int sourceId;
+
+  const DeleteTransactionBySource(this.sourceId);
+
+  @override
+  List<Object> get props => [sourceId];
 }

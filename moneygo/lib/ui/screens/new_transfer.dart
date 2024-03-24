@@ -1,9 +1,8 @@
 import 'package:drift/drift.dart' hide Column;
+import 'package:expression_language/expression_language.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:moneygo/data/app_database.dart';
-import 'package:moneygo/data/blocs/periods/period_bloc.dart';
-import 'package:moneygo/data/blocs/periods/period_state.dart';
 import 'package:moneygo/data/blocs/sources/source_bloc.dart';
 import 'package:moneygo/data/blocs/sources/source_event.dart';
 import 'package:moneygo/data/blocs/sources/source_state.dart';
@@ -79,7 +78,7 @@ class _NewTransferScreenState extends State<NewTransferScreen> {
                   onPressed: () => Navigator.popAndPushNamed(context, "/home"),
                   icon: Icons.arrow_back,
                   color: Colors.white),
-              title: const Text('Transfer Details',
+              title: const Text('New Transfer',
                   style: CustomTextStyleScheme.appBarTitleCards),
               centerTitle: true,
             ),
@@ -212,13 +211,20 @@ class _NewTransferScreenState extends State<NewTransferScreen> {
     if (value == null || value.isEmpty) {
       return "Amount cannot be empty";
     }
-    // Check if the value is a valid double
-    final doubleValue = double.tryParse(value);
-    if (doubleValue == null) {
-      return "Please enter a valid number";
+
+    try {
+      final parser = ExpressionParser(const {});
+      final expression = parser.parse(value);
+      final result = expression.evaluate();
+      if (result is! Decimal && result is! Number) {
+        return "Please enter a valid number or expression";
+      }
+      _amountController.text = result.toString();
+    } catch (e) {
+      return "Invalid expression";
     }
 
-    return null;
+    return null; // Return null if the input is valid
   }
 
   String? _validateDropDownSourceFrom(int? value) {
@@ -284,7 +290,7 @@ class _NewTransferScreenState extends State<NewTransferScreen> {
       );
 
       BlocProvider.of<TransactionBloc>(context)
-          .add(AddTransferTransaction(transaction, transfer));
+          .add(AddTransaction(transaction, transfer));
 
       _titleController.clear();
       _amountController.clear();

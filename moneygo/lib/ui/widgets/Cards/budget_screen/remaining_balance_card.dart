@@ -40,10 +40,14 @@ class _RemainingBalanceCardState extends State<RemainingBalanceCard> {
           const Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                'Remaining Balance',
-                textAlign: TextAlign.left,
-                style: CustomTextStyleScheme.cardTitle,
+              Row(
+                children: [
+                  Text(
+                    'Remaining Balance',
+                    textAlign: TextAlign.left,
+                    style: CustomTextStyleScheme.cardTitle,
+                  ),
+                ],
               ),
             ],
           ),

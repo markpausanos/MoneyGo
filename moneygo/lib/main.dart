@@ -39,6 +39,14 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final periodDao = PeriodDao(database);
+    final categoryDao = CategoryDao(database);
+    final incomeDao = IncomeDao(database);
+    final expenseDao = ExpenseDao(database);
+    final sourceDao = SourceDao(database);
+    final transactionDao = TransactionDao(database);
+    final transferDao = TransferDao(database);
+
     return MultiProvider(
       providers: [
         Provider<AppDatabase>(create: (_) => database),
@@ -49,30 +57,27 @@ class MyApp extends StatelessWidget {
         ),
         BlocProvider<CategoryBloc>(
           create: (context) => CategoryBloc(
-            categoryRepository: CategoryRepository(
-                CategoryDao(context.read()), PeriodDao(context.read())),
-          ),
+              categoryRepository: CategoryRepository(categoryDao, periodDao)),
         ),
         BlocProvider<SourceBloc>(
           create: (context) => SourceBloc(
-            sourceRepository: SourceRepository(SourceDao(context.read())),
+            sourceRepository: SourceRepository(sourceDao),
           ),
         ),
         BlocProvider<PeriodBloc>(
           create: (context) => PeriodBloc(
-            periodRepository: PeriodRepository(
-                PeriodDao(context.read()), CategoryDao(context.read())),
-          ),
+              periodRepository: PeriodRepository(periodDao, categoryDao)),
         ),
         BlocProvider<TransactionBloc>(
           create: (context) => TransactionBloc(
             transactionRepository: TransactionRepository(
-              TransactionDao(context.read()),
-              ExpenseDao(context.read()),
-              SourceDao(context.read()),
-              CategoryDao(context.read()),
-              IncomeDao(context.read()),
-              TransferDao(context.read()),
+              transactionDao,
+              expenseDao,
+              sourceDao,
+              categoryDao,
+              incomeDao,
+              transferDao,
+              periodDao,
             ),
           ),
         ),

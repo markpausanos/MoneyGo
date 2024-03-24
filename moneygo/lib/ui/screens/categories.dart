@@ -5,13 +5,11 @@ import 'package:moneygo/data/app_database.dart';
 import 'package:moneygo/data/blocs/categories/category_bloc.dart';
 import 'package:moneygo/data/blocs/categories/category_event.dart';
 import 'package:moneygo/data/blocs/categories/category_state.dart';
-import 'package:moneygo/data/blocs/periods/period_bloc.dart';
-import 'package:moneygo/data/blocs/periods/period_event.dart';
-import 'package:moneygo/data/blocs/periods/period_state.dart';
-import 'package:moneygo/ui/utils/list_utils.dart';
+import 'package:moneygo/ui/utils/screen_utils.dart';
 import 'package:moneygo/ui/widgets/Buttons/dialog_button.dart';
 import 'package:moneygo/ui/widgets/CheckBoxWithItem/category_checkbox.dart';
 import 'package:moneygo/ui/widgets/IconButton/large_icon_button.dart';
+import 'package:moneygo/ui/widgets/Loaders/loading_state.dart';
 import 'package:moneygo/ui/widgets/SizedBoxes/dashed_box_with_message.dart';
 import 'package:moneygo/ui/widgets/Themes/custom_color_scheme.dart';
 import 'package:moneygo/ui/widgets/Themes/custom_text_scheme.dart';
@@ -28,7 +26,6 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
   final _budgetController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   bool _autoValidate = false;
-  int? _periodId;
 
   List<Category> _categories = [];
   Map<int, bool> _checkedStates = {};
@@ -42,7 +39,6 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
       _checkedStates[category.id] = false;
     }
     BlocProvider.of<CategoryBloc>(context).add(LoadCategories());
-    BlocProvider.of<PeriodBloc>(context).add(LoadPeriods());
   }
 
   @override
@@ -58,165 +54,158 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
       listeners: [
         BlocListener<CategoryBloc, CategoryState>(listener: (context, state) {
           if (state is CategoriesSaveSuccess) {
-            showSnackBarAddOrUpdate(
+            ScreenUtils.showSnackBarAddOrUpdate(
                 context, 'Category ${state.name} has been added');
           } else if (state is CategoriesUpdateSuccess) {
-            showSnackBarAddOrUpdate(context, 'Category has been updated');
+            ScreenUtils.showSnackBarAddOrUpdate(
+                context, 'Category has been updated');
           } else if (state is CategoriesDeleteSuccess) {
-            showSnackBarDelete(context, 'Category/ies deleted');
+            ScreenUtils.showSnackBarDelete(context, 'Category/ies deleted');
           }
         }),
       ],
-      child: BlocBuilder<PeriodBloc, PeriodState>(builder: (context, state) {
-        if (state is PeriodsLoaded) {
-          _periodId = state.periods.first.id;
-
-          return Scaffold(
-            backgroundColor: Colors.white,
-            appBar: AppBar(
-              backgroundColor: CustomColorScheme.appBarCards,
-              leading: IconButtonLarge(
-                  onPressed: () => Navigator.popAndPushNamed(context, "/home"),
-                  icon: Icons.arrow_back,
-                  color: Colors.white),
-              title: const Text('Categories',
-                  style: CustomTextStyleScheme.appBarTitleCards),
-              centerTitle: true,
-              actions: [
-                IconButtonLarge(
-                  onPressed: () {},
-                  icon: Icons.restart_alt_rounded,
-                  color: Colors.white,
-                )
-              ],
-            ),
-            body: SingleChildScrollView(
-                padding: const EdgeInsets.fromLTRB(25.0, 10.0, 25.0, 0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+      child: Scaffold(
+        backgroundColor: Colors.white,
+        appBar: AppBar(
+          backgroundColor: CustomColorScheme.appBarCards,
+          leading: IconButtonLarge(
+              onPressed: () => Navigator.popAndPushNamed(context, "/home"),
+              icon: Icons.arrow_back,
+              color: Colors.white),
+          title: const Text('Categories',
+              style: CustomTextStyleScheme.appBarTitleCards),
+          centerTitle: true,
+          actions: [
+            IconButtonLarge(
+              onPressed: () {},
+              icon: Icons.restart_alt_rounded,
+              color: Colors.white,
+            )
+          ],
+        ),
+        body: SingleChildScrollView(
+            padding: const EdgeInsets.fromLTRB(25.0, 10.0, 25.0, 0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        AnimatedSwitcher(
-                          duration: const Duration(milliseconds: 200),
-                          transitionBuilder:
-                              (Widget child, Animation<double> animation) {
-                            return FadeTransition(
-                              opacity: animation,
-                              child: child,
-                            );
-                          },
-                          child: IconButton(
-                              key: Key(_containsChecked.toString()),
-                              onPressed: () {
-                                _categories.isEmpty
-                                    ? null
-                                    : _containsChecked
-                                        ? _unselectAllCategories()
-                                        : _selectAllCategories();
-                              },
-                              icon: _containsChecked
-                                  ? const Icon(
-                                      Icons.cancel_rounded,
-                                      color: CustomColorScheme.appRed,
-                                    )
-                                  : const Icon(
-                                      Icons.select_all,
-                                      color: CustomColorScheme.appBlue,
-                                    )),
-                        ),
-                        Container(
-                          decoration: const BoxDecoration(
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(10.0)),
-                              color: CustomColorScheme.headerWithText),
-                          padding: const EdgeInsets.fromLTRB(30, 5, 30, 5),
-                          child: const Text(
-                            "Custom",
-                            style: TextStyle(color: Colors.white),
-                          ),
-                        ),
-                        AnimatedSwitcher(
-                          duration: const Duration(milliseconds: 200),
-                          transitionBuilder:
-                              (Widget child, Animation<double> animation) {
-                            return FadeTransition(
-                              opacity: animation,
-                              child: child,
-                            );
-                          },
-                          child: IconButton(
-                            key: Key(_containsChecked.toString()),
-                            onPressed: _containsChecked
-                                ? _showDeleteConfirmationDialog
-                                : _showAddCategoryDialog,
-                            icon: _containsChecked
-                                ? const Icon(
-                                    Icons.delete_rounded,
-                                    color: CustomColorScheme.appRed,
-                                  )
-                                : const Icon(
-                                    Icons.add_circle_outline_rounded,
-                                    color: CustomColorScheme.appGreen,
-                                  ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 20),
-                    BlocBuilder<CategoryBloc, CategoryState>(
-                      builder: (context, state) {
-                        if (state is CategoriesLoading) {
-                          return const CircularProgressIndicator();
-                        } else if (state is CategoriesLoaded) {
-                          _categories = state.categories;
-                          return _buildCategoryList(state.categories);
-                        } else if (state is CategoriesError) {
-                          return DashedWidgetWithMessage(
-                              message: 'Error: ${state.message}');
-                        } else {
-                          return const DashedWidgetWithMessage(
-                              message: 'Error loading categories');
-                        }
+                    AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 200),
+                      transitionBuilder:
+                          (Widget child, Animation<double> animation) {
+                        return FadeTransition(
+                          opacity: animation,
+                          child: child,
+                        );
                       },
+                      child: IconButton(
+                          key: Key(_containsChecked.toString()),
+                          onPressed: () {
+                            _categories.isEmpty
+                                ? null
+                                : _containsChecked
+                                    ? _unselectAllCategories()
+                                    : _selectAllCategories();
+                          },
+                          icon: _containsChecked
+                              ? const Icon(
+                                  Icons.cancel_rounded,
+                                  color: CustomColorScheme.appRed,
+                                )
+                              : const Icon(
+                                  Icons.select_all,
+                                  color: CustomColorScheme.appBlue,
+                                )),
                     ),
-                    const SizedBox(height: 20),
-                    // Center(
-                    //   child: Container(
-                    //     decoration: const BoxDecoration(
-                    //         borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                    //         color: CustomColorScheme.headerWithText),
-                    //     padding: const EdgeInsets.fromLTRB(30, 5, 30, 5),
-                    //     child: const Text(
-                    //       "Savings",
-                    //       style: TextStyle(color: Colors.white),
-                    //     ),
-                    //   ),
-                    // ),
-                    // const SizedBox(height: 20),
-                    // const DashedWidgetWithMessage(message: "No savings found"),
-                    // const SizedBox(height: 20),
-                    // Center(
-                    //   child: Container(
-                    //     decoration: const BoxDecoration(
-                    //         borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                    //         color: CustomColorScheme.headerWithText),
-                    //     padding: const EdgeInsets.fromLTRB(30, 5, 30, 5),
-                    //     child: const Text(
-                    //       "Debts",
-                    //       style: TextStyle(color: Colors.white),
-                    //     ),
-                    //   ),
-                    // ),
-
-                    // const DashedWidgetWithMessage(message: "No debts found"),
+                    Container(
+                      decoration: const BoxDecoration(
+                          borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                          color: CustomColorScheme.headerWithText),
+                      padding: const EdgeInsets.fromLTRB(30, 5, 30, 5),
+                      child: const Text(
+                        "Custom",
+                        style: TextStyle(color: Colors.white),
+                      ),
+                    ),
+                    AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 200),
+                      transitionBuilder:
+                          (Widget child, Animation<double> animation) {
+                        return FadeTransition(
+                          opacity: animation,
+                          child: child,
+                        );
+                      },
+                      child: IconButton(
+                        key: Key(_containsChecked.toString()),
+                        onPressed: _containsChecked
+                            ? _handleDeleteConfirmation
+                            : _showAddCategoryDialog,
+                        icon: _containsChecked
+                            ? const Icon(
+                                Icons.delete_rounded,
+                                color: CustomColorScheme.appRed,
+                              )
+                            : const Icon(
+                                Icons.add_circle_outline_rounded,
+                                color: CustomColorScheme.appGreen,
+                              ),
+                      ),
+                    ),
                   ],
-                )),
-          );
-        }
-        return const CircularProgressIndicator();
-      }),
+                ),
+                const SizedBox(height: 20),
+                BlocBuilder<CategoryBloc, CategoryState>(
+                  builder: (context, state) {
+                    if (state is CategoriesLoading) {
+                      return const Loader();
+                    } else if (state is CategoriesLoaded) {
+                      _categories = state.categories;
+                      return _buildCategoryList(state.categories);
+                    } else if (state is CategoriesError) {
+                      return DashedWidgetWithMessage(
+                          message: 'Error: ${state.message}');
+                    } else {
+                      return const DashedWidgetWithMessage(
+                          message: 'Error loading categories');
+                    }
+                  },
+                ),
+                const SizedBox(height: 20),
+                // Center(
+                //   child: Container(
+                //     decoration: const BoxDecoration(
+                //         borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                //         color: CustomColorScheme.headerWithText),
+                //     padding: const EdgeInsets.fromLTRB(30, 5, 30, 5),
+                //     child: const Text(
+                //       "Savings",
+                //       style: TextStyle(color: Colors.white),
+                //     ),
+                //   ),
+                // ),
+                // const SizedBox(height: 20),
+                // const DashedWidgetWithMessage(message: "No savings found"),
+                // const SizedBox(height: 20),
+                // Center(
+                //   child: Container(
+                //     decoration: const BoxDecoration(
+                //         borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                //         color: CustomColorScheme.headerWithText),
+                //     padding: const EdgeInsets.fromLTRB(30, 5, 30, 5),
+                //     child: const Text(
+                //       "Debts",
+                //       style: TextStyle(color: Colors.white),
+                //     ),
+                //   ),
+                // ),
+
+                // const DashedWidgetWithMessage(message: "No debts found"),
+              ],
+            )),
+      ),
     );
   }
 
@@ -287,12 +276,13 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
     final String budgetString = _budgetController.text;
     final double? budget = double.tryParse(budgetString);
 
-    if (name.isNotEmpty && budget != null && _periodId != null) {
+    print("Im here!");
+    if (name.isNotEmpty && budget != null) {
       final category = CategoriesCompanion(
-          name: Value(name),
-          maxBudget: Value(budget),
-          balance: Value(budget),
-          periodId: Value(_periodId!));
+        name: Value(name),
+        maxBudget: Value(budget),
+        balance: Value(budget),
+      );
 
       BlocProvider.of<CategoryBloc>(context).add(AddCategory(category));
 
@@ -349,87 +339,16 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
     }
   }
 
-  Future<void> _showDeleteConfirmationDialog() async {
-    final bool? result = await showDialog<bool>(
-      context: context,
-      barrierDismissible: true,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
-          titlePadding: const EdgeInsets.all(0.0),
-          actionsPadding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
-          buttonPadding: const EdgeInsets.all(0.0),
-          title: Container(
-              decoration: const BoxDecoration(
-                color: CustomColorScheme.appRed,
-                borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(10.0),
-                    topRight: Radius.circular(10.0)),
-              ),
-              child: const Column(
-                children: [
-                  SizedBox(height: 15.0),
-                  Center(
-                    child: Text(
-                      'Delete Categories',
-                      style: CustomTextStyleScheme.dialogTitle,
-                    ),
-                  ),
-                  SizedBox(height: 15.0),
-                ],
-              )),
-          content: const SingleChildScrollView(
-            child: Center(
-              child: Text(
-                  'Are you sure you want to delete the selected categories?',
-                  style: CustomTextStyleScheme.dialogBody,
-                  textAlign: TextAlign.center),
-            ),
-          ),
-          actions: <Widget>[
-            Column(
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    ElevatedButton(
-                        style: ButtonStyle(
-                            backgroundColor: MaterialStateProperty.all(
-                                CustomColorScheme.dialogButtonCancel),
-                            shape: MaterialStateProperty.all(
-                              RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10.0),
-                              ),
-                            )),
-                        onPressed: () => Navigator.of(context).pop(false),
-                        child: const Text('Cancel',
-                            style: TextStyle(color: Colors.black))),
-                    const SizedBox(width: 10.0),
-                    ElevatedButton(
-                        style: ButtonStyle(
-                            backgroundColor: MaterialStateProperty.all(
-                                CustomColorScheme.appRed),
-                            shape: MaterialStateProperty.all(
-                              RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10.0),
-                              ),
-                            )),
-                        onPressed: () => Navigator.of(context).pop(true),
-                        child: const Text('Delete',
-                            style: TextStyle(color: Colors.white)))
-                  ],
-                ),
-                const SizedBox(height: 10.0),
-              ],
-            ),
-          ],
-        );
-      },
-    );
-
-    if (result ?? false) {
-      await _deleteCategories();
+  Future<void> _handleDeleteConfirmation() async {
+    if (_containsChecked) {
+      await ScreenUtils.showConfirmationDialog(
+        context: context,
+        title: 'Delete Categories',
+        content: 'Are you sure you want to delete the selected categories?',
+        onConfirm: () => _deleteCategories(),
+      );
+    } else {
+      _showAddCategoryDialog();
     }
   }
 
@@ -528,7 +447,6 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                         text: 'Cancel',
                         backgroundColor: CustomColorScheme.dialogButtonCancel,
                         textColor: Colors.black,
-                        // Since there's no border needed for the cancel button, don't pass borderColor or border
                       ),
                       DialogButton(
                         onPressed: _validateForm,

@@ -2,16 +2,16 @@ import 'package:moneygo/data/app_database.dart';
 import 'package:moneygo/data/models/interfaces/transaction_subtype.dart';
 
 class TransferModel implements TransactionType {
-  final int id;
-  final Transaction transaction;
-  final Source? fromSource;
-  final Source? toSource;
+  int id;
+  Transaction transaction;
+  Source fromSource;
+  Source toSource;
 
   TransferModel({
     required this.id,
     required this.transaction,
-    this.fromSource,
-    this.toSource,
+    required this.fromSource,
+    required this.toSource,
   });
 
   TransferModel copyWith({

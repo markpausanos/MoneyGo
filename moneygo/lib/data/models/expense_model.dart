@@ -2,15 +2,15 @@ import 'package:moneygo/data/app_database.dart';
 import 'package:moneygo/data/models/interfaces/transaction_subtype.dart';
 
 class ExpenseModel implements TransactionType {
-  final int id;
-  final Transaction transaction;
-  final Source? source;
-  final Category? category;
+  int id;
+  Transaction transaction;
+  Source source;
+  Category? category;
 
   ExpenseModel({
     required this.id,
     required this.transaction,
-    this.source,
+    required this.source,
     this.category,
   });
 
@@ -24,7 +24,7 @@ class ExpenseModel implements TransactionType {
       id: id ?? this.id,
       transaction: transaction ?? this.transaction,
       source: source ?? this.source,
-      category: category ?? this.category,
+      category: category,
     );
   }
 

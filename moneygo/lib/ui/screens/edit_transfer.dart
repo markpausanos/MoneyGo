@@ -9,6 +9,8 @@ import 'package:moneygo/data/blocs/sources/source_state.dart';
 import 'package:moneygo/data/blocs/transactions/transaction_bloc.dart';
 import 'package:moneygo/data/blocs/transactions/transaction_event.dart';
 import 'package:moneygo/data/blocs/transactions/transaction_state.dart';
+import 'package:moneygo/data/models/transfer_model.dart';
+import 'package:moneygo/ui/utils/screen_utils.dart';
 import 'package:moneygo/ui/widgets/Buttons/dialog_button.dart';
 import 'package:moneygo/ui/widgets/DateTimePicker/base_datetime_picker.dart';
 import 'package:moneygo/ui/widgets/IconButton/large_icon_button.dart';
@@ -16,28 +18,42 @@ import 'package:moneygo/ui/widgets/Textfields/base_textfield.dart';
 import 'package:moneygo/ui/widgets/Textfields/textfield_with_dropdown.dart';
 import 'package:moneygo/ui/widgets/Themes/custom_color_scheme.dart';
 import 'package:moneygo/ui/widgets/Themes/custom_text_scheme.dart';
-import 'package:moneygo/utils/transaction_types.dart';
 
-class NewIncomeScreen extends StatefulWidget {
-  const NewIncomeScreen({super.key});
+class EditTransferScreen extends StatefulWidget {
+  final Transaction transaction;
+  final TransferModel transfer;
+  final String? previousRoute;
+
+  const EditTransferScreen(
+      {super.key,
+      required this.transaction,
+      required this.transfer,
+      this.previousRoute});
 
   @override
-  State<NewIncomeScreen> createState() => _NewIncomeScreenState();
+  State<EditTransferScreen> createState() => _EditTransferScreenState();
 }
 
-class _NewIncomeScreenState extends State<NewIncomeScreen> {
+class _EditTransferScreenState extends State<EditTransferScreen> {
   final _formKey = GlobalKey<FormState>();
   final _titleController = TextEditingController();
   final _amountController = TextEditingController();
   final _descriptionController = TextEditingController();
 
   DateTime _selectedDateTime = DateTime.now();
-  int? _selectedSourceId;
-  bool _stayOnPage = false;
+  int? _selectedFromSourceId;
+  int? _selectedToSourceId;
 
   @override
   void initState() {
     super.initState();
+
+    _titleController.text = widget.transaction.title;
+    _amountController.text = widget.transaction.amount.toString();
+    _descriptionController.text = widget.transaction.description ?? '';
+    _selectedDateTime = widget.transaction.date;
+    _selectedFromSourceId = widget.transfer.fromSource.id;
+    _selectedToSourceId = widget.transfer.toSource.id;
 
     BlocProvider.of<SourceBloc>(context).add(LoadSources());
     BlocProvider.of<TransactionBloc>(context).add(LoadTransactions());
@@ -58,15 +74,24 @@ class _NewIncomeScreenState extends State<NewIncomeScreen> {
           if (state is TransactionsSaveSuccess) {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
-                content: Text('Income saved successfully'),
+                content: Text('Transfer saved successfully'),
                 duration: Duration(seconds: 2),
                 backgroundColor: CustomColorScheme.appGreen,
               ),
             );
 
-            if (!_stayOnPage) {
-              Navigator.popAndPushNamed(context, "/home");
-            }
+            Navigator.popAndPushNamed(context, widget.previousRoute ?? '/home');
+          }
+          if (state is TransactionsDeleteSuccess) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Transfer deleted successfully'),
+                duration: Duration(seconds: 2),
+                backgroundColor: CustomColorScheme.appRed,
+              ),
+            );
+
+            Navigator.popAndPushNamed(context, widget.previousRoute ?? '/home');
           }
         },
         child: Scaffold(
@@ -77,9 +102,16 @@ class _NewIncomeScreenState extends State<NewIncomeScreen> {
                   onPressed: () => Navigator.popAndPushNamed(context, "/home"),
                   icon: Icons.arrow_back,
                   color: Colors.white),
-              title: const Text('New Income',
+              title: const Text('New Transfer',
                   style: CustomTextStyleScheme.appBarTitleCards),
               centerTitle: true,
+              actions: [
+                IconButtonLarge(
+                  icon: Icons.delete,
+                  color: Colors.white,
+                  onPressed: () => _onDeleteTransfer(),
+                )
+              ],
             ),
             body: SingleChildScrollView(
               padding: const EdgeInsets.fromLTRB(35, 30, 35, 30),
@@ -103,7 +135,9 @@ class _NewIncomeScreenState extends State<NewIncomeScreen> {
                           const TextInputType.numberWithOptions(decimal: true),
                     ),
                     const SizedBox(height: 25),
-                    _buildSourceDropdown(),
+                    _buildSourceFromDropdown(),
+                    const SizedBox(height: 25),
+                    _buildSourceToDropdown(),
                     const SizedBox(height: 25),
                     BaseTextField(
                       controller: _descriptionController,
@@ -112,34 +146,11 @@ class _NewIncomeScreenState extends State<NewIncomeScreen> {
                     ),
                     const SizedBox(height: 25),
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      mainAxisAlignment: MainAxisAlignment.end,
                       children: [
-                        Row(
-                          children: [
-                            Switch(
-                              value: _stayOnPage,
-                              onChanged: (value) {
-                                setState(() {
-                                  _stayOnPage = value;
-                                });
-                              },
-                              activeColor: CustomColorScheme.appGreen,
-                              inactiveTrackColor:
-                                  CustomColorScheme.backgroundColor,
-                              trackOutlineColor: MaterialStateProperty.all(
-                                  CustomColorScheme.appGray),
-                              trackOutlineWidth:
-                                  const MaterialStatePropertyAll(0.5),
-                            ),
-                            const SizedBox(width: 3),
-                            const Text(
-                              "Stay on page",
-                            ),
-                          ],
-                        ),
                         DialogButton(
-                          onPressed: _onSaveIncome,
-                          text: "Save Income",
+                          onPressed: _onSaveTransfer,
+                          text: "Save Transfer",
                           backgroundColor: CustomColorScheme.appGreenLight,
                           textColor: CustomColorScheme.appGreen,
                         ),
@@ -151,7 +162,31 @@ class _NewIncomeScreenState extends State<NewIncomeScreen> {
             )));
   }
 
-  Widget _buildSourceDropdown() {
+  Widget _buildSourceFromDropdown() {
+    return BlocBuilder<SourceBloc, SourceState>(builder: (context, state) {
+      if (state is SourcesLoaded) {
+        Map<int, String> sourceMap = {
+          for (var source in state.sources) source.id: source.name
+        };
+
+        _selectedFromSourceId ??=
+            sourceMap.isNotEmpty ? sourceMap.keys.first : null;
+        return BaseDropdownFormField(
+          dropDownItemList: sourceMap,
+          initialValue: _selectedFromSourceId,
+          onChanged: (int? id) {
+            if (id != null) _onSourceFromChanged(id);
+          },
+          labelText: "Source From",
+          validator: _validateDropDownSourceFrom,
+        );
+      } else {
+        return const CircularProgressIndicator();
+      }
+    });
+  }
+
+  Widget _buildSourceToDropdown() {
     return BlocBuilder<SourceBloc, SourceState>(builder: (context, state) {
       if (state is SourcesLoaded) {
         Map<int, String> sourceMap = {
@@ -160,12 +195,12 @@ class _NewIncomeScreenState extends State<NewIncomeScreen> {
 
         return BaseDropdownFormField(
           dropDownItemList: sourceMap,
-          initialValue: null,
+          initialValue: _selectedFromSourceId! + 1,
           onChanged: (int? id) {
-            if (id != null) _onSourceChanged(id);
+            if (id != null) _onSourceToChanged(id);
           },
-          labelText: "Received on",
-          validator: _validateDropDown,
+          labelText: "Source To",
+          validator: _validateDropDownSourceTo,
         );
       } else {
         return const CircularProgressIndicator();
@@ -200,9 +235,22 @@ class _NewIncomeScreenState extends State<NewIncomeScreen> {
     return null; // Return null if the input is valid
   }
 
-  String? _validateDropDown(int? value) {
+  String? _validateDropDownSourceFrom(int? value) {
     if (value == null || value == 0) {
       return "Please choose or add an item here first";
+    }
+    if (_selectedToSourceId != null && value == _selectedToSourceId) {
+      return "Source From and Source To cannot be the same";
+    }
+    return null;
+  }
+
+  String? _validateDropDownSourceTo(int? value) {
+    if (value == null || value == 0) {
+      return "Please choose or add an item here first";
+    }
+    if (_selectedFromSourceId != null && value == _selectedFromSourceId) {
+      return "Source From and Source To cannot be the same";
     }
     return null;
   }
@@ -213,39 +261,58 @@ class _NewIncomeScreenState extends State<NewIncomeScreen> {
     });
   }
 
-  void _onSourceChanged(int id) {
+  void _onSourceFromChanged(int id) {
     setState(() {
-      _selectedSourceId = id;
+      _selectedFromSourceId = id;
+      if (_selectedFromSourceId == _selectedToSourceId) {
+        _selectedToSourceId = null;
+      }
     });
   }
 
-  void _onSaveIncome() {
+  void _onSourceToChanged(int id) {
+    setState(() {
+      _selectedToSourceId = id;
+    });
+  }
+
+  void _onSaveTransfer() {
     if (_formKey.currentState!.validate()) {
-      // If the form is valid, process the data
       String title = _titleController.text;
       String amount = _amountController.text;
       String description = _descriptionController.text;
-      int sourceId = _selectedSourceId!;
-      DateTime selectedDate = _selectedDateTime;
+      int fromSourceId = _selectedFromSourceId!;
+      int toSourceId = _selectedToSourceId!;
+      DateTime selectedDateTime = _selectedDateTime;
 
-      // Create a new transaction object
-      final transaction = TransactionsCompanion(
-          title: Value(title),
-          amount: Value(double.parse(amount)),
-          description: Value(description),
-          date: Value(selectedDate),
-          type: const Value(TransactionTypes.income));
+      final transaction = widget.transaction.copyWith(
+        title: title,
+        amount: double.parse(amount),
+        date: selectedDateTime,
+        description: Value(description),
+      );
 
-      // Create a new expense object
-      final income = IncomesCompanion(placedOnsourceId: Value(sourceId));
+      final transfer = widget.transfer.copyWith(
+        fromSource: widget.transfer.fromSource.copyWith(id: fromSourceId),
+        toSource: widget.transfer.toSource.copyWith(id: toSourceId),
+      );
 
-      BlocProvider.of<TransactionBloc>(context)
-          .add(AddTransaction(transaction, income));
-
-      // Clear the form fields
-      _titleController.clear();
-      _amountController.clear();
-      _descriptionController.clear();
+      BlocProvider.of<TransactionBloc>(context).add(
+        UpdateTransaction(transaction, transfer),
+      );
     }
+  }
+
+  void _onDeleteTransfer() {
+    ScreenUtils.showConfirmationDialog(
+        context: context,
+        title: "Delete Transaction",
+        content: "Are you sure to delete this transaction?",
+        onConfirm: () => _deleteTransfer());
+  }
+
+  Future<void> _deleteTransfer() async {
+    BlocProvider.of<TransactionBloc>(context)
+        .add(DeleteTransaction(widget.transaction));
   }
 }

@@ -74,6 +74,7 @@ class _TransactionsCardState extends State<TransactionsCard> {
                       TransactionBar(
                         transaction: transaction,
                         transactionType: map.values.first,
+                        previousRoute: "/home",
                       ),
                       const SizedBox(height: 5),
                     ],

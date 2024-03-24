@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:moneygo/data/app_database.dart';
 import 'package:moneygo/data/blocs/categories/category_bloc.dart';
 import 'package:moneygo/data/blocs/categories/category_event.dart';
 import 'package:moneygo/data/blocs/categories/category_state.dart';
 import 'package:moneygo/data/blocs/periods/period_bloc.dart';
 import 'package:moneygo/data/blocs/periods/period_event.dart';
-import 'package:moneygo/data/blocs/periods/period_state.dart';
 import 'package:moneygo/data/blocs/settings/settings_bloc.dart';
 import 'package:moneygo/data/blocs/settings/settings_event.dart';
 import 'package:moneygo/data/blocs/settings/settings_state.dart';
@@ -16,7 +14,7 @@ import 'package:moneygo/data/blocs/sources/source_state.dart';
 import 'package:moneygo/data/blocs/transactions/transaction_bloc.dart';
 import 'package:moneygo/data/blocs/transactions/transaction_event.dart';
 import 'package:moneygo/data/blocs/transactions/transaction_state.dart';
-import 'package:moneygo/ui/utils/state_widget.dart';
+import 'package:moneygo/ui/utils/screen_utils.dart';
 import 'package:moneygo/ui/widgets/Cards/budget_screen/budget_period_card.dart';
 import 'package:moneygo/ui/widgets/Cards/budget_screen/categories_card.dart';
 import 'package:moneygo/ui/widgets/Cards/budget_screen/remaining_balance_card.dart';
@@ -62,7 +60,7 @@ class _BudgetScreenState extends State<BudgetScreen> {
 
   Widget _buildBalanceCard() {
     return BlocBuilder<SettingsBloc, SettingsState>(builder: (context, state) {
-      return buildBlocStateWidget(state,
+      return ScreenUtils.buildBlocStateWidget(state,
           onLoad: const CircularProgressIndicator(),
           onError: (message) => DashedWidgetWithMessage(message: message),
           onLoaded: (state) {
@@ -76,7 +74,7 @@ class _BudgetScreenState extends State<BudgetScreen> {
 
   Widget _buildCategoriesCard() {
     return BlocBuilder<CategoryBloc, CategoryState>(builder: (context, state) {
-      return buildBlocStateWidget(state,
+      return ScreenUtils.buildBlocStateWidget(state,
           onLoad: const Loader(),
           onError: (message) => DashedWidgetWithMessage(message: message),
           onLoaded: (state) => CategoriesCard(
@@ -87,7 +85,7 @@ class _BudgetScreenState extends State<BudgetScreen> {
 
   Widget _buildSourcesCard() {
     return BlocBuilder<SourceBloc, SourceState>(builder: (context, state) {
-      return buildBlocStateWidget(state,
+      return ScreenUtils.buildBlocStateWidget(state,
           onLoad: const Loader(),
           onError: (message) => DashedWidgetWithMessage(message: message),
           onLoaded: (state) {
@@ -101,7 +99,7 @@ class _BudgetScreenState extends State<BudgetScreen> {
   Widget _buildTransactionsCard() {
     return BlocBuilder<TransactionBloc, TransactionState>(
         builder: (context, state) {
-      return buildBlocStateWidget(state,
+      return ScreenUtils.buildBlocStateWidget(state,
           onLoad: const Loader(),
           onError: (message) => DashedWidgetWithMessage(message: message),
           onLoaded: (state) => TransactionsCard(

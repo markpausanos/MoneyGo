@@ -3,9 +3,16 @@ import 'package:intl/intl.dart';
 import 'package:moneygo/ui/widgets/Themes/custom_color_scheme.dart';
 
 class BaseDateTimePicker extends StatefulWidget {
-  Function(DateTime) onDateTimeChanged;
+  final Function(DateTime) onDateTimeChanged;
+  final DateTime? firstDate;
+  final String? Function(String?)? validator;
 
-  BaseDateTimePicker({super.key, required this.onDateTimeChanged});
+  const BaseDateTimePicker({
+    super.key,
+    required this.onDateTimeChanged,
+    this.firstDate,
+    this.validator,
+  });
 
   @override
   State<BaseDateTimePicker> createState() => _BaseDateTimePickerState();
@@ -27,8 +34,8 @@ class _BaseDateTimePickerState extends State<BaseDateTimePicker> {
     final DateTime? pickedDate = await showDatePicker(
       context: context,
       initialDate: selectedDateTime,
-      firstDate: DateTime(2000),
-      lastDate: DateTime(2025),
+      firstDate: widget.firstDate ?? DateTime(2020, 01),
+      lastDate: DateTime.now(),
     );
     if (pickedDate == null) return;
 
@@ -59,8 +66,9 @@ class _BaseDateTimePickerState extends State<BaseDateTimePicker> {
 
   @override
   Widget build(BuildContext context) {
-    return TextField(
+    return TextFormField(
       controller: _dateController,
+      validator: widget.validator,
       decoration: InputDecoration(
         filled: true,
         fillColor: CustomColorScheme.backgroundColor,
@@ -72,6 +80,18 @@ class _BaseDateTimePickerState extends State<BaseDateTimePicker> {
           borderSide:
               const BorderSide(color: CustomColorScheme.appBlue, width: 1.0),
           borderRadius: BorderRadius.circular(10),
+        ),
+        errorBorder: OutlineInputBorder(
+          borderSide: const BorderSide(color: Colors.red, width: 1.0),
+          borderRadius: BorderRadius.circular(10),
+        ),
+        focusedErrorBorder: OutlineInputBorder(
+          borderSide: const BorderSide(color: Colors.red, width: 1.0),
+          borderRadius: BorderRadius.circular(10),
+        ),
+        errorStyle: const TextStyle(
+          backgroundColor: Colors.white,
+          color: Colors.red,
         ),
         labelText: "Date and Time",
       ),

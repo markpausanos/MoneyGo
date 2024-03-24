@@ -5,7 +5,10 @@ import 'package:moneygo/data/app_database.dart';
 import 'package:moneygo/data/blocs/sources/source_bloc.dart';
 import 'package:moneygo/data/blocs/sources/source_event.dart';
 import 'package:moneygo/data/blocs/sources/source_state.dart';
-import 'package:moneygo/ui/utils/list_utils.dart';
+import 'package:moneygo/data/blocs/transactions/transaction_bloc.dart';
+import 'package:moneygo/data/blocs/transactions/transaction_event.dart';
+import 'package:moneygo/data/blocs/transactions/transaction_state.dart';
+import 'package:moneygo/ui/utils/screen_utils.dart';
 import 'package:moneygo/ui/widgets/CheckBoxWithItem/source_checkbox.dart';
 import 'package:moneygo/ui/widgets/IconButton/large_icon_button.dart';
 import 'package:moneygo/ui/widgets/Loaders/loading_state.dart';
@@ -48,17 +51,31 @@ class _SourcesScreenState extends State<SourcesScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<SourceBloc, SourceState>(
-        listener: (context, state) {
-          if (state is SourcesSaveSuccess) {
-            showSnackBarAddOrUpdate(
-                context, 'Source ${state.name} has been added');
-          } else if (state is SourcesUpdateSuccess) {
-            showSnackBarAddOrUpdate(context, 'Source has been updated');
-          } else if (state is SourcesDeleteSuccess) {
-            showSnackBarDelete(context, 'Source/s deleted');
-          }
-        },
+    return MultiBlocListener(
+        listeners: [
+          BlocListener<SourceBloc, SourceState>(listener: (context, state) {
+            if (state is SourcesSaveSuccess) {
+              ScreenUtils.showSnackBarAddOrUpdate(
+                  context, 'Source ${state.name} has been added');
+            } else if (state is SourcesUpdateSuccess) {
+              ScreenUtils.showSnackBarAddOrUpdate(
+                  context, 'Source has been updated');
+            } else if (state is SourcesDeleteSuccess) {
+              ScreenUtils.showSnackBarDelete(context, 'Source/s deleted');
+            }
+          }),
+          BlocListener<TransactionBloc, TransactionState>(
+              listener: (context, state) {
+            if (state is TransactionsDeleteSuccess) {
+              int sourceId = state.sourceId;
+
+              if (sourceId != 0) {
+                BlocProvider.of<SourceBloc>(context)
+                    .add(DeleteSource(sourceId));
+              }
+            }
+          })
+        ],
         child: Scaffold(
           backgroundColor: Colors.white,
           appBar: AppBar(
@@ -245,7 +262,8 @@ class _SourcesScreenState extends State<SourcesScreen> {
         .toList();
 
     for (final id in sourceIdsToDelete) {
-      BlocProvider.of<SourceBloc>(context).add(DeleteSource(id));
+      BlocProvider.of<TransactionBloc>(context)
+          .add(DeleteTransactionBySource(id));
     }
 
     _unselectAllSources();

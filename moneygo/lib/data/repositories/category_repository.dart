@@ -7,20 +7,27 @@ class CategoryRepository {
   final CategoryDao _categoriesDao;
   final PeriodDao _periodDao;
 
-  CategoryRepository(this._categoriesDao, this._periodDao);
+  CategoryRepository(
+    this._categoriesDao,
+    this._periodDao,
+  );
 
   Stream<List<Category>> watchAllCategories() =>
       _categoriesDao.watchAllCategories();
 
   Future<List<Category>> getAllCategories() async {
     var categories = await _categoriesDao.getAllCategories();
-    var latestPeriod = await _periodDao.getLatestPeriod();
+    var period = await _periodDao.getLatestPeriod();
 
-    if (latestPeriod != null) {
-      categories = categories
-          .where((category) => category.periodId == latestPeriod.id)
-          .toList();
+    var latestPeriod = period;
+
+    if (latestPeriod == null) {
+      return [];
     }
+
+    categories = categories
+        .where((category) => category.periodId == latestPeriod.id)
+        .toList();
 
     return categories;
   }
@@ -35,6 +42,13 @@ class CategoryRepository {
       throw Exception('Max budget cannot be negative');
     }
 
+    var period = await _periodDao.getLatestPeriod();
+
+    if (period == null) {
+      throw Exception('Period not found');
+    }
+
+    category = category.copyWith(periodId: Value(period.id));
     return await _categoriesDao.insertCategory(category);
   }
 

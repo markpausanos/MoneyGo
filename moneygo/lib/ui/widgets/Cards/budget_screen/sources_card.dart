@@ -25,10 +25,33 @@ class _SourcesCardState extends State<SourcesCard> {
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const Text(
-              'Sources',
-              textAlign: TextAlign.left,
-              style: CustomTextStyleScheme.cardTitle,
+            Row(
+              children: [
+                const Text(
+                  'Sources',
+                  textAlign: TextAlign.left,
+                  style: CustomTextStyleScheme.cardTitle,
+                ),
+                const SizedBox(
+                  width: 5,
+                ),
+                SizedBox(
+                  width: 15,
+                  height: 15,
+                  child: Tooltip(
+                    padding: const EdgeInsets.all(10),
+                    margin: const EdgeInsets.all(10),
+                    triggerMode: TooltipTriggerMode.tap,
+                    message: _getTooltipMessage(),
+                    showDuration: const Duration(seconds: 5),
+                    textAlign: TextAlign.center,
+                    child: const Icon(
+                      Icons.info_outline,
+                      size: 15,
+                    ),
+                  ),
+                ),
+              ],
             ),
             TextButton(
                 style: TextButton.styleFrom(
@@ -54,9 +77,7 @@ class _SourcesCardState extends State<SourcesCard> {
                   return Column(
                     children: [
                       SourceBar(
-                        id: source.id,
-                        name: source.name,
-                        value: source.balance,
+                        source: source,
                       ),
                       const SizedBox(height: 10),
                     ],
@@ -65,5 +86,9 @@ class _SourcesCardState extends State<SourcesCard> {
               ),
       ],
     ));
+  }
+
+  String _getTooltipMessage() {
+    return 'Sources are the places where you place and get your money from like your Bank or Cash.';
   }
 }

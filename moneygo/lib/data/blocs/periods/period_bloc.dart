@@ -15,8 +15,9 @@ class PeriodBloc extends Bloc<PeriodEvent, PeriodState> {
 
   void _onLoadPeriods(LoadPeriods event, Emitter<PeriodState> emit) async {
     try {
-      final periods = await periodRepository.getAllPeriods();
-      emit(PeriodsLoaded(periods));
+      final period = await periodRepository.getLatestPeriod();
+      print("Hello loaded");
+      emit(PeriodsLoaded(period));
     } catch (e) {
       emit(PeriodsError(e.toString()));
     }
@@ -25,9 +26,9 @@ class PeriodBloc extends Bloc<PeriodEvent, PeriodState> {
   void _onAddPeriod(AddPeriod event, Emitter<PeriodState> emit) async {
     try {
       await periodRepository.insertPeriod(event.period);
-      final periods = await periodRepository.getAllPeriods();
+      final period = await periodRepository.getLatestPeriod();
       emit(PeriodsSaveSuccess());
-      emit(PeriodsLoaded(periods));
+      emit(PeriodsLoaded(period));
     } catch (e) {
       emit(PeriodsError(e.toString()));
     }
@@ -36,9 +37,9 @@ class PeriodBloc extends Bloc<PeriodEvent, PeriodState> {
   void _onUpdatePeriod(UpdatePeriod event, Emitter<PeriodState> emit) async {
     try {
       await periodRepository.updatePeriod(event.period);
-      final periods = await periodRepository.getAllPeriods();
+      final period = await periodRepository.getLatestPeriod();
       emit(PeriodsUpdateSuccess());
-      emit(PeriodsLoaded(periods));
+      emit(PeriodsLoaded(period));
     } catch (e) {
       emit(PeriodsError(e.toString()));
     }

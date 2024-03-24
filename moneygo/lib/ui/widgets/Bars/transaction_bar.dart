@@ -16,9 +16,13 @@ import 'package:moneygo/utils/utils.dart';
 class TransactionBar extends StatefulWidget {
   final Transaction transaction;
   final TransactionType transactionType;
+  final String? previousRoute;
 
   const TransactionBar(
-      {super.key, required this.transaction, required this.transactionType});
+      {super.key,
+      required this.transaction,
+      required this.transactionType,
+      this.previousRoute});
 
   @override
   State<TransactionBar> createState() => _TransactionBarState();
@@ -42,80 +46,109 @@ class _TransactionBarState extends State<TransactionBar> {
           _currency = state.settings["currency"] ?? "\$";
         }
 
-        return Padding(
-          padding: const EdgeInsets.only(bottom: 5.0),
-          child: Stack(
-            children: <Widget>[
-              Container(
-                height: 63,
-                decoration: const BoxDecoration(
-                  color: Colors.white,
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(10.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            widget.transaction.title,
-                            style: CustomTextStyleScheme.barLabel,
-                          ),
-                          // Date in MMM dd, yyyy format
-                          Text(
-                            Utils.getFormattedDateFull(widget.transaction.date),
-                            style: CustomTextStyleScheme.progressBarText,
-                          ),
-                        ],
-                      ),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          Row(
-                            children: [
-                              Text(
-                                _getSign(widget.transaction) ?? '',
-                                style: CustomTextStyleScheme.barLabel.copyWith(
-                                    color: _getColor(widget.transaction,
-                                        widget.transactionType)),
-                              ),
-                              Text(
-                                _currency,
-                                style: CustomTextStyleScheme.barLabel.copyWith(
-                                    color: _getColor(widget.transaction,
-                                        widget.transactionType),
-                                    fontFamily: CustomTextStyleScheme
-                                        .barBalancePeso.fontFamily),
-                              ),
-                              Text(
-                                  Utils.formatNumber(widget.transaction.amount),
-                                  style:
-                                      CustomTextStyleScheme.barLabel.copyWith(
-                                    color: _getColor(widget.transaction,
-                                        widget.transactionType),
-                                  )),
-                            ],
-                          ),
-                          Text(
-                            _getDescription(widget.transaction,
-                                            widget.transactionType)
-                                        .length >
-                                    20
-                                ? '${_getDescription(widget.transaction, widget.transactionType).substring(0, 20)}...'
-                                : _getDescription(
-                                    widget.transaction, widget.transactionType),
-                            style: CustomTextStyleScheme.progressBarText,
-                          ),
-                        ],
-                      )
-                    ],
+        return InkWell(
+          onTap: () {
+            if (widget.transactionType is ExpenseModel) {
+              Navigator.pushNamed(context, '/expense/edit', arguments: {
+                'transaction': widget.transaction,
+                'expense': widget.transactionType,
+                'previousRoute': widget.previousRoute
+              });
+            } else if (widget.transactionType is IncomeModel) {
+              Navigator.pushNamed(context, '/income/edit', arguments: {
+                'transaction': widget.transaction,
+                'income': widget.transactionType,
+                'previousRoute': widget.previousRoute
+              });
+            } else if (widget.transactionType is TransferModel) {
+              Navigator.pushNamed(context, '/transfer/edit', arguments: {
+                'transaction': widget.transaction,
+                'transfer': widget.transactionType,
+                'previousRoute': widget.previousRoute
+              });
+            }
+          },
+          borderRadius: BorderRadius.circular(10),
+          splashColor: CustomColorScheme.backgroundColor,
+          child: Padding(
+            padding: const EdgeInsets.all(6.0),
+            child: Stack(
+              children: <Widget>[
+                Container(
+                  height: 63,
+                  decoration: const BoxDecoration(
+                    color: Colors.white,
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(10.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              widget.transaction.title,
+                              style: CustomTextStyleScheme.barLabel,
+                            ),
+                            // Date in MMM dd, yyyy format
+                            Text(
+                              Utils.getFormattedDateFull(
+                                  widget.transaction.date),
+                              style: CustomTextStyleScheme.progressBarText,
+                            ),
+                          ],
+                        ),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            Row(
+                              children: [
+                                Text(
+                                  _getSign(widget.transaction) ?? '',
+                                  style: CustomTextStyleScheme.barLabel
+                                      .copyWith(
+                                          color: _getColor(widget.transaction,
+                                              widget.transactionType)),
+                                ),
+                                Text(
+                                  _currency,
+                                  style: CustomTextStyleScheme.barLabel
+                                      .copyWith(
+                                          color: _getColor(widget.transaction,
+                                              widget.transactionType),
+                                          fontFamily: CustomTextStyleScheme
+                                              .barBalancePeso.fontFamily),
+                                ),
+                                Text(
+                                    Utils.formatNumber(
+                                        widget.transaction.amount),
+                                    style:
+                                        CustomTextStyleScheme.barLabel.copyWith(
+                                      color: _getColor(widget.transaction,
+                                          widget.transactionType),
+                                    )),
+                              ],
+                            ),
+                            Text(
+                              _getDescription(widget.transaction,
+                                              widget.transactionType)
+                                          .length >
+                                      20
+                                  ? '${_getDescription(widget.transaction, widget.transactionType).substring(0, 20)}...'
+                                  : _getDescription(widget.transaction,
+                                      widget.transactionType),
+                              style: CustomTextStyleScheme.progressBarText,
+                            ),
+                          ],
+                        )
+                      ],
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         );
       },
@@ -139,8 +172,7 @@ class _TransactionBarState extends State<TransactionBar> {
 
     if (transactionType is ExpenseModel) {
       String sourceName = transactionType.source?.name ?? "";
-      String categoryName =
-          transactionType.category?.name ?? "";
+      String categoryName = transactionType.category?.name ?? "";
 
       description = transaction.amount > 0
           ? "$categoryName using $sourceName"

@@ -31,4 +31,11 @@ class TransactionsSaveSuccess extends TransactionState {}
 
 class TransactionsUpdateSuccess extends TransactionState {}
 
-class TransactionsDeleteSuccess extends TransactionState {}
+class TransactionsDeleteSuccess extends TransactionState {
+  final int sourceId;
+
+  TransactionsDeleteSuccess(this.sourceId);
+
+  @override
+  List<Object> get props => [sourceId];
+}

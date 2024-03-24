@@ -1,11 +1,14 @@
 import 'package:drift/drift.dart' hide Column;
+import 'package:expression_language/expression_language.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:intl/intl.dart';
 import 'package:moneygo/data/app_database.dart';
 import 'package:moneygo/data/blocs/categories/category_bloc.dart';
 import 'package:moneygo/data/blocs/categories/category_event.dart';
 import 'package:moneygo/data/blocs/categories/category_state.dart';
 import 'package:moneygo/data/blocs/periods/period_bloc.dart';
+import 'package:moneygo/data/blocs/periods/period_event.dart';
 import 'package:moneygo/data/blocs/periods/period_state.dart';
 import 'package:moneygo/data/blocs/sources/source_bloc.dart';
 import 'package:moneygo/data/blocs/sources/source_event.dart';
@@ -40,6 +43,9 @@ class _NewExpenseScreenState extends State<NewExpenseScreen> {
   int? _selectedCategoryId;
   bool _stayOnPage = false;
 
+  Period? _currentPeriod;
+  Map<int, Category?> _categoryMap = {};
+
   @override
   void initState() {
     super.initState();
@@ -47,6 +53,7 @@ class _NewExpenseScreenState extends State<NewExpenseScreen> {
     BlocProvider.of<SourceBloc>(context).add(LoadSources());
     BlocProvider.of<CategoryBloc>(context).add(LoadCategories());
     BlocProvider.of<TransactionBloc>(context).add(LoadTransactions());
+    BlocProvider.of<PeriodBloc>(context).add(LoadPeriods());
   }
 
   @override
@@ -83,7 +90,7 @@ class _NewExpenseScreenState extends State<NewExpenseScreen> {
                   onPressed: () => Navigator.popAndPushNamed(context, "/home"),
                   icon: Icons.arrow_back,
                   color: Colors.white),
-              title: const Text('Expense Details',
+              title: const Text('New Expense',
                   style: CustomTextStyleScheme.appBarTitleCards),
               centerTitle: true,
             ),
@@ -93,7 +100,17 @@ class _NewExpenseScreenState extends State<NewExpenseScreen> {
                 key: _formKey,
                 child: Column(
                   children: [
-                    BaseDateTimePicker(onDateTimeChanged: _onDateTimeChanged),
+                    BlocBuilder<PeriodBloc, PeriodState>(
+                        builder: (context, state) {
+                      if (state is PeriodsLoaded) {
+                        _currentPeriod = state.period;
+                        print(_currentPeriod);
+                      }
+                      return BaseDateTimePicker(
+                        onDateTimeChanged: _onDateTimeChanged,
+                        validator: _validateDate,
+                      );
+                    }),
                     const SizedBox(height: 25),
                     BaseTextField(
                       controller: _titleController,
@@ -186,13 +203,15 @@ class _NewExpenseScreenState extends State<NewExpenseScreen> {
   Widget _buildCategoryDropdown() {
     return BlocBuilder<CategoryBloc, CategoryState>(builder: (context, state) {
       if (state is CategoriesLoaded) {
-        Map<int, String> categoryMap = {
-          for (var category in state.categories) category.id: category.name
+        _categoryMap = {
+          for (var category in state.categories) category.id: category
         };
 
-        categoryMap[0] = "None";
+        _categoryMap[0] = null;
         return BaseDropdownFormField(
-          dropDownItemList: categoryMap,
+          dropDownItemList: _categoryMap.map((key, value) {
+            return MapEntry(key, value?.name ?? "None");
+          }),
           initialValue: null,
           onChanged: (int? id) {
             _onCategoryChanged(id);
@@ -203,6 +222,26 @@ class _NewExpenseScreenState extends State<NewExpenseScreen> {
         return const CircularProgressIndicator();
       }
     });
+  }
+
+  String? _validateDate(String? dateTime) {
+    Category? selectedCategory = _categoryMap[_selectedCategoryId];
+    print(selectedCategory);
+    if (selectedCategory != null && dateTime != null) {
+      if (_currentPeriod != null) {
+        DateFormat format = DateFormat("MMMM dd, yyyy 'at' hh:mm a");
+        DateTime dateTimeParsed = format.parse(dateTime);
+        print(dateTimeParsed);
+        print(_currentPeriod!.startDate);
+        print(_currentPeriod!.endDate);
+        if (dateTimeParsed.isBefore(_currentPeriod!.startDate) ||
+            (_currentPeriod!.endDate != null &&
+                dateTimeParsed.isAfter(_currentPeriod!.endDate!))) {
+          return "Date must be current for the selected category";
+        }
+      }
+    }
+    return null;
   }
 
   String? _validateName(String? value) {
@@ -216,10 +255,17 @@ class _NewExpenseScreenState extends State<NewExpenseScreen> {
     if (value == null || value.isEmpty) {
       return "Amount cannot be empty";
     }
-    // Check if the value is a valid double
-    final doubleValue = double.tryParse(value);
-    if (doubleValue == null) {
-      return "Please enter a valid number";
+
+    try {
+      final parser = ExpressionParser(const {});
+      final expression = parser.parse(value);
+      final result = expression.evaluate();
+      if (result is! Decimal && result is! Number) {
+        return "Please enter a valid number or expression";
+      }
+      _amountController.text = result.toString();
+    } catch (e) {
+      return "Invalid expression";
     }
 
     return null; // Return null if the input is valid
@@ -247,9 +293,6 @@ class _NewExpenseScreenState extends State<NewExpenseScreen> {
   void _onCategoryChanged(int? id) {
     setState(() {
       _selectedCategoryId = id;
-      if (id == 0 || id == null) {
-        _selectedCategoryId = null;
-      }
     });
   }
 
@@ -270,13 +313,16 @@ class _NewExpenseScreenState extends State<NewExpenseScreen> {
           date: Value(selectedDate),
           type: const Value(TransactionTypes.expense));
 
+      print(transaction);
+
       // Create a new expense object
       final expense = ExpensesCompanion(
           sourceId: Value(sourceId),
           categoryId: categoryId == 0 ? const Value(null) : Value(categoryId));
 
+      print(expense);
       BlocProvider.of<TransactionBloc>(context)
-          .add(AddExpenseTransaction(transaction, expense));
+          .add(AddTransaction(transaction, expense));
 
       // Clear the form fields
       _titleController.clear();

@@ -9,12 +9,12 @@ abstract class PeriodState extends Equatable {
 class PeriodsLoading extends PeriodState {}
 
 class PeriodsLoaded extends PeriodState {
-  final List<Period> periods;
+  final Period period;
 
-  PeriodsLoaded(this.periods);
+  PeriodsLoaded(this.period);
 
   @override
-  List<Object> get props => [periods];
+  List<Object> get props => [period];
 }
 
 class PeriodsError extends PeriodState {

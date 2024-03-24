@@ -6,7 +6,7 @@ import 'package:moneygo/data/blocs/settings/settings_bloc.dart';
 import 'package:moneygo/data/blocs/settings/settings_event.dart';
 import 'package:moneygo/data/blocs/settings/settings_state.dart';
 import 'package:moneygo/ui/mini_screens/budget_screen.dart';
-import 'package:moneygo/ui/utils/state_widget.dart';
+import 'package:moneygo/ui/utils/screen_utils.dart';
 import 'package:moneygo/ui/widgets/BottomSheets/new_item_bottom_sheet.dart';
 import 'package:moneygo/ui/widgets/Buttons/navigation_button.dart';
 import 'package:moneygo/ui/widgets/SizedBoxes/dashed_box_with_message.dart';
@@ -21,7 +21,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  final ScrollController _scrollController = ScrollController();
+  final PageController _pageController = PageController();
 
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _nameController = TextEditingController();
@@ -29,7 +29,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
   bool _autoValidate = false;
   int _selectedIndex = 0;
-  int _previousIndex = -1;
   String _username = 'Default User';
   String _currency = '\$';
 
@@ -42,52 +41,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   void dispose() {
-    _scrollController.dispose();
     _nameController.dispose();
     _currencyController.dispose();
     super.dispose();
-  }
-
-  void _selectButton(int index, int previousIndex) {
-    setState(() {
-      _previousIndex = previousIndex;
-      _selectedIndex = index;
-    });
-
-    double offset = (_selectedIndex - _previousIndex) * 80;
-
-    _scrollController.animateTo(
-      offset,
-      duration: const Duration(milliseconds: 300),
-      curve: Curves.easeInOut,
-    );
-  }
-
-  Widget _buildNavigationButton(String title, int index) {
-    return Padding(
-      padding: const EdgeInsets.only(right: 5.0),
-      child: NavigationButton(
-        title: title,
-        isSelected: _selectedIndex == index,
-        onPressed: () => _selectButton(index, _selectedIndex),
-      ),
-    );
-  }
-
-  Widget _getCurrentScreen() {
-    switch (_selectedIndex) {
-      case 0:
-        return const BudgetScreen();
-      case 1:
-        return const DashedWidgetWithMessage(
-            message: 'Savings Screen Ongoing!');
-      case 2:
-        return const DashedWidgetWithMessage(message: 'Debt Screen Ongoing!');
-      case 3:
-        return const DashedWidgetWithMessage(message: 'Credit Screen Ongoing!');
-      default:
-        return const DashedWidgetWithMessage(message: 'No screen found!');
-    }
   }
 
   @override
@@ -101,7 +57,7 @@ class _HomeScreenState extends State<HomeScreen> {
             onPressed: () => SystemNavigator.pop(),
           ),
           title: BlocBuilder<SettingsBloc, SettingsState>(
-            builder: (context, state) => buildBlocStateWidget(state,
+            builder: (context, state) => ScreenUtils.buildBlocStateWidget(state,
                 onLoad: const CircularProgressIndicator(),
                 onError: (message) => const Text('Error loading settings'),
                 onLoaded: (state) {
@@ -124,14 +80,13 @@ class _HomeScreenState extends State<HomeScreen> {
                 icon: const Icon(Icons.settings))
           ],
         ),
-        body: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(18.0, 10.0, 18.0, 100),
+        body: Padding(
+          padding: const EdgeInsets.fromLTRB(18.0, 10.0, 18.0, 0),
           child: Column(
             children: [
               SizedBox(
                 height: 35,
                 child: ListView(
-                  controller: _scrollController,
                   scrollDirection: Axis.horizontal,
                   children: buttonTitles
                       .map((title) => _buildNavigationButton(
@@ -139,25 +94,77 @@ class _HomeScreenState extends State<HomeScreen> {
                       .toList(),
                 ),
               ),
-              const SizedBox(height: 10),
-              _getCurrentScreen()
+              const SizedBox(height: 10.0),
+              Expanded(
+                child: PageView(
+                  controller: _pageController,
+                  onPageChanged: (index) {
+                    setState(() {
+                      _selectedIndex = index;
+                    });
+                  },
+                  children: [
+                    _wrapChildrenWithScrollView(const BudgetScreen()),
+                    const DashedWidgetWithMessage(
+                        message: 'Savings Screen Ongoing!'),
+                    const DashedWidgetWithMessage(
+                        message: 'Debt Screen Ongoing!'),
+                    const DashedWidgetWithMessage(
+                        message: 'Credit Screen Ongoing!'),
+                  ],
+                ),
+              ),
             ],
           ),
         ),
-        floatingActionButton: SizedBox(
-          width: 80,
-          height: 80,
-          child: FittedBox(
-            child: FloatingActionButton(
-              elevation: 10,
-              onPressed: () => _showBottomSheet(context),
-              backgroundColor: Theme.of(context).colorScheme.primary,
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(50.0)),
-              child: const Icon(Icons.add),
+        floatingActionButton: Tooltip(
+          padding: const EdgeInsets.all(10.0),
+          margin: const EdgeInsets.all(10.0),
+          textAlign: TextAlign.center,
+          message:
+              'Add a new transaction by selecting what type of transaction you want to add.',
+          child: SizedBox(
+            width: 80,
+            height: 80,
+            child: FittedBox(
+              child: FloatingActionButton(
+                elevation: 10,
+                onPressed: () => _showBottomSheet(context),
+                backgroundColor: Theme.of(context).colorScheme.primary,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(50.0)),
+                child: const Icon(Icons.add),
+              ),
             ),
           ),
         ));
+  }
+
+  void _selectButton(int index) {
+    _pageController.animateToPage(
+      index,
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeInOut,
+    );
+  }
+
+  Widget _buildNavigationButton(String title, int index) {
+    return Padding(
+      padding: const EdgeInsets.only(right: 5.0),
+      child: NavigationButton(
+        title: title,
+        isSelected: _selectedIndex == index,
+        onPressed: () => _selectButton(index),
+      ),
+    );
+  }
+
+  Widget _wrapChildrenWithScrollView(Widget child) {
+    return SingleChildScrollView(
+      child: Column(
+        children: [child, const SizedBox(height: 100)],
+      ),
+    );
   }
 
   void _showBottomSheet(BuildContext context) {

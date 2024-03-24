@@ -1,8 +1,9 @@
-import 'package:collection/collection.dart';
 import 'package:drift/drift.dart' hide Column;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:moneygo/data/app_database.dart';
+import 'package:moneygo/data/blocs/categories/category_bloc.dart';
+import 'package:moneygo/data/blocs/categories/category_event.dart';
 import 'package:moneygo/data/blocs/periods/period_bloc.dart';
 import 'package:moneygo/data/blocs/periods/period_event.dart';
 import 'package:moneygo/data/blocs/periods/period_state.dart';
@@ -27,88 +28,95 @@ class _BudgetPeriodCardState extends State<BudgetPeriodCard> {
   @override
   void initState() {
     super.initState();
-
-    BlocProvider.of<PeriodBloc>(context).add(LoadPeriods());
   }
 
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<PeriodBloc, PeriodState>(builder: (context, state) {
       if (state is PeriodsLoaded) {
-        _currentPeriod = state.periods.firstWhereOrNull(
-          (period) =>
-              period.startDate.isBefore(DateTime.now()) &&
-              (period.endDate == null ||
-                  period.endDate!.isAfter(DateTime.now()) ||
-                  period.endDate!.isAtSameMomentAs(DateTime.now())),
-        );
-
-        DateTime newStartDate;
-        if (_currentPeriod == null) {
-          var previousPeriod = state.periods.firstOrNull;
-
-          if (previousPeriod != null && previousPeriod.endDate != null) {
-            newStartDate = previousPeriod.endDate!.add(const Duration(days: 1));
-          } else {
-            newStartDate = DateTime.now();
-            newStartDate = DateTime(
-                newStartDate.year, newStartDate.month, newStartDate.day);
-          }
-          var newPeriod = PeriodsCompanion(
-              startDate: Value(newStartDate), endDate: const Value(null));
-
-          BlocProvider.of<PeriodBloc>(context).add(AddPeriod(newPeriod));
-        }
-
+        _currentPeriod = state.period;
+        BlocProvider.of<CategoryBloc>(context).add(LoadCategories());
         if (_currentPeriod != null) {
           return InkWell(
             borderRadius: BorderRadius.circular(12),
             splashColor: CustomColorScheme.backgroundColor,
-            onLongPress: () => _showDialog(
-                title: "Edit Period", endTime: _currentPeriod!.endDate),
             child: BaseCard(
-                child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text(
-                      'Budget Period',
-                      textAlign: TextAlign.left,
-                      style: CustomTextStyleScheme.cardTitle,
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        Text(
-                          _currentPeriod!.endDate != null
-                              ? '${Utils.getFormattedDateShort(_currentPeriod!.startDate)} - ${Utils.getFormattedDateShort(_currentPeriod!.endDate!)}'
-                              : '${Utils.getFormattedDateShort(_currentPeriod!.startDate)} - TBA',
-                          textAlign: TextAlign.right,
-                          style: CustomTextStyleScheme.cardTitle,
-                        ),
-                        const SizedBox(width: 10),
-                        SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: IconButton(
-                            iconSize: 20,
-                            padding: const EdgeInsets.only(right: 5),
-                            onPressed: () => _showDialog(
-                                title: "Edit Period",
-                                endTime: _currentPeriod!.endDate),
-                            icon: const Icon(
-                              Icons.edit_calendar_outlined,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'Budget Period',
+                            textAlign: TextAlign.left,
+                            style: CustomTextStyleScheme.cardTitle,
+                          ),
+                          const SizedBox(
+                            width: 5,
+                          ),
+                          SizedBox(
+                            width: 15,
+                            height: 15,
+                            child: Tooltip(
+                              padding: const EdgeInsets.all(10),
+                              margin: const EdgeInsets.all(10),
+                              triggerMode: TooltipTriggerMode.tap,
+                              message: _getTooltipMessage(),
+                              showDuration: const Duration(seconds: 5),
+                              textAlign: TextAlign.center,
+                              child: const Icon(
+                                Icons.info_outline,
+                                size: 15,
+                              ),
                             ),
                           ),
-                        )
-                      ],
-                    ),
-                  ],
-                ),
-              ],
-            )),
+                        ],
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          Tooltip(
+                            padding: const EdgeInsets.all(10),
+                            margin: const EdgeInsets.all(10),
+                            message: _getCurrentDateTooltipMessage(),
+                            textAlign: TextAlign.center,
+                            triggerMode: TooltipTriggerMode.tap,
+                            showDuration: const Duration(seconds: 5),
+                            child: Text(
+                              _currentPeriod!.endDate != null
+                                  ? '${Utils.getFormattedDateShort(_currentPeriod!.startDate)} - ${Utils.getFormattedDateShort(_currentPeriod!.endDate!)}'
+                                  : '${Utils.getFormattedDateShort(_currentPeriod!.startDate)} - TBA',
+                              textAlign: TextAlign.right,
+                              style: CustomTextStyleScheme.cardTitle,
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: IconButton(
+                              iconSize: 20,
+                              padding: const EdgeInsets.only(right: 5),
+                              onPressed: () => _showDialog(
+                                  title: "Edit Period",
+                                  endTime: _currentPeriod!.endDate),
+                              icon: const Icon(
+                                Icons.edit_calendar_outlined,
+                              ),
+                              tooltip: "Edit the Period's End Date",
+                            ),
+                          )
+                        ],
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
           );
         }
         return const Center(child: Loader());
@@ -116,6 +124,14 @@ class _BudgetPeriodCardState extends State<BudgetPeriodCard> {
         return const Center(child: Loader());
       }
     });
+  }
+
+  String _getTooltipMessage() {
+    return 'This is the current budget period. The budget period is the time frame in which all transactions are recorded and budgeted for. The budget categories are reset at the end of each period.';
+  }
+
+  String _getCurrentDateTooltipMessage() {
+    return 'Start Date: ${Utils.getFormattedDateShort(_currentPeriod!.startDate)} 00:00:00\nEnd Date: ${_currentPeriod!.endDate != null ? '${Utils.getFormattedDateShort(_currentPeriod!.endDate!)}23:59:59' : 'TBA'}\n\nClick the edit icon to change the end date of the period.';
   }
 
   void _savePeriod() {

@@ -92,4 +92,10 @@ class CustomTextStyleScheme {
     fontWeight: FontWeight.normal,
     color: Colors.black,
   );
+
+  static const TextStyle transactionBarDate = TextStyle(
+    fontSize: 12,
+    fontWeight: FontWeight.normal,
+    color: Colors.white,
+  );
 }

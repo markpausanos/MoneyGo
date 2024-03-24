@@ -2,14 +2,14 @@ import 'package:moneygo/data/app_database.dart';
 import 'package:moneygo/data/models/interfaces/transaction_subtype.dart';
 
 class IncomeModel implements TransactionType {
-  final int id;
-  final Transaction transaction;
-  final Source? placedOnSource;
+  int id;
+  Transaction transaction;
+  Source placedOnSource;
 
   IncomeModel({
     required this.id,
     required this.transaction,
-    this.placedOnSource,
+    required this.placedOnSource,
   });
 
   IncomeModel copyWith({

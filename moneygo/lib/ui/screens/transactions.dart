@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:moneygo/data/app_database.dart';
 import 'package:moneygo/data/blocs/transactions/transaction_bloc.dart';
@@ -64,37 +65,60 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
 
             return Padding(
               padding: const EdgeInsets.fromLTRB(0, 8, 0, 10),
-              child: Column(
-                children: transactionsMap.keys.map((date) {
-                  return Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Container(
-                          padding: const EdgeInsets.fromLTRB(15, 5, 15, 5),
-                          decoration: BoxDecoration(
-                              color: CustomColorScheme.appBlueLight,
-                              borderRadius: BorderRadius.circular(20)),
-                          child: Text(Utils.getFormattedDateFull(date),
-                              style: const TextStyle(color: Colors.white))),
-                      const SizedBox(height: 10),
-                      Column(
-                          children:
-                              transactionsMap[date]!.keys.map((transaction) {
-                        final transactionType =
-                            transactionsMap[date]![transaction]!;
-
-                        return Column(
+              child: SingleChildScrollView(
+                child: Column(
+                  children: transactionsMap.keys.map((date) {
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            TransactionBar(
-                              transaction: transaction,
-                              transactionType: transactionType,
-                            ),
+                            // const Expanded(
+                            //   child: Divider(
+                            //     color: CustomColorScheme.backgroundColor,
+                            //   ),
+                            // ),
+                            Container(
+                                padding:
+                                    const EdgeInsets.fromLTRB(15, 5, 15, 5),
+                                decoration: BoxDecoration(
+                                    color: CustomColorScheme.appBlueLight,
+                                    borderRadius: BorderRadius.circular(20)),
+                                child: Center(
+                                  child: Text(Utils.getFormattedDateFull(date),
+                                      style: CustomTextStyleScheme
+                                          .transactionBarDate),
+                                )),
+                            const Expanded(
+                              child: Divider(
+                                color: CustomColorScheme.backgroundColor,
+                              ),
+                            )
                           ],
-                        );
-                      }).toList())
-                    ],
-                  );
-                }).toList(),
+                        ),
+                        const SizedBox(height: 10),
+                        Column(
+                            children:
+                                transactionsMap[date]!.keys.map((transaction) {
+                          final transactionType =
+                              transactionsMap[date]![transaction]!;
+
+                          return Column(
+                            children: [
+                              TransactionBar(
+                                transaction: transaction,
+                                transactionType: transactionType,
+                                previousRoute: "/transactions",
+                              ),
+                            ],
+                          );
+                        }).toList()),
+                        const SizedBox(height: 10),
+                      ],
+                    );
+                  }).toList(),
+                ),
               ),
             );
           } else {

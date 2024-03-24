@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:moneygo/data/app_database.dart';
 import 'package:moneygo/data/blocs/settings/settings_bloc.dart';
 import 'package:moneygo/data/blocs/settings/settings_event.dart';
 import 'package:moneygo/data/blocs/settings/settings_state.dart';
@@ -8,15 +9,11 @@ import 'package:moneygo/ui/widgets/Themes/custom_text_scheme.dart';
 import 'package:moneygo/utils/utils.dart';
 
 class SourceBar extends StatefulWidget {
-  final int id;
-  final String name;
-  final double value;
+  final Source source;
 
   const SourceBar({
     super.key,
-    required this.id,
-    required this.name,
-    required this.value,
+    required this.source,
   });
 
   @override
@@ -58,7 +55,7 @@ class _SourceBarState extends State<SourceBar> {
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       Text(
-                        widget.name,
+                        widget.source.name,
                         style: CustomTextStyleScheme.barLabel,
                       ),
                       Column(
@@ -67,11 +64,11 @@ class _SourceBarState extends State<SourceBar> {
                           Row(
                             children: [
                               Text(
-                                '$_currency ',
+                                _currency,
                                 style: CustomTextStyleScheme.barBalancePeso,
                               ),
                               Text(
-                                Utils.formatNumber(widget.value),
+                                Utils.formatNumber(widget.source.balance),
                                 style: CustomTextStyleScheme.barBalance,
                               ),
                             ],

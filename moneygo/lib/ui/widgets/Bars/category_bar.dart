@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:moneygo/data/app_database.dart';
 import 'package:moneygo/data/blocs/settings/settings_bloc.dart';
 import 'package:moneygo/data/blocs/settings/settings_event.dart';
 import 'package:moneygo/data/blocs/settings/settings_state.dart';
@@ -8,17 +9,11 @@ import 'package:moneygo/ui/widgets/Themes/custom_text_scheme.dart';
 import 'package:moneygo/utils/utils.dart';
 
 class CategoryBar extends StatefulWidget {
-  final int id;
-  final String name;
-  final double maxValue;
-  final double remainingValue;
+  final Category category;
 
   const CategoryBar({
     super.key,
-    required this.id,
-    required this.name,
-    required this.maxValue,
-    required this.remainingValue,
+    required this.category,
   });
 
   @override
@@ -29,10 +24,10 @@ class _CategoryBarState extends State<CategoryBar> {
   String _currency = '\$';
 
   double get percentage {
-    if (widget.remainingValue > widget.maxValue) {
+    if (widget.category.balance > widget.category.maxBudget) {
       return 1;
     }
-    return widget.remainingValue / widget.maxValue;
+    return widget.category.balance / widget.category.maxBudget;
   }
 
   @override
@@ -54,12 +49,12 @@ class _CategoryBarState extends State<CategoryBar> {
         child: Stack(children: <Widget>[
           SizedBox(
             child: LinearProgressIndicator(
-                value: widget.maxValue == 0 ? 0 : percentage,
+                value: widget.category.maxBudget == 0 ? 0 : percentage,
                 minHeight: 56,
                 borderRadius: BorderRadius.circular(10),
                 backgroundColor: CustomColorScheme.backgroundColor,
                 valueColor: AlwaysStoppedAnimation(
-                  widget.maxValue == 0
+                  widget.category.maxBudget == 0
                       ? CustomColorScheme.appGray
                       : percentage > 0.75
                           ? CustomColorScheme.percentageGood
@@ -75,7 +70,7 @@ class _CategoryBarState extends State<CategoryBar> {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Text(
-                  widget.name,
+                  widget.category.name,
                   style: CustomTextStyleScheme.barLabel,
                 ),
                 Column(
@@ -83,17 +78,17 @@ class _CategoryBarState extends State<CategoryBar> {
                   children: [
                     Row(
                       children: [
-                        widget.maxValue == 0
+                        widget.category.maxBudget == 0
                             ? const Text('Not set',
                                 style: CustomTextStyleScheme.barBalance)
                             : Row(
                                 children: [
                                   Text(
-                                    "$_currency ",
+                                    _currency,
                                     style: CustomTextStyleScheme.barBalancePeso,
                                   ),
                                   Text(
-                                    Utils.formatNumber(widget.remainingValue),
+                                    Utils.formatNumber(widget.category.balance),
                                     style: CustomTextStyleScheme.barBalance,
                                   ),
                                 ],
