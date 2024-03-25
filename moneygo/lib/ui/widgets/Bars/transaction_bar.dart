@@ -74,11 +74,8 @@ class _TransactionBarState extends State<TransactionBar> {
             padding: const EdgeInsets.all(6.0),
             child: Stack(
               children: <Widget>[
-                Container(
+                SizedBox(
                   height: 63,
-                  decoration: const BoxDecoration(
-                    color: Colors.white,
-                  ),
                   child: Padding(
                     padding: const EdgeInsets.all(10.0),
                     child: Row(

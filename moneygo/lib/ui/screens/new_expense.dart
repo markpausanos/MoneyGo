@@ -131,7 +131,7 @@ class _NewExpenseScreenState extends State<NewExpenseScreen> {
                     const SizedBox(height: 25),
                     BaseTextField(
                       controller: _descriptionController,
-                      labelText: "Description",
+                      labelText: "Description (Optional)",
                       maxLines: 10,
                     ),
                     const SizedBox(height: 25),

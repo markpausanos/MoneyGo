@@ -91,8 +91,7 @@ class _BudgetPeriodCardState extends State<BudgetPeriodCard> {
                             child: Text(
                               _currentPeriod!.endDate != null
                                   ? Utils.getRemainingDays(
-                                      _currentPeriod!.startDate,
-                                      _currentPeriod!.endDate!)
+                                      DateTime.now(), _currentPeriod!.endDate!)
                                   : 'TBA days remaining',
                               textAlign: TextAlign.right,
                               style: CustomTextStyleScheme.cardTitle.copyWith(

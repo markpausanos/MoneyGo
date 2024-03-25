@@ -37,17 +37,16 @@ class _SourceBarState extends State<SourceBar> {
         _currency = state.settings["currency"] ?? "\$";
       }
 
-      return Padding(
-          padding: const EdgeInsets.only(bottom: 5.0),
+      return InkWell(
+          onTap: () {},
+          borderRadius: BorderRadius.circular(10),
           child: Stack(
             children: <Widget>[
               Container(
                 height: 63,
                 decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(10),
-                    color: Colors.white,
-                    border: Border.all(
-                        color: CustomColorScheme.backgroundColor, width: 3)),
+                  borderRadius: BorderRadius.circular(10),
+                ),
                 child: Padding(
                   padding: const EdgeInsets.all(10.0),
                   child: Row(

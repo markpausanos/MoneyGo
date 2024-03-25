@@ -91,11 +91,19 @@ flutter:
   # list giving the asset and other descriptors for the font. For
   # example:
   # fonts:
-  #   - family: Schyler
+  #   - family: CeraRoundPro
   #     fonts:
-  #       - asset: fonts/Schyler-Regular.ttf
-  #       - asset: fonts/Schyler-Italic.ttf
-  #         style: italic
+  #       - asset: fonts/Fontspring-DEMO-ceraroundpro-regular.otf
+  #       - asset: fonts/Fontspring-DEMO-ceraroundpro-bold.otf
+  #         weight: 700
+  #       - asset: fonts/Fontspring-DEMO-ceraroundpro-light.otf
+  #         weight: 300
+  #       - asset: fonts/Fontspring-DEMO-ceraroundpro-medium.otf
+  #         weight: 500
+  #       - asset: fonts/Fontspring-DEMO-ceraroundpro-thin.otf
+  #         weight: 100
+  #       - asset: fonts/Fontspring-DEMO-ceraroundpro-black.otf
+  #         weight: 900
   #   - family: Trajan Pro
   #     fonts:
   #       - asset: fonts/TrajanPro.ttf

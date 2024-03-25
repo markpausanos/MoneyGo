@@ -79,7 +79,6 @@ class _SourcesCardState extends State<SourcesCard> {
                       SourceBar(
                         source: source,
                       ),
-                      const SizedBox(height: 10),
                     ],
                   );
                 }).toList(),

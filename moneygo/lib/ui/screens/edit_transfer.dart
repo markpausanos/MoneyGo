@@ -141,7 +141,7 @@ class _EditTransferScreenState extends State<EditTransferScreen> {
                     const SizedBox(height: 25),
                     BaseTextField(
                       controller: _descriptionController,
-                      labelText: "Description",
+                      labelText: "Description (Optional)",
                       maxLines: 10,
                     ),
                     const SizedBox(height: 25),

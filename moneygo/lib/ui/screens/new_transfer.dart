@@ -119,7 +119,7 @@ class _NewTransferScreenState extends State<NewTransferScreen> {
                     const SizedBox(height: 25),
                     BaseTextField(
                       controller: _descriptionController,
-                      labelText: "Description",
+                      labelText: "Description (Optional)",
                       maxLines: 10,
                     ),
                     const SizedBox(height: 25),
