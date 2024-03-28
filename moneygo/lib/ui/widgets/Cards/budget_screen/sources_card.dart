@@ -1,20 +1,27 @@
 import 'package:flutter/material.dart';
-import 'package:moneygo/data/app_database.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:moneygo/data/blocs/sources/source_bloc.dart';
+import 'package:moneygo/data/blocs/sources/source_event.dart';
+import 'package:moneygo/data/blocs/sources/source_state.dart';
 import 'package:moneygo/ui/widgets/Bars/source_bar.dart';
 import 'package:moneygo/ui/widgets/Cards/base_card.dart';
 import 'package:moneygo/ui/widgets/SizedBoxes/dashed_box_with_message.dart';
 import 'package:moneygo/ui/widgets/Themes/custom_text_scheme.dart';
 
 class SourcesCard extends StatefulWidget {
-  final List<Source> sources;
-
-  const SourcesCard({super.key, required this.sources});
+  const SourcesCard({super.key});
 
   @override
   State<SourcesCard> createState() => _SourcesCardState();
 }
 
 class _SourcesCardState extends State<SourcesCard> {
+  @override
+  void initState() {
+    super.initState();
+    BlocProvider.of<SourceBloc>(context).add(LoadSources());
+  }
+
   @override
   Widget build(BuildContext context) {
     return BaseCard(
@@ -53,36 +60,46 @@ class _SourcesCardState extends State<SourcesCard> {
                 ),
               ],
             ),
-            TextButton(
-                style: TextButton.styleFrom(
-                  padding: EdgeInsets.zero,
-                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  minimumSize: Size.zero,
-                ),
-                onPressed: () {
-                  Navigator.of(context).pushNamed('/sources');
-                },
-                child: Text(
-                  widget.sources.isNotEmpty ? 'View All' : 'Add Here',
-                  textAlign: TextAlign.right,
-                  style: CustomTextStyleScheme.cardViewAll,
-                )),
+            BlocBuilder<SourceBloc, SourceState>(builder: (context, state) {
+              if (state is SourcesLoaded) {
+                return TextButton(
+                    style: TextButton.styleFrom(
+                      padding: EdgeInsets.zero,
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      minimumSize: Size.zero,
+                    ),
+                    onPressed: () {
+                      Navigator.of(context).pushNamed('/sources');
+                    },
+                    child: Text(
+                      state.sources.isNotEmpty ? 'View All' : 'Add Here',
+                      textAlign: TextAlign.right,
+                      style: CustomTextStyleScheme.cardViewAll,
+                    ));
+              }
+              return const SizedBox();
+            }),
           ],
         ),
         const SizedBox(height: 20),
-        widget.sources.isEmpty
-            ? const DashedWidgetWithMessage(message: 'Empty')
-            : Column(
-                children: widget.sources.map((source) {
-                  return Column(
-                    children: [
-                      SourceBar(
-                        source: source,
-                      ),
-                    ],
+        BlocBuilder<SourceBloc, SourceState>(builder: (context, state) {
+          if (state is SourcesLoaded) {
+            return state.sources.isEmpty
+                ? const DashedWidgetWithMessage(message: 'Empty')
+                : Column(
+                    children: state.sources.map((source) {
+                      return Column(
+                        children: [
+                          SourceBar(
+                            source: source,
+                          ),
+                        ],
+                      );
+                    }).toList(),
                   );
-                }).toList(),
-              ),
+          }
+          return const CircularProgressIndicator();
+        }),
       ],
     ));
   }

@@ -4,7 +4,6 @@ import 'package:moneygo/data/app_database.dart';
 import 'package:moneygo/data/blocs/settings/settings_bloc.dart';
 import 'package:moneygo/data/blocs/settings/settings_event.dart';
 import 'package:moneygo/data/blocs/settings/settings_state.dart';
-import 'package:moneygo/ui/widgets/Themes/custom_color_scheme.dart';
 import 'package:moneygo/ui/widgets/Themes/custom_text_scheme.dart';
 import 'package:moneygo/utils/utils.dart';
 

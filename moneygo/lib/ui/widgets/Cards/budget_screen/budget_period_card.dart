@@ -1,7 +1,5 @@
 import 'package:drift/drift.dart' hide Column;
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:moneygo/data/app_database.dart';
 import 'package:moneygo/data/blocs/categories/category_bloc.dart';
@@ -30,6 +28,7 @@ class _BudgetPeriodCardState extends State<BudgetPeriodCard> {
   @override
   void initState() {
     super.initState();
+    BlocProvider.of<PeriodBloc>(context).add(LoadPeriods());
   }
 
   @override

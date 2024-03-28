@@ -7,14 +7,13 @@ import 'package:moneygo/data/blocs/sources/source_bloc.dart';
 import 'package:moneygo/data/blocs/sources/source_event.dart';
 import 'package:moneygo/data/blocs/sources/source_state.dart';
 import 'package:moneygo/ui/widgets/Cards/base_card.dart';
+import 'package:moneygo/ui/widgets/Loaders/loading_state.dart';
 import 'package:moneygo/ui/widgets/Themes/custom_color_scheme.dart';
 import 'package:moneygo/ui/widgets/Themes/custom_text_scheme.dart';
 import 'package:moneygo/utils/utils.dart';
 
 class RemainingBalanceCard extends StatefulWidget {
-  final bool isVisible;
-
-  const RemainingBalanceCard({super.key, required this.isVisible});
+  const RemainingBalanceCard({super.key});
 
   @override
   State<RemainingBalanceCard> createState() => _RemainingBalanceCardState();
@@ -73,50 +72,68 @@ class _RemainingBalanceCardState extends State<RemainingBalanceCard> {
                     },
                   ),
                   const SizedBox(width: 5),
-                  widget.isVisible
-                      ? BlocBuilder<SourceBloc, SourceState>(
-                          builder: (context, state) {
-                            if (state is SourcesLoaded) {
-                              final sources = state.sources;
-                              if (sources.isEmpty) {
-                                return const Text(
-                                  '0.00',
-                                  style: CustomTextStyleScheme
-                                      .remainingBalanceText,
-                                );
-                              }
-                              _balance = sources
-                                  .map((source) => source.balance)
-                                  .reduce((a, b) => a + b);
-                              return Text(
-                                Utils.formatNumber(_balance),
+                  BlocBuilder<SettingsBloc, SettingsState>(
+                    builder: (context, state) {
+                      if (state is SettingsLoaded) {
+                        bool isVisible = state.settings['isVisible'] == 'true';
+                        return isVisible
+                            ? BlocBuilder<SourceBloc, SourceState>(
+                                builder: (context, state) {
+                                  if (state is SourcesLoaded) {
+                                    final sources = state.sources;
+                                    if (sources.isEmpty) {
+                                      return const Text(
+                                        '0.00',
+                                        style: CustomTextStyleScheme
+                                            .remainingBalanceText,
+                                      );
+                                    }
+                                    _balance = sources
+                                        .map((source) => source.balance)
+                                        .reduce((a, b) => a + b);
+                                    return Text(
+                                      Utils.formatNumber(_balance),
+                                      style: CustomTextStyleScheme
+                                          .remainingBalanceText,
+                                    );
+                                  }
+                                  return Text(
+                                    Utils.formatNumber(_balance),
+                                    style: CustomTextStyleScheme
+                                        .remainingBalanceText,
+                                  );
+                                },
+                              )
+                            : const Text(
+                                '*******',
                                 style:
                                     CustomTextStyleScheme.remainingBalanceText,
                               );
-                            }
-                            return Text(
-                              Utils.formatNumber(_balance),
-                              style: CustomTextStyleScheme.remainingBalanceText,
-                            );
-                          },
-                        )
-                      : const Text(
-                          '*******',
-                          style: CustomTextStyleScheme.remainingBalanceText,
-                        ),
+                      }
+                      return const Loader();
+                    },
+                  ),
                 ],
               ),
-              IconButton(
-                onPressed: () {
-                  bool isVisible = !widget.isVisible;
-                  BlocProvider.of<SettingsBloc>(context)
-                      .add(SaveSetting("isVisible", isVisible.toString()));
-                },
-                color: CustomColorScheme.appGray,
-                icon: widget.isVisible
-                    ? const Icon(Icons.visibility)
-                    : const Icon(Icons.visibility_off),
-              ),
+              BlocBuilder<SettingsBloc, SettingsState>(
+                  builder: (context, state) {
+                if (state is SettingsLoaded) {
+                  bool isVisible = state.settings['isVisible'] == 'true';
+
+                  return IconButton(
+                    onPressed: () {
+                      isVisible = !isVisible;
+                      BlocProvider.of<SettingsBloc>(context)
+                          .add(SaveSetting("isVisible", isVisible.toString()));
+                    },
+                    color: CustomColorScheme.appGray,
+                    icon: isVisible
+                        ? const Icon(Icons.visibility)
+                        : const Icon(Icons.visibility_off),
+                  );
+                }
+                return const SizedBox.shrink();
+              }),
             ],
           ),
         ],
