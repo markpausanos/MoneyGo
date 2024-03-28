@@ -88,8 +88,11 @@ class _EditExpenseScreenState extends State<EditExpenseScreen> {
                 backgroundColor: CustomColorScheme.appGreen,
               ),
             );
-
-            Navigator.popAndPushNamed(context, widget.previousRoute ?? '/home');
+            if (widget.previousRoute != null) {
+              Navigator.popAndPushNamed(context, widget.previousRoute!);
+            } else {
+              Navigator.pop(context);
+            }
           }
           if (state is TransactionsDeleteSuccess) {
             ScaffoldMessenger.of(context).showSnackBar(
@@ -100,7 +103,11 @@ class _EditExpenseScreenState extends State<EditExpenseScreen> {
               ),
             );
 
-            Navigator.popAndPushNamed(context, widget.previousRoute ?? '/home');
+            if (widget.previousRoute != null) {
+              Navigator.popAndPushNamed(context, widget.previousRoute!);
+            } else {
+              Navigator.pop(context);
+            }
           }
         },
         child: Scaffold(
@@ -249,8 +256,8 @@ class _EditExpenseScreenState extends State<EditExpenseScreen> {
   String? _validateName(String? value) {
     if (value == null) {
       return "Name cannot be null";
-    } else if (value.length > 15) {
-      return "Name must be less than 15 characters";
+    } else if (value.length > 25) {
+      return "Name must be less than 25 characters";
     } else if (value.isEmpty) {
       _titleController.text = "Unnamed";
     }

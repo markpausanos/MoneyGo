@@ -2,15 +2,20 @@ import 'package:drift/drift.dart' hide Column;
 import 'package:expression_language/expression_language.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:intl/intl.dart';
 import 'package:moneygo/data/app_database.dart';
+import 'package:moneygo/data/blocs/categories/category_bloc.dart';
+import 'package:moneygo/data/blocs/categories/category_event.dart';
+import 'package:moneygo/data/blocs/categories/category_state.dart';
+import 'package:moneygo/data/blocs/periods/period_bloc.dart';
+import 'package:moneygo/data/blocs/periods/period_event.dart';
+import 'package:moneygo/data/blocs/periods/period_state.dart';
 import 'package:moneygo/data/blocs/sources/source_bloc.dart';
 import 'package:moneygo/data/blocs/sources/source_event.dart';
 import 'package:moneygo/data/blocs/sources/source_state.dart';
 import 'package:moneygo/data/blocs/transactions/transaction_bloc.dart';
 import 'package:moneygo/data/blocs/transactions/transaction_event.dart';
 import 'package:moneygo/data/blocs/transactions/transaction_state.dart';
-import 'package:moneygo/data/models/income_model.dart';
-import 'package:moneygo/ui/utils/screen_utils.dart';
 import 'package:moneygo/ui/widgets/Buttons/dialog_button.dart';
 import 'package:moneygo/ui/widgets/DateTimePicker/base_datetime_picker.dart';
 import 'package:moneygo/ui/widgets/IconButton/large_icon_button.dart';
@@ -18,23 +23,16 @@ import 'package:moneygo/ui/widgets/Textfields/base_textfield.dart';
 import 'package:moneygo/ui/widgets/Textfields/textfield_with_dropdown.dart';
 import 'package:moneygo/ui/widgets/Themes/custom_color_scheme.dart';
 import 'package:moneygo/ui/widgets/Themes/custom_text_scheme.dart';
+import 'package:moneygo/utils/transaction_types.dart';
 
-class EditIncomeScreen extends StatefulWidget {
-  final Transaction transaction;
-  final IncomeModel income;
-  final String? previousRoute;
-
-  const EditIncomeScreen(
-      {super.key,
-      required this.transaction,
-      required this.income,
-      this.previousRoute});
+class NewExpenseScreen extends StatefulWidget {
+  const NewExpenseScreen({super.key});
 
   @override
-  State<EditIncomeScreen> createState() => _EditIncomeScreen();
+  State<NewExpenseScreen> createState() => _NewExpenseScreenState();
 }
 
-class _EditIncomeScreen extends State<EditIncomeScreen> {
+class _NewExpenseScreenState extends State<NewExpenseScreen> {
   final _formKey = GlobalKey<FormState>();
   final _titleController = TextEditingController();
   final _amountController = TextEditingController();
@@ -42,19 +40,20 @@ class _EditIncomeScreen extends State<EditIncomeScreen> {
 
   DateTime _selectedDateTime = DateTime.now();
   int? _selectedSourceId;
+  int? _selectedCategoryId;
+  bool _stayOnPage = false;
+
+  Period? _currentPeriod;
+  Map<int, Category?> _categoryMap = {};
 
   @override
   void initState() {
     super.initState();
 
-    _titleController.text = widget.transaction.title;
-    _amountController.text = widget.transaction.amount.toString();
-    _descriptionController.text = widget.transaction.description ?? '';
-    _selectedDateTime = widget.transaction.date;
-    _selectedSourceId = widget.income.placedOnSource.id;
-
     BlocProvider.of<SourceBloc>(context).add(LoadSources());
+    BlocProvider.of<CategoryBloc>(context).add(LoadCategories());
     BlocProvider.of<TransactionBloc>(context).add(LoadTransactions());
+    BlocProvider.of<PeriodBloc>(context).add(LoadPeriods());
   }
 
   @override
@@ -69,27 +68,18 @@ class _EditIncomeScreen extends State<EditIncomeScreen> {
   Widget build(BuildContext context) {
     return BlocListener<TransactionBloc, TransactionState>(
         listener: (context, state) {
-          if (state is TransactionsUpdateSuccess) {
+          if (state is TransactionsSaveSuccess) {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
-                content: Text('Income updated successfully'),
+                content: Text('Expense saved successfully'),
                 duration: Duration(seconds: 2),
                 backgroundColor: CustomColorScheme.appGreen,
               ),
             );
 
-            Navigator.popAndPushNamed(context, widget.previousRoute ?? '/home');
-          }
-          if (state is TransactionsDeleteSuccess) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Income deleted successfully'),
-                duration: Duration(seconds: 2),
-                backgroundColor: CustomColorScheme.appRed,
-              ),
-            );
-
-            Navigator.popAndPushNamed(context, widget.previousRoute ?? '/home');
+            if (!_stayOnPage) {
+              Navigator.popAndPushNamed(context, "/home");
+            }
           }
         },
         child: Scaffold(
@@ -97,19 +87,12 @@ class _EditIncomeScreen extends State<EditIncomeScreen> {
             appBar: AppBar(
               backgroundColor: CustomColorScheme.appBarCards,
               leading: IconButtonLarge(
-                  onPressed: () => Navigator.of(context).pop(),
+                  onPressed: () => Navigator.popAndPushNamed(context, "/home"),
                   icon: Icons.arrow_back,
                   color: Colors.white),
-              title: const Text('Edit Income Details',
+              title: const Text('New Expense',
                   style: CustomTextStyleScheme.appBarTitleCards),
               centerTitle: true,
-              actions: [
-                IconButtonLarge(
-                  icon: Icons.delete,
-                  color: Colors.white,
-                  onPressed: () => _onDeleteIncome(),
-                )
-              ],
             ),
             body: SingleChildScrollView(
               padding: const EdgeInsets.fromLTRB(35, 30, 35, 30),
@@ -117,7 +100,16 @@ class _EditIncomeScreen extends State<EditIncomeScreen> {
                 key: _formKey,
                 child: Column(
                   children: [
-                    BaseDateTimePicker(onDateTimeChanged: _onDateTimeChanged),
+                    BlocBuilder<PeriodBloc, PeriodState>(
+                        builder: (context, state) {
+                      if (state is PeriodsLoaded) {
+                        _currentPeriod = state.period;
+                      }
+                      return BaseDateTimePicker(
+                        onDateTimeChanged: _onDateTimeChanged,
+                        validator: _validateDate,
+                      );
+                    }),
                     const SizedBox(height: 25),
                     BaseTextField(
                       controller: _titleController,
@@ -135,6 +127,8 @@ class _EditIncomeScreen extends State<EditIncomeScreen> {
                     const SizedBox(height: 25),
                     _buildSourceDropdown(),
                     const SizedBox(height: 25),
+                    _buildCategoryDropdown(),
+                    const SizedBox(height: 25),
                     BaseTextField(
                       controller: _descriptionController,
                       labelText: "Description (Optional)",
@@ -142,11 +136,34 @@ class _EditIncomeScreen extends State<EditIncomeScreen> {
                     ),
                     const SizedBox(height: 25),
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
+                        Row(
+                          children: [
+                            Switch(
+                              value: _stayOnPage,
+                              onChanged: (value) {
+                                setState(() {
+                                  _stayOnPage = value;
+                                });
+                              },
+                              activeColor: CustomColorScheme.appGreen,
+                              inactiveTrackColor:
+                                  CustomColorScheme.backgroundColor,
+                              trackOutlineColor: MaterialStateProperty.all(
+                                  CustomColorScheme.appGray),
+                              trackOutlineWidth:
+                                  const MaterialStatePropertyAll(0.5),
+                            ),
+                            const SizedBox(width: 3),
+                            const Text(
+                              "Stay on page",
+                            ),
+                          ],
+                        ),
                         DialogButton(
-                          onPressed: () => _onSaveIncome(),
-                          text: "Save Income",
+                          onPressed: _onSaveExpense,
+                          text: "Save Expense",
                           backgroundColor: CustomColorScheme.appGreenLight,
                           textColor: CustomColorScheme.appGreen,
                         ),
@@ -165,13 +182,15 @@ class _EditIncomeScreen extends State<EditIncomeScreen> {
           for (var source in state.sources) source.id: source.name
         };
 
+        _selectedSourceId ??=
+            sourceMap.isNotEmpty ? sourceMap.keys.first : null;
         return BaseDropdownFormField(
           dropDownItemList: sourceMap,
           initialValue: _selectedSourceId,
           onChanged: (int? id) {
             if (id != null) _onSourceChanged(id);
           },
-          labelText: "Received on",
+          labelText: "Source",
           validator: _validateDropDown,
         );
       } else {
@@ -180,11 +199,52 @@ class _EditIncomeScreen extends State<EditIncomeScreen> {
     });
   }
 
+  Widget _buildCategoryDropdown() {
+    return BlocBuilder<CategoryBloc, CategoryState>(builder: (context, state) {
+      if (state is CategoriesLoaded) {
+        _categoryMap = {
+          for (var category in state.categories) category.id: category
+        };
+
+        _categoryMap[0] = null;
+        return BaseDropdownFormField(
+          dropDownItemList: _categoryMap.map((key, value) {
+            return MapEntry(key, value?.name ?? "None");
+          }),
+          initialValue: null,
+          onChanged: (int? id) {
+            _onCategoryChanged(id);
+          },
+          labelText: "Category",
+        );
+      } else {
+        return const CircularProgressIndicator();
+      }
+    });
+  }
+
+  String? _validateDate(String? dateTime) {
+    Category? selectedCategory = _categoryMap[_selectedCategoryId];
+
+    if (selectedCategory != null && dateTime != null) {
+      if (_currentPeriod != null) {
+        DateFormat format = DateFormat("MMMM dd, yyyy 'at' hh:mm a");
+        DateTime dateTimeParsed = format.parse(dateTime);
+        if (dateTimeParsed.isBefore(_currentPeriod!.startDate) ||
+            (_currentPeriod!.endDate != null &&
+                dateTimeParsed.isAfter(_currentPeriod!.endDate!))) {
+          return "Date must be current for the selected category";
+        }
+      }
+    }
+    return null;
+  }
+
   String? _validateName(String? value) {
     if (value == null) {
       return "Name cannot be null";
-    } else if (value.length > 15) {
-      return "Name must be less than 15 characters";
+    } else if (value.length > 25) {
+      return "Name must be less than 25 characters";
     } else if (value.isEmpty) {
       _titleController.text = "Unnamed";
     }
@@ -230,40 +290,41 @@ class _EditIncomeScreen extends State<EditIncomeScreen> {
     });
   }
 
-  void _onSaveIncome() {
+  void _onCategoryChanged(int? id) {
+    setState(() {
+      _selectedCategoryId = id;
+    });
+  }
+
+  void _onSaveExpense() {
     if (_formKey.currentState!.validate()) {
+      // If the form is valid, process the data
       String title = _titleController.text;
       String amount = _amountController.text;
       String description = _descriptionController.text;
       int sourceId = _selectedSourceId!;
-      DateTime selectedDateTime = _selectedDateTime;
+      int categoryId = _selectedCategoryId ?? 0;
+      DateTime selectedDate = _selectedDateTime;
 
-      final transaction = widget.transaction.copyWith(
-        title: title,
-        amount: double.parse(amount),
-        date: selectedDateTime,
-        description: Value(description),
-      );
+      final transaction = TransactionsCompanion(
+          title: Value(title),
+          amount: Value(double.parse(amount)),
+          description: Value(description),
+          date: Value(selectedDate),
+          type: const Value(TransactionTypes.expense));
 
-      final income = widget.income.copyWith(
-        placedOnSource: widget.income.placedOnSource.copyWith(id: sourceId),
-      );
+      // Create a new expense object
+      final expense = ExpensesCompanion(
+          sourceId: Value(sourceId),
+          categoryId: categoryId == 0 ? const Value(null) : Value(categoryId));
 
       BlocProvider.of<TransactionBloc>(context)
-          .add(UpdateTransaction(transaction, income));
+          .add(AddTransaction(transaction, expense));
+
+      // Clear the form fields
+      _titleController.clear();
+      _amountController.clear();
+      _descriptionController.clear();
     }
-  }
-
-  void _onDeleteIncome() {
-    ScreenUtils.showConfirmationDialog(
-        context: context,
-        title: "Delete Transaction",
-        content: "Are you sure to delete this transaction?",
-        onConfirm: () => _deleteIncome());
-  }
-
-  Future<void> _deleteIncome() async {
-    BlocProvider.of<TransactionBloc>(context)
-        .add(DeleteTransaction(widget.transaction));
   }
 }

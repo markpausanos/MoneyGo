@@ -18,6 +18,15 @@ class TransactionsLoaded extends TransactionState {
   List<Object> get props => [transactions];
 }
 
+class TransactionsBySourceLoaded extends TransactionState {
+  final Map<Transaction, TransactionType> transactions;
+
+  TransactionsBySourceLoaded(this.transactions);
+
+  @override
+  List<Object> get props => [transactions];
+}
+
 class TransactionsError extends TransactionState {
   final String message;
 

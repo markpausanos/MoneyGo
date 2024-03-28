@@ -44,67 +44,76 @@ class _CategoryBarState extends State<CategoryBar> {
         _currency = state.settings["currency"] ?? "\$";
       }
 
-      return Padding(
-        padding: const EdgeInsets.only(bottom: 5.0),
-        child: Stack(children: <Widget>[
-          SizedBox(
-            child: LinearProgressIndicator(
-                value: widget.category.maxBudget == 0 ? 0 : percentage,
-                minHeight: 56,
-                borderRadius: BorderRadius.circular(10),
-                backgroundColor: CustomColorScheme.backgroundColor,
-                valueColor: AlwaysStoppedAnimation(
-                  widget.category.maxBudget == 0
-                      ? CustomColorScheme.appGray
-                      : percentage > 0.75
-                          ? CustomColorScheme.percentageGood
-                          : percentage > 0.5
-                              ? CustomColorScheme.percentageAverage
-                              : CustomColorScheme.percentageBad,
-                )),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(10.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Text(
-                  widget.category.name,
-                  style: CustomTextStyleScheme.barLabel,
-                ),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Row(
-                      children: [
-                        widget.category.maxBudget == 0
-                            ? const Text('Not set',
-                                style: CustomTextStyleScheme.barBalance)
-                            : Row(
-                                children: [
-                                  Text(
-                                    _currency,
-                                    style: CustomTextStyleScheme.barBalancePeso,
-                                  ),
-                                  Text(
-                                    Utils.formatNumber(widget.category.balance),
-                                    style: CustomTextStyleScheme.barBalance,
-                                  ),
-                                ],
-                              ),
-                      ],
-                    ),
-                    const Text(
-                      'remaining budget',
-                      style: CustomTextStyleScheme.progressBarText,
-                    ),
-                  ],
-                )
-              ],
+      return InkWell(
+        onTap: () {
+          Navigator.of(context)
+              .pushNamed('/categories/view', arguments: widget.category);
+        },
+        borderRadius: BorderRadius.circular(10),
+        child: Padding(
+          padding: const EdgeInsets.all(2.0),
+          child: Stack(children: <Widget>[
+            SizedBox(
+              child: LinearProgressIndicator(
+                  value: widget.category.maxBudget == 0 ? 0 : percentage,
+                  minHeight: 56,
+                  borderRadius: BorderRadius.circular(10),
+                  backgroundColor: CustomColorScheme.backgroundColor,
+                  valueColor: AlwaysStoppedAnimation(
+                    widget.category.maxBudget == 0
+                        ? CustomColorScheme.appGray
+                        : percentage > 0.75
+                            ? CustomColorScheme.percentageGood
+                            : percentage > 0.5
+                                ? CustomColorScheme.percentageAverage
+                                : CustomColorScheme.percentageBad,
+                  )),
             ),
-          ),
-        ]),
+            Padding(
+              padding: const EdgeInsets.all(10.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Text(
+                    widget.category.name,
+                    style: CustomTextStyleScheme.barLabel,
+                  ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Row(
+                        children: [
+                          widget.category.maxBudget == 0
+                              ? const Text('Not set',
+                                  style: CustomTextStyleScheme.barBalance)
+                              : Row(
+                                  children: [
+                                    Text(
+                                      _currency,
+                                      style:
+                                          CustomTextStyleScheme.barBalancePeso,
+                                    ),
+                                    Text(
+                                      Utils.formatNumber(
+                                          widget.category.balance),
+                                      style: CustomTextStyleScheme.barBalance,
+                                    ),
+                                  ],
+                                ),
+                        ],
+                      ),
+                      const Text(
+                        'remaining budget',
+                        style: CustomTextStyleScheme.progressBarText,
+                      ),
+                    ],
+                  )
+                ],
+              ),
+            ),
+          ]),
+        ),
       );
     });
   }

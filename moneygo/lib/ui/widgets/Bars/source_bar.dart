@@ -38,7 +38,10 @@ class _SourceBarState extends State<SourceBar> {
       }
 
       return InkWell(
-          onTap: () {},
+          onTap: () {
+            Navigator.pushNamed(context, '/sources/view',
+                arguments: widget.source);
+          },
           borderRadius: BorderRadius.circular(10),
           child: Stack(
             children: <Widget>[

@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:moneygo/data/app_database.dart';
+import 'package:moneygo/data/blocs/backups/backup_bloc.dart';
+import 'package:moneygo/data/blocs/backups/backup_event.dart';
+import 'package:moneygo/data/blocs/backups/backup_state.dart';
 import 'package:moneygo/data/blocs/transactions/transaction_bloc.dart';
 import 'package:moneygo/data/blocs/transactions/transaction_event.dart';
 import 'package:moneygo/data/blocs/transactions/transaction_state.dart';
@@ -27,6 +30,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
     super.initState();
 
     BlocProvider.of<TransactionBloc>(context).add(LoadTransactions());
+    BlocProvider.of<BackupBloc>(context).add(LoadBackups());
   }
 
   @override
@@ -42,6 +46,26 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
         title: const Text('Transactions',
             style: CustomTextStyleScheme.appBarTitleCards),
         centerTitle: true,
+        actions: [
+          BlocBuilder<BackupBloc, BackupState>(builder: (context, state) {
+            if (state is BackupLoaded) {
+              if (state.backups.isEmpty) {
+                return const SizedBox();
+              }
+              return IconButtonLarge(
+                  onPressed: () => _showBackupDropdown(context, state.backups),
+                  icon: Icons.backup,
+                  color: Colors.white);
+            } else if (state is BackupRestoreSuccess) {
+              SystemNavigator.pop();
+              return const Loader();
+            } else if (state is BackupError) {
+              return const Loader();
+            } else {
+              return const Loader();
+            }
+          }),
+        ],
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.fromLTRB(25.0, 20.0, 25.0, 0),
@@ -127,6 +151,35 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
           }
         }),
       ),
+    );
+  }
+
+  void _showBackupDropdown(BuildContext context, List<String> backups) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Backups'),
+          content: SizedBox(
+            width: double.maxFinite,
+            child: ListView.builder(
+              shrinkWrap: true,
+              itemCount: backups.length,
+              itemBuilder: (BuildContext context, int index) {
+                return ListTile(
+                  title: Text(
+                      // Convert to date, where it is in format YYYYMMDD. Add a - after four chars and another - after the next two chars
+                      "${backups[index].substring(0, 4)}-${backups[index].substring(4, 6)}-${backups[index].substring(6, 8)}"),
+                  onTap: () {
+                    BlocProvider.of<BackupBloc>(context)
+                        .add(RestoreBackup(backups[index]));
+                  },
+                );
+              },
+            ),
+          ),
+        );
+      },
     );
   }
 }

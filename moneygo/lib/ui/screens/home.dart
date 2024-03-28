@@ -68,17 +68,18 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           title: BlocBuilder<SettingsBloc, SettingsState>(
             builder: (context, state) => ScreenUtils.buildBlocStateWidget(state,
-                onLoad: const CircularProgressIndicator(),
-                onError: (message) => const Text('Error loading settings'),
-                onLoaded: (state) {
-                  final settings = (state as SettingsLoaded).settings;
-                  _username = settings['username'] ?? 'Default User';
-                  _currency = settings['currency'] ?? '\$';
-                  return Text(
-                    _username,
-                    style: Theme.of(context).textTheme.titleMedium,
-                  );
-                }),
+                onLoad: const CircularProgressIndicator(), onError: (message) {
+              print(message);
+              return const Text('Error loading settings');
+            }, onLoaded: (state) {
+              final settings = (state as SettingsLoaded).settings;
+              _username = settings['username'] ?? 'Default User';
+              _currency = settings['currency'] ?? '\$';
+              return Text(
+                _username,
+                style: Theme.of(context).textTheme.titleMedium,
+              );
+            }),
           ),
           titleSpacing: 0,
           backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -147,6 +148,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 } else {
                   var sources = (state as SourcesLoaded).sources;
 
+                  if (sources.isEmpty) {
+                    return const SizedBox();
+                  }
                   return FloatingActionButton(
                     elevation: 10,
                     onPressed: () =>

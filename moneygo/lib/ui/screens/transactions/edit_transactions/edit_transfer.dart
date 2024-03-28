@@ -9,6 +9,8 @@ import 'package:moneygo/data/blocs/sources/source_state.dart';
 import 'package:moneygo/data/blocs/transactions/transaction_bloc.dart';
 import 'package:moneygo/data/blocs/transactions/transaction_event.dart';
 import 'package:moneygo/data/blocs/transactions/transaction_state.dart';
+import 'package:moneygo/data/models/transfer_model.dart';
+import 'package:moneygo/ui/utils/screen_utils.dart';
 import 'package:moneygo/ui/widgets/Buttons/dialog_button.dart';
 import 'package:moneygo/ui/widgets/DateTimePicker/base_datetime_picker.dart';
 import 'package:moneygo/ui/widgets/IconButton/large_icon_button.dart';
@@ -16,16 +18,23 @@ import 'package:moneygo/ui/widgets/Textfields/base_textfield.dart';
 import 'package:moneygo/ui/widgets/Textfields/textfield_with_dropdown.dart';
 import 'package:moneygo/ui/widgets/Themes/custom_color_scheme.dart';
 import 'package:moneygo/ui/widgets/Themes/custom_text_scheme.dart';
-import 'package:moneygo/utils/transaction_types.dart';
 
-class NewTransferScreen extends StatefulWidget {
-  const NewTransferScreen({super.key});
+class EditTransferScreen extends StatefulWidget {
+  final Transaction transaction;
+  final TransferModel transfer;
+  final String? previousRoute;
+
+  const EditTransferScreen(
+      {super.key,
+      required this.transaction,
+      required this.transfer,
+      this.previousRoute});
 
   @override
-  State<NewTransferScreen> createState() => _NewTransferScreenState();
+  State<EditTransferScreen> createState() => _EditTransferScreenState();
 }
 
-class _NewTransferScreenState extends State<NewTransferScreen> {
+class _EditTransferScreenState extends State<EditTransferScreen> {
   final _formKey = GlobalKey<FormState>();
   final _titleController = TextEditingController();
   final _amountController = TextEditingController();
@@ -34,11 +43,17 @@ class _NewTransferScreenState extends State<NewTransferScreen> {
   DateTime _selectedDateTime = DateTime.now();
   int? _selectedFromSourceId;
   int? _selectedToSourceId;
-  bool _stayOnPage = false;
 
   @override
   void initState() {
     super.initState();
+
+    _titleController.text = widget.transaction.title;
+    _amountController.text = widget.transaction.amount.toString();
+    _descriptionController.text = widget.transaction.description ?? '';
+    _selectedDateTime = widget.transaction.date;
+    _selectedFromSourceId = widget.transfer.fromSource.id;
+    _selectedToSourceId = widget.transfer.toSource.id;
 
     BlocProvider.of<SourceBloc>(context).add(LoadSources());
     BlocProvider.of<TransactionBloc>(context).add(LoadTransactions());
@@ -56,27 +71,35 @@ class _NewTransferScreenState extends State<NewTransferScreen> {
   Widget build(BuildContext context) {
     return BlocListener<TransactionBloc, TransactionState>(
         listener: (context, state) {
-          if (state is TransactionsSaveSuccess) {
+          if (state is TransactionsUpdateSuccess) {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
-                content: Text('Transfer saved successfully'),
+                content: Text('Transfer updated successfully'),
                 duration: Duration(seconds: 2),
                 backgroundColor: CustomColorScheme.appGreen,
               ),
             );
 
-            if (!_stayOnPage) {
-              Navigator.popAndPushNamed(context, "/home");
+            if (widget.previousRoute != null) {
+              Navigator.popAndPushNamed(context, widget.previousRoute!);
+            } else {
+              Navigator.pop(context);
             }
           }
-          if (state is TransactionsError) {
+          if (state is TransactionsDeleteSuccess) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(state.message),
-                duration: const Duration(seconds: 2),
+              const SnackBar(
+                content: Text('Transfer deleted successfully'),
+                duration: Duration(seconds: 2),
                 backgroundColor: CustomColorScheme.appRed,
               ),
             );
+
+            if (widget.previousRoute != null) {
+              Navigator.popAndPushNamed(context, widget.previousRoute!);
+            } else {
+              Navigator.pop(context);
+            }
           }
         },
         child: Scaffold(
@@ -87,9 +110,16 @@ class _NewTransferScreenState extends State<NewTransferScreen> {
                   onPressed: () => Navigator.popAndPushNamed(context, "/home"),
                   icon: Icons.arrow_back,
                   color: Colors.white),
-              title: const Text('New Transfer',
+              title: const Text('Edit Transfer Details',
                   style: CustomTextStyleScheme.appBarTitleCards),
               centerTitle: true,
+              actions: [
+                IconButtonLarge(
+                  icon: Icons.delete,
+                  color: Colors.white,
+                  onPressed: () => _onDeleteTransfer(),
+                )
+              ],
             ),
             body: SingleChildScrollView(
               padding: const EdgeInsets.fromLTRB(35, 30, 35, 30),
@@ -124,31 +154,8 @@ class _NewTransferScreenState extends State<NewTransferScreen> {
                     ),
                     const SizedBox(height: 25),
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      mainAxisAlignment: MainAxisAlignment.end,
                       children: [
-                        Row(
-                          children: [
-                            Switch(
-                              value: _stayOnPage,
-                              onChanged: (value) {
-                                setState(() {
-                                  _stayOnPage = value;
-                                });
-                              },
-                              activeColor: CustomColorScheme.appGreen,
-                              inactiveTrackColor:
-                                  CustomColorScheme.backgroundColor,
-                              trackOutlineColor: MaterialStateProperty.all(
-                                  CustomColorScheme.appGray),
-                              trackOutlineWidth:
-                                  const MaterialStatePropertyAll(0.5),
-                            ),
-                            const SizedBox(width: 3),
-                            const Text(
-                              "Stay on page",
-                            ),
-                          ],
-                        ),
                         DialogButton(
                           onPressed: _onSaveTransfer,
                           text: "Save Transfer",
@@ -170,15 +177,14 @@ class _NewTransferScreenState extends State<NewTransferScreen> {
           for (var source in state.sources) source.id: source.name
         };
 
-        _selectedFromSourceId ??=
-            sourceMap.isNotEmpty ? sourceMap.keys.first : null;
         return BaseDropdownFormField(
+          isReadOnly: true,
           dropDownItemList: sourceMap,
           initialValue: _selectedFromSourceId,
           onChanged: (int? id) {
             if (id != null) _onSourceFromChanged(id);
           },
-          labelText: "Source From",
+          labelText: "Source From (Not Editable)",
           validator: _validateDropDownSourceFrom,
         );
       } else {
@@ -193,9 +199,6 @@ class _NewTransferScreenState extends State<NewTransferScreen> {
         Map<int, String> sourceMap = {
           for (var source in state.sources) source.id: source.name
         };
-
-        _selectedToSourceId ??=
-            sourceMap.isNotEmpty ? sourceMap.keys.elementAt(1) : null;
 
         return BaseDropdownFormField(
           dropDownItemList: sourceMap,
@@ -215,8 +218,8 @@ class _NewTransferScreenState extends State<NewTransferScreen> {
   String? _validateName(String? value) {
     if (value == null) {
       return "Name cannot be null";
-    } else if (value.length > 15) {
-      return "Name must be less than 15 characters";
+    } else if (value.length > 25) {
+      return "Name must be less than 25 characters";
     } else if (value.isEmpty) {
       _titleController.text = "Unnamed";
     }
@@ -272,6 +275,9 @@ class _NewTransferScreenState extends State<NewTransferScreen> {
   void _onSourceFromChanged(int id) {
     setState(() {
       _selectedFromSourceId = id;
+      if (_selectedFromSourceId == _selectedToSourceId) {
+        _selectedToSourceId = null;
+      }
     });
   }
 
@@ -286,28 +292,37 @@ class _NewTransferScreenState extends State<NewTransferScreen> {
       String title = _titleController.text;
       String amount = _amountController.text;
       String description = _descriptionController.text;
-      int sourceFromId = _selectedFromSourceId ?? 0;
-      int sourceToId = _selectedToSourceId ?? 0;
-      DateTime selectedDate = _selectedDateTime;
+      int fromSourceId = _selectedFromSourceId!;
+      int toSourceId = _selectedToSourceId!;
+      DateTime selectedDateTime = _selectedDateTime;
 
-      final transaction = TransactionsCompanion(
-          title: Value(title),
-          amount: Value(double.parse(amount)),
-          description: Value(description),
-          date: Value(selectedDate),
-          type: const Value(TransactionTypes.transfer));
+      final transaction = widget.transaction.copyWith(
+        title: title,
+        amount: double.parse(amount),
+        date: selectedDateTime,
+        description: Value(description),
+      );
 
-      final transfer = TransfersCompanion(
-        fromSourceId: Value(sourceFromId),
-        toSourceId: Value(sourceToId),
+      final transfer = widget.transfer.copyWith(
+        fromSource: widget.transfer.fromSource.copyWith(id: fromSourceId),
+        toSource: widget.transfer.toSource.copyWith(id: toSourceId),
       );
 
       BlocProvider.of<TransactionBloc>(context)
-          .add(AddTransaction(transaction, transfer));
-
-      _titleController.clear();
-      _amountController.clear();
-      _descriptionController.clear();
+          .add(UpdateTransaction(transaction, transfer));
     }
+  }
+
+  void _onDeleteTransfer() {
+    ScreenUtils.showConfirmationDialog(
+        context: context,
+        title: "Delete Transaction",
+        content: "Are you sure to delete this transaction?",
+        onConfirm: () => _deleteTransfer());
+  }
+
+  Future<void> _deleteTransfer() async {
+    BlocProvider.of<TransactionBloc>(context)
+        .add(DeleteTransaction(widget.transaction));
   }
 }

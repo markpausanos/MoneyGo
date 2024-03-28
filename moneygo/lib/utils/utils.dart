@@ -51,6 +51,10 @@ class Utils {
     return '${date.month.toString().padLeft(2, '0')}/${date.day.toString().padLeft(2, '0')}/${date.year % 100}';
   }
 
+  static String getFormattedDateAndTimeWithAMPM(DateTime date) {
+    return '${getFormattedDateMMM(date)} ${date.hour % 12}:${date.minute.toString().padLeft(2, '0')} ${date.hour < 12 ? 'AM' : 'PM'}';
+  }
+
   static String getRemainingDays(DateTime startDate, DateTime endDate) {
     final difference = endDate.difference(startDate).inDays;
 

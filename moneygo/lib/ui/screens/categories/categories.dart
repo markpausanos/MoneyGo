@@ -75,13 +75,6 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
           title: const Text('Categories',
               style: CustomTextStyleScheme.appBarTitleCards),
           centerTitle: true,
-          actions: [
-            IconButtonLarge(
-              onPressed: () {},
-              icon: Icons.restart_alt_rounded,
-              color: Colors.white,
-            )
-          ],
         ),
         body: SingleChildScrollView(
             padding: const EdgeInsets.fromLTRB(25.0, 10.0, 25.0, 0),

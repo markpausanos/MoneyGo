@@ -75,6 +75,17 @@ class CustomTextStyleScheme {
     color: Colors.black,
   );
 
+  static const TextStyle dialogTitleSmall = TextStyle(
+    fontSize: 18,
+    fontWeight: FontWeight.bold,
+    color: Colors.white,
+  );
+  static const TextStyle dialogBodySmall = TextStyle(
+    fontSize: 12,
+    fontWeight: FontWeight.normal,
+    color: Colors.black,
+  );
+
   static const TextStyle emptyText = TextStyle(
     fontSize: 20,
     fontWeight: FontWeight.bold,
@@ -96,6 +107,29 @@ class CustomTextStyleScheme {
   static const TextStyle transactionBarDate = TextStyle(
     fontSize: 12,
     fontWeight: FontWeight.normal,
+    color: Colors.white,
+  );
+
+  static const TextStyle viewBalanceNameText = TextStyle(
+    fontSize: 14,
+    fontWeight: FontWeight.normal,
+    color: Colors.white,
+  );
+  static TextStyle viewBalanceNameCurrency = TextStyle(
+    fontSize: 14,
+    fontWeight: FontWeight.normal,
+    color: Colors.white,
+    fontFamily: GoogleFonts.roboto().fontFamily,
+  );
+  static TextStyle viewBalanceAmountCurrency = TextStyle(
+    fontSize: 24,
+    fontWeight: FontWeight.bold,
+    color: Colors.white,
+    fontFamily: GoogleFonts.roboto().fontFamily,
+  );
+  static const TextStyle viewBalanceAmountText = TextStyle(
+    fontSize: 24,
+    fontWeight: FontWeight.bold,
     color: Colors.white,
   );
 }

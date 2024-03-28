@@ -48,6 +48,9 @@ class _TransactionBarState extends State<TransactionBar> {
 
         return InkWell(
           onTap: () {
+            _showDetailsDialog(context);
+          },
+          onLongPress: () {
             if (widget.transactionType is ExpenseModel) {
               Navigator.pushNamed(context, '/expense/edit', arguments: {
                 'transaction': widget.transaction,
@@ -170,22 +173,19 @@ class _TransactionBarState extends State<TransactionBar> {
     String description = "Unknown Transaction Type";
 
     if (transactionType is ExpenseModel) {
-      String sourceName = transactionType.source?.name ?? "";
+      String sourceName = transactionType.source.name;
       String categoryName = transactionType.category?.name ?? "";
 
       description = transaction.amount > 0
           ? "$categoryName using $sourceName"
           : "Refund for $categoryName to $sourceName";
     } else if (transactionType is IncomeModel) {
-      String placedOnSourceText =
-          transactionType.placedOnSource?.name ?? "Inexistent Source";
+      String placedOnSourceText = transactionType.placedOnSource.name;
 
       description = "To $placedOnSourceText";
     } else if (transactionType is TransferModel) {
-      String fromSourceName =
-          transactionType.fromSource?.name ?? "Inexistent Source";
-      String toSourceName =
-          transactionType.toSource?.name ?? "Inexistent Source";
+      String fromSourceName = transactionType.fromSource.name;
+      String toSourceName = transactionType.toSource.name;
 
       description = "$fromSourceName to $toSourceName";
     }
@@ -207,5 +207,111 @@ class _TransactionBarState extends State<TransactionBar> {
     }
 
     return color;
+  }
+
+  void _showDetailsDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
+          backgroundColor: Colors.white,
+          surfaceTintColor: Colors.white,
+          titlePadding: const EdgeInsets.all(0.0),
+          actionsPadding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
+          buttonPadding: const EdgeInsets.all(0.0),
+          title: Container(
+            decoration: BoxDecoration(
+              color: _getColor(widget.transaction, widget.transactionType),
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(10),
+                topRight: Radius.circular(10),
+              ),
+            ),
+            child: Column(
+              children: [
+                const SizedBox(height: 15.0),
+                Center(
+                    child: Text(widget.transaction.title,
+                        style: CustomTextStyleScheme.dialogTitleSmall)),
+                const SizedBox(height: 15.0),
+              ],
+            ),
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Flexible(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                        _getDescription(
+                            widget.transaction, widget.transactionType),
+                        style: CustomTextStyleScheme.dialogBodySmall
+                            .copyWith(fontWeight: FontWeight.bold)),
+                  ],
+                ),
+              ),
+              const Divider(
+                color: CustomColorScheme.backgroundColor,
+              ),
+              Flexible(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text('Date and Time:',
+                        style: CustomTextStyleScheme.dialogBodySmall),
+                    Text(
+                        Utils.getFormattedDateAndTimeWithAMPM(
+                            widget.transaction.date),
+                        style: CustomTextStyleScheme.dialogBodySmall),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 3),
+              Flexible(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text('Amount:',
+                        style: CustomTextStyleScheme.dialogBodySmall),
+                    Text(
+                        '${_getSign(widget.transaction) ?? ''} $_currency${Utils.formatNumber(widget.transaction.amount)}',
+                        style: CustomTextStyleScheme.dialogBodySmall),
+                  ],
+                ),
+              ),
+              const Divider(
+                color: CustomColorScheme.backgroundColor,
+              ),
+              if (widget.transaction.description != null &&
+                  widget.transaction.description!.isNotEmpty)
+                Flexible(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(widget.transaction.description!,
+                          softWrap: true,
+                          style: CustomTextStyleScheme.dialogBodySmall),
+                    ],
+                  ),
+                ),
+            ],
+          ),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('Close'),
+            ),
+          ],
+        );
+      },
+    );
   }
 }

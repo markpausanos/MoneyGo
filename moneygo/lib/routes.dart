@@ -3,16 +3,18 @@ import 'package:moneygo/data/app_database.dart';
 import 'package:moneygo/data/models/expense_model.dart';
 import 'package:moneygo/data/models/income_model.dart';
 import 'package:moneygo/data/models/transfer_model.dart';
-import 'package:moneygo/ui/screens/categories.dart';
-import 'package:moneygo/ui/screens/edit_expense.dart';
-import 'package:moneygo/ui/screens/edit_income.dart';
-import 'package:moneygo/ui/screens/edit_transfer.dart';
+import 'package:moneygo/ui/screens/categories/categories.dart';
+import 'package:moneygo/ui/screens/categories/view_categories/view_category.dart';
+import 'package:moneygo/ui/screens/sources/view_sources/view_source.dart';
+import 'package:moneygo/ui/screens/transactions/edit_transactions/edit_expense.dart';
+import 'package:moneygo/ui/screens/transactions/edit_transactions/edit_income.dart';
+import 'package:moneygo/ui/screens/transactions/edit_transactions/edit_transfer.dart';
 import 'package:moneygo/ui/screens/home.dart';
-import 'package:moneygo/ui/screens/new_expense.dart';
-import 'package:moneygo/ui/screens/new_income.dart';
-import 'package:moneygo/ui/screens/new_transfer.dart';
-import 'package:moneygo/ui/screens/sources.dart';
-import 'package:moneygo/ui/screens/transactions.dart';
+import 'package:moneygo/ui/screens/transactions/new_transactions/new_expense.dart';
+import 'package:moneygo/ui/screens/transactions/new_transactions/new_income.dart';
+import 'package:moneygo/ui/screens/transactions/new_transactions/new_transfer.dart';
+import 'package:moneygo/ui/screens/sources/sources.dart';
+import 'package:moneygo/ui/screens/transactions/transactions.dart';
 
 class AppRoutes {
   static Route<dynamic> generateRoute(RouteSettings settings) {
@@ -21,10 +23,25 @@ class AppRoutes {
         return MaterialPageRoute(builder: (_) => const HomeScreen());
       case '/home':
         return MaterialPageRoute(builder: (_) => const HomeScreen());
+
       case '/categories':
         return MaterialPageRoute(builder: (_) => const CategoriesScreen());
+      case '/categories/view':
+        final Category category = settings.arguments as Category;
+        return MaterialPageRoute(
+          builder: (_) => ViewCategoryScreen(category: category),
+        );
+
       case '/sources':
         return MaterialPageRoute(builder: (_) => const SourcesScreen());
+      case '/sources/view':
+        final Source source = settings.arguments as Source;
+        return MaterialPageRoute(
+          builder: (_) => ViewSourceScreen(source: source),
+        );
+
+      case '/transactions':
+        return MaterialPageRoute(builder: (_) => const TransactionsScreen());
 
       case '/expense/new':
         return MaterialPageRoute(builder: (_) => const NewExpenseScreen());
@@ -64,9 +81,6 @@ class AppRoutes {
             previousRoute: args['previousRoute'] as String?,
           ),
         );
-
-      case '/transactions':
-        return MaterialPageRoute(builder: (_) => const TransactionsScreen());
       default:
         return MaterialPageRoute(builder: (_) => const HomeScreen());
     }

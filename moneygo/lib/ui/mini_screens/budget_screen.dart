@@ -53,7 +53,7 @@ class _BudgetScreenState extends State<BudgetScreen> {
         _buildBalanceCard(),
         _buildCategoriesCard(),
         _buildSourcesCard(),
-        _buildTransactionsCard(),
+        const TransactionsCard(),
       ],
     );
   }
@@ -93,17 +93,6 @@ class _BudgetScreenState extends State<BudgetScreen> {
               sources: (state as SourcesLoaded).sources,
             );
           });
-    });
-  }
-
-  Widget _buildTransactionsCard() {
-    return BlocBuilder<TransactionBloc, TransactionState>(
-        builder: (context, state) {
-      return ScreenUtils.buildBlocStateWidget(state,
-          onLoad: const Loader(),
-          onError: (message) => DashedWidgetWithMessage(message: message),
-          onLoaded: (state) => TransactionsCard(
-              transactionsMap: (state as TransactionsLoaded).transactions));
     });
   }
 }

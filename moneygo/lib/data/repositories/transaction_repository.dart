@@ -62,6 +62,24 @@ class TransactionRepository {
     return transactionsMap;
   }
 
+  Future<Map<Transaction, TransactionType>> getTransactionsBySourceId(
+      int sourceId) async {
+    var transactions = await getAllTransactions();
+
+    transactions.removeWhere((key, value) {
+      if (value is ExpenseModel) {
+        return value.source.id != sourceId;
+      } else if (value is IncomeModel) {
+        return value.placedOnSource.id != sourceId;
+      } else if (value is TransferModel) {
+        return value.fromSource.id != sourceId && value.toSource.id != sourceId;
+      }
+      return false;
+    });
+
+    return transactions;
+  }
+
   Future<ExpenseModel?> _getExpenseModelByTransaction(
       Transaction transaction) async {
     var expense = await _expenseDao.getExpenseByTransactionId(transaction.id);
