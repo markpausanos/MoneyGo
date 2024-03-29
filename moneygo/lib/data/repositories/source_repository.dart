@@ -1,6 +1,6 @@
 import 'package:drift/drift.dart';
 import 'package:moneygo/data/app_database.dart';
-import 'package:moneygo/data/daos/source_dao.dart';
+import 'package:moneygo/data/daos/budget/source_dao.dart';
 
 class SourceRepository {
   final SourceDao _sourceDao;

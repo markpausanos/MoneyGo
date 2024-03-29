@@ -1,20 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:moneygo/data/app_database.dart';
-import 'package:moneygo/data/models/expense_model.dart';
-import 'package:moneygo/data/models/income_model.dart';
-import 'package:moneygo/data/models/transfer_model.dart';
-import 'package:moneygo/ui/screens/categories/categories.dart';
-import 'package:moneygo/ui/screens/categories/view_categories/view_category.dart';
-import 'package:moneygo/ui/screens/sources/view_sources/view_source.dart';
-import 'package:moneygo/ui/screens/transactions/edit_transactions/edit_expense.dart';
-import 'package:moneygo/ui/screens/transactions/edit_transactions/edit_income.dart';
-import 'package:moneygo/ui/screens/transactions/edit_transactions/edit_transfer.dart';
+import 'package:moneygo/data/models/budget/expense_model.dart';
+import 'package:moneygo/data/models/budget/income_model.dart';
+import 'package:moneygo/data/models/budget/transfer_model.dart';
+import 'package:moneygo/ui/screens/budget/categories/categories.dart';
+import 'package:moneygo/ui/screens/budget/categories/view_categories/view_category.dart';
+import 'package:moneygo/ui/screens/budget/sources/view_sources/view_source.dart';
+import 'package:moneygo/ui/screens/budget/transactions/edit_transactions/edit_expense.dart';
+import 'package:moneygo/ui/screens/budget/transactions/edit_transactions/edit_income.dart';
+import 'package:moneygo/ui/screens/budget/transactions/edit_transactions/edit_transfer.dart';
 import 'package:moneygo/ui/screens/home.dart';
-import 'package:moneygo/ui/screens/transactions/new_transactions/new_expense.dart';
-import 'package:moneygo/ui/screens/transactions/new_transactions/new_income.dart';
-import 'package:moneygo/ui/screens/transactions/new_transactions/new_transfer.dart';
-import 'package:moneygo/ui/screens/sources/sources.dart';
-import 'package:moneygo/ui/screens/transactions/transactions.dart';
+import 'package:moneygo/ui/screens/budget/transactions/new_transactions/new_expense.dart';
+import 'package:moneygo/ui/screens/budget/transactions/new_transactions/new_income.dart';
+import 'package:moneygo/ui/screens/budget/transactions/new_transactions/new_transfer.dart';
+import 'package:moneygo/ui/screens/budget/sources/sources.dart';
+import 'package:moneygo/ui/screens/budget/transactions/transactions.dart';
 
 class AppRoutes {
   static Route<dynamic> generateRoute(RouteSettings settings) {

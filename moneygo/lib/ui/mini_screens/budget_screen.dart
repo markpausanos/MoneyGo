@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:moneygo/ui/widgets/Cards/budget_screen/budget_period_card.dart';
-import 'package:moneygo/ui/widgets/Cards/budget_screen/categories_card.dart';
-import 'package:moneygo/ui/widgets/Cards/budget_screen/remaining_balance_card.dart';
-import 'package:moneygo/ui/widgets/Cards/budget_screen/sources_card.dart';
-import 'package:moneygo/ui/widgets/Cards/budget_screen/transactions_card.dart';
+import 'package:moneygo/ui/widgets/Cards/budget/budget_period_card.dart';
+import 'package:moneygo/ui/widgets/Cards/budget/categories_card.dart';
+import 'package:moneygo/ui/widgets/Cards/budget/remaining_balance_card.dart';
+import 'package:moneygo/ui/widgets/Cards/budget/sources_card.dart';
+import 'package:moneygo/ui/widgets/Cards/budget/transactions_card.dart';
 
 class BudgetScreen extends StatefulWidget {
   const BudgetScreen({super.key});

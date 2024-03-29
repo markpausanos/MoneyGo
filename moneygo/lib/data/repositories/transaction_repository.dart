@@ -1,17 +1,17 @@
 import 'package:drift/drift.dart';
 import 'package:moneygo/data/app_database.dart';
-import 'package:moneygo/data/daos/category_dao.dart';
-import 'package:moneygo/data/daos/expense_dao.dart';
-import 'package:moneygo/data/daos/income_dao.dart';
-import 'package:moneygo/data/daos/period_dao.dart';
-import 'package:moneygo/data/daos/source_dao.dart';
-import 'package:moneygo/data/daos/transaction_dao.dart';
-import 'package:moneygo/data/daos/transfer_dao.dart';
-import 'package:moneygo/data/models/expense_model.dart';
-import 'package:moneygo/data/models/income_model.dart';
-import 'package:moneygo/data/models/interfaces/transaction_subtype.dart';
-import 'package:moneygo/data/models/transfer_model.dart';
-import 'package:moneygo/utils/transaction_types.dart';
+import 'package:moneygo/data/daos/budget/category_dao.dart';
+import 'package:moneygo/data/daos/budget/expense_dao.dart';
+import 'package:moneygo/data/daos/budget/income_dao.dart';
+import 'package:moneygo/data/daos/budget/period_dao.dart';
+import 'package:moneygo/data/daos/budget/source_dao.dart';
+import 'package:moneygo/data/daos/budget/transaction_dao.dart';
+import 'package:moneygo/data/daos/budget/transfer_dao.dart';
+import 'package:moneygo/data/models/budget/expense_model.dart';
+import 'package:moneygo/data/models/budget/income_model.dart';
+import 'package:moneygo/data/models/budget/interfaces/transaction_subtype.dart';
+import 'package:moneygo/data/models/budget/transfer_model.dart';
+import 'package:moneygo/utils/enums.dart';
 
 class TransactionRepository {
   final TransactionDao _transactionDao;
@@ -229,7 +229,7 @@ class TransactionRepository {
 
     if (success > 0) {
       Source? source =
-          await _sourceDao.getSourceById(income.placedOnsourceId.value!);
+          await _sourceDao.getSourceById(income.placedOnsourceId.value);
 
       if (source != null) {
         source = source.copyWith(

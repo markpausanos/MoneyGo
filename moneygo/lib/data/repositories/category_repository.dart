@@ -1,7 +1,7 @@
 import 'package:drift/drift.dart';
 import 'package:moneygo/data/app_database.dart';
-import 'package:moneygo/data/daos/category_dao.dart';
-import 'package:moneygo/data/daos/period_dao.dart';
+import 'package:moneygo/data/daos/budget/category_dao.dart';
+import 'package:moneygo/data/daos/budget/period_dao.dart';
 
 class CategoryRepository {
   final CategoryDao _categoriesDao;
