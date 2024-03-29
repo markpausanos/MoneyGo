@@ -1,7 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:moneygo/data/blocs/settings/settings_event.dart';
 import 'package:moneygo/data/blocs/settings/settings_state.dart';
-import 'package:moneygo/data/repositories/budget/settings_repository.dart';
+import 'package:moneygo/data/repositories/settings_repository.dart';
 
 class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
   final SettingsRepository settingsRepository;

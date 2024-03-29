@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:moneygo/data/app_database.dart';
-import 'package:moneygo/data/models/budget/interfaces/transaction_subtype.dart';
+import 'package:moneygo/data/models/budget/transaction_subtype.dart';
 
 abstract class TransactionState extends Equatable {
   @override

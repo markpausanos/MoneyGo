@@ -9,7 +9,7 @@ import 'package:moneygo/data/daos/budget/transaction_dao.dart';
 import 'package:moneygo/data/daos/budget/transfer_dao.dart';
 import 'package:moneygo/data/models/budget/expense_model.dart';
 import 'package:moneygo/data/models/budget/income_model.dart';
-import 'package:moneygo/data/models/budget/interfaces/transaction_subtype.dart';
+import 'package:moneygo/data/models/budget/transaction_subtype.dart';
 import 'package:moneygo/data/models/budget/transfer_model.dart';
 import 'package:moneygo/utils/enums.dart';
 

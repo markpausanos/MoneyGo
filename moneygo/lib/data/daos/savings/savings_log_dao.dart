@@ -2,12 +2,12 @@ import 'package:drift/drift.dart';
 import 'package:moneygo/data/app_database.dart';
 import 'package:moneygo/data/tables/savings/savings_logs.dart';
 
-part 'savings_logs.g.dart';
+part 'savings_log_dao.g.dart';
 
 @DriftAccessor(tables: [SavingsLogs])
-class SavingsLogsDao extends DatabaseAccessor<AppDatabase>
-    with _$SavingsLogsDaoMixin {
-  SavingsLogsDao(super.db);
+class SavingsLogDao extends DatabaseAccessor<AppDatabase>
+    with _$SavingsLogDaoMixin {
+  SavingsLogDao(super.db);
 
   Stream<List<SavingsLog>> watchAllSavingsLogs() => select(savingsLogs).watch();
 

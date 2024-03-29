@@ -6,7 +6,7 @@ import 'package:moneygo/data/blocs/settings/settings_event.dart';
 import 'package:moneygo/data/blocs/settings/settings_state.dart';
 import 'package:moneygo/data/models/budget/expense_model.dart';
 import 'package:moneygo/data/models/budget/income_model.dart';
-import 'package:moneygo/data/models/budget/interfaces/transaction_subtype.dart';
+import 'package:moneygo/data/models/budget/transaction_subtype.dart';
 import 'package:moneygo/data/models/budget/transfer_model.dart';
 import 'package:moneygo/ui/widgets/Themes/custom_color_scheme.dart';
 import 'package:moneygo/ui/widgets/Themes/custom_text_scheme.dart';

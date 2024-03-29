@@ -2345,11 +2345,21 @@ class $SavingsTable extends Savings with TableInfo<$SavingsTable, Saving> {
       requiredDuringInsert: false,
       defaultConstraints:
           GeneratedColumn.constraintIsAlways('PRIMARY KEY AUTOINCREMENT'));
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+      'name', aliasedName, false,
+      additionalChecks:
+          GeneratedColumn.checkTextLength(minTextLength: 1, maxTextLength: 50),
+      type: DriftSqlType.string,
+      requiredDuringInsert: true);
   static const VerificationMeta _amountMeta = const VerificationMeta('amount');
   @override
   late final GeneratedColumn<double> amount = GeneratedColumn<double>(
       'amount', aliasedName, false,
-      type: DriftSqlType.double, requiredDuringInsert: true);
+      type: DriftSqlType.double,
+      requiredDuringInsert: false,
+      defaultValue: const Constant(0.0));
   static const VerificationMeta _vaultIdMeta =
       const VerificationMeta('vaultId');
   @override
@@ -2387,8 +2397,16 @@ class $SavingsTable extends Savings with TableInfo<$SavingsTable, Saving> {
       requiredDuringInsert: false,
       defaultValue: currentDateAndTime);
   @override
-  List<GeneratedColumn> get $columns =>
-      [id, amount, vaultId, goalAmount, goalEndDate, dateCreated, dateUpdated];
+  List<GeneratedColumn> get $columns => [
+        id,
+        name,
+        amount,
+        vaultId,
+        goalAmount,
+        goalEndDate,
+        dateCreated,
+        dateUpdated
+      ];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -2402,11 +2420,15 @@ class $SavingsTable extends Savings with TableInfo<$SavingsTable, Saving> {
     if (data.containsKey('id')) {
       context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
     }
+    if (data.containsKey('name')) {
+      context.handle(
+          _nameMeta, name.isAcceptableOrUnknown(data['name']!, _nameMeta));
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
     if (data.containsKey('amount')) {
       context.handle(_amountMeta,
           amount.isAcceptableOrUnknown(data['amount']!, _amountMeta));
-    } else if (isInserting) {
-      context.missing(_amountMeta);
     }
     if (data.containsKey('vault_id')) {
       context.handle(_vaultIdMeta,
@@ -2449,6 +2471,8 @@ class $SavingsTable extends Savings with TableInfo<$SavingsTable, Saving> {
     return Saving(
       id: attachedDatabase.typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}id'])!,
+      name: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}name'])!,
       amount: attachedDatabase.typeMapping
           .read(DriftSqlType.double, data['${effectivePrefix}amount'])!,
       vaultId: attachedDatabase.typeMapping
@@ -2472,6 +2496,7 @@ class $SavingsTable extends Savings with TableInfo<$SavingsTable, Saving> {
 
 class Saving extends DataClass implements Insertable<Saving> {
   final int id;
+  final String name;
   final double amount;
   final int vaultId;
   final double? goalAmount;
@@ -2480,6 +2505,7 @@ class Saving extends DataClass implements Insertable<Saving> {
   final DateTime? dateUpdated;
   const Saving(
       {required this.id,
+      required this.name,
       required this.amount,
       required this.vaultId,
       this.goalAmount,
@@ -2490,6 +2516,7 @@ class Saving extends DataClass implements Insertable<Saving> {
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<int>(id);
+    map['name'] = Variable<String>(name);
     map['amount'] = Variable<double>(amount);
     map['vault_id'] = Variable<int>(vaultId);
     if (!nullToAbsent || goalAmount != null) {
@@ -2508,6 +2535,7 @@ class Saving extends DataClass implements Insertable<Saving> {
   SavingsCompanion toCompanion(bool nullToAbsent) {
     return SavingsCompanion(
       id: Value(id),
+      name: Value(name),
       amount: Value(amount),
       vaultId: Value(vaultId),
       goalAmount: goalAmount == null && nullToAbsent
@@ -2528,6 +2556,7 @@ class Saving extends DataClass implements Insertable<Saving> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return Saving(
       id: serializer.fromJson<int>(json['id']),
+      name: serializer.fromJson<String>(json['name']),
       amount: serializer.fromJson<double>(json['amount']),
       vaultId: serializer.fromJson<int>(json['vaultId']),
       goalAmount: serializer.fromJson<double?>(json['goalAmount']),
@@ -2541,6 +2570,7 @@ class Saving extends DataClass implements Insertable<Saving> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'id': serializer.toJson<int>(id),
+      'name': serializer.toJson<String>(name),
       'amount': serializer.toJson<double>(amount),
       'vaultId': serializer.toJson<int>(vaultId),
       'goalAmount': serializer.toJson<double?>(goalAmount),
@@ -2552,6 +2582,7 @@ class Saving extends DataClass implements Insertable<Saving> {
 
   Saving copyWith(
           {int? id,
+          String? name,
           double? amount,
           int? vaultId,
           Value<double?> goalAmount = const Value.absent(),
@@ -2560,6 +2591,7 @@ class Saving extends DataClass implements Insertable<Saving> {
           Value<DateTime?> dateUpdated = const Value.absent()}) =>
       Saving(
         id: id ?? this.id,
+        name: name ?? this.name,
         amount: amount ?? this.amount,
         vaultId: vaultId ?? this.vaultId,
         goalAmount: goalAmount.present ? goalAmount.value : this.goalAmount,
@@ -2571,6 +2603,7 @@ class Saving extends DataClass implements Insertable<Saving> {
   String toString() {
     return (StringBuffer('Saving(')
           ..write('id: $id, ')
+          ..write('name: $name, ')
           ..write('amount: $amount, ')
           ..write('vaultId: $vaultId, ')
           ..write('goalAmount: $goalAmount, ')
@@ -2582,13 +2615,14 @@ class Saving extends DataClass implements Insertable<Saving> {
   }
 
   @override
-  int get hashCode => Object.hash(
-      id, amount, vaultId, goalAmount, goalEndDate, dateCreated, dateUpdated);
+  int get hashCode => Object.hash(id, name, amount, vaultId, goalAmount,
+      goalEndDate, dateCreated, dateUpdated);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is Saving &&
           other.id == this.id &&
+          other.name == this.name &&
           other.amount == this.amount &&
           other.vaultId == this.vaultId &&
           other.goalAmount == this.goalAmount &&
@@ -2599,6 +2633,7 @@ class Saving extends DataClass implements Insertable<Saving> {
 
 class SavingsCompanion extends UpdateCompanion<Saving> {
   final Value<int> id;
+  final Value<String> name;
   final Value<double> amount;
   final Value<int> vaultId;
   final Value<double?> goalAmount;
@@ -2607,6 +2642,7 @@ class SavingsCompanion extends UpdateCompanion<Saving> {
   final Value<DateTime?> dateUpdated;
   const SavingsCompanion({
     this.id = const Value.absent(),
+    this.name = const Value.absent(),
     this.amount = const Value.absent(),
     this.vaultId = const Value.absent(),
     this.goalAmount = const Value.absent(),
@@ -2616,16 +2652,18 @@ class SavingsCompanion extends UpdateCompanion<Saving> {
   });
   SavingsCompanion.insert({
     this.id = const Value.absent(),
-    required double amount,
+    required String name,
+    this.amount = const Value.absent(),
     required int vaultId,
     this.goalAmount = const Value.absent(),
     this.goalEndDate = const Value.absent(),
     this.dateCreated = const Value.absent(),
     this.dateUpdated = const Value.absent(),
-  })  : amount = Value(amount),
+  })  : name = Value(name),
         vaultId = Value(vaultId);
   static Insertable<Saving> custom({
     Expression<int>? id,
+    Expression<String>? name,
     Expression<double>? amount,
     Expression<int>? vaultId,
     Expression<double>? goalAmount,
@@ -2635,6 +2673,7 @@ class SavingsCompanion extends UpdateCompanion<Saving> {
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
+      if (name != null) 'name': name,
       if (amount != null) 'amount': amount,
       if (vaultId != null) 'vault_id': vaultId,
       if (goalAmount != null) 'goal_amount': goalAmount,
@@ -2646,6 +2685,7 @@ class SavingsCompanion extends UpdateCompanion<Saving> {
 
   SavingsCompanion copyWith(
       {Value<int>? id,
+      Value<String>? name,
       Value<double>? amount,
       Value<int>? vaultId,
       Value<double?>? goalAmount,
@@ -2654,6 +2694,7 @@ class SavingsCompanion extends UpdateCompanion<Saving> {
       Value<DateTime?>? dateUpdated}) {
     return SavingsCompanion(
       id: id ?? this.id,
+      name: name ?? this.name,
       amount: amount ?? this.amount,
       vaultId: vaultId ?? this.vaultId,
       goalAmount: goalAmount ?? this.goalAmount,
@@ -2668,6 +2709,9 @@ class SavingsCompanion extends UpdateCompanion<Saving> {
     final map = <String, Expression>{};
     if (id.present) {
       map['id'] = Variable<int>(id.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
     }
     if (amount.present) {
       map['amount'] = Variable<double>(amount.value);
@@ -2694,6 +2738,7 @@ class SavingsCompanion extends UpdateCompanion<Saving> {
   String toString() {
     return (StringBuffer('SavingsCompanion(')
           ..write('id: $id, ')
+          ..write('name: $name, ')
           ..write('amount: $amount, ')
           ..write('vaultId: $vaultId, ')
           ..write('goalAmount: $goalAmount, ')

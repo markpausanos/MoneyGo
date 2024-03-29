@@ -18,7 +18,7 @@ import 'package:moneygo/data/daos/budget/transfer_dao.dart';
 import 'package:moneygo/data/repositories/backup_repository.dart';
 import 'package:moneygo/data/repositories/budget/category_repository.dart';
 import 'package:moneygo/data/repositories/budget/period_repository.dart';
-import 'package:moneygo/data/repositories/budget/settings_repository.dart';
+import 'package:moneygo/data/repositories/settings_repository.dart';
 import 'package:moneygo/data/repositories/budget/source_repository.dart';
 import 'package:moneygo/data/repositories/budget/transaction_repository.dart';
 import 'package:moneygo/routes.dart';

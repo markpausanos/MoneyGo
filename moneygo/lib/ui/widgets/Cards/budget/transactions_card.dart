@@ -4,7 +4,7 @@ import 'package:moneygo/data/app_database.dart';
 import 'package:moneygo/data/blocs/transactions/transaction_bloc.dart';
 import 'package:moneygo/data/blocs/transactions/transaction_event.dart';
 import 'package:moneygo/data/blocs/transactions/transaction_state.dart';
-import 'package:moneygo/data/models/budget/interfaces/transaction_subtype.dart';
+import 'package:moneygo/data/models/budget/transaction_subtype.dart';
 import 'package:moneygo/routes.dart';
 import 'package:moneygo/ui/widgets/Bars/budget/transaction_bar.dart';
 import 'package:moneygo/ui/widgets/Cards/base_card.dart';
