@@ -1,7 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:moneygo/data/blocs/categories/category_event.dart';
 import 'package:moneygo/data/blocs/categories/category_state.dart';
-import 'package:moneygo/data/repositories/category_repository.dart';
+import 'package:moneygo/data/repositories/budget/category_repository.dart';
 
 class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
   final CategoryRepository categoryRepository;

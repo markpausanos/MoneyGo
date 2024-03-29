@@ -1,9 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:moneygo/data/blocs/categories/category_state.dart';
-import 'package:moneygo/data/blocs/periods/period_state.dart';
-import 'package:moneygo/data/blocs/settings/settings_state.dart';
-import 'package:moneygo/data/blocs/sources/source_state.dart';
-import 'package:moneygo/data/blocs/transactions/transaction_state.dart';
 import 'package:moneygo/ui/widgets/Themes/custom_color_scheme.dart';
 import 'package:moneygo/ui/widgets/Themes/custom_text_scheme.dart';
 

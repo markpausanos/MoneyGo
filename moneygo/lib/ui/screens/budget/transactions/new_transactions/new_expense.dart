@@ -121,8 +121,6 @@ class _NewExpenseScreenState extends State<NewExpenseScreen> {
                       controller: _amountController,
                       labelText: "Amount",
                       validator: _validateAmount,
-                      keyboardType:
-                          const TextInputType.numberWithOptions(decimal: true),
                     ),
                     const SizedBox(height: 25),
                     _buildSourceDropdown(),
@@ -318,6 +316,8 @@ class _NewExpenseScreenState extends State<NewExpenseScreen> {
           sourceId: Value(sourceId),
           categoryId: categoryId == 0 ? const Value(null) : Value(categoryId));
 
+      print("Transaction: $transaction");
+      print("Expense: $expense");
       BlocProvider.of<TransactionBloc>(context)
           .add(AddTransaction(transaction, expense));
 

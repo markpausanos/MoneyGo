@@ -156,8 +156,6 @@ class _EditExpenseScreenState extends State<EditExpenseScreen> {
                       controller: _amountController,
                       labelText: "Amount",
                       validator: _validateAmount,
-                      keyboardType:
-                          const TextInputType.numberWithOptions(decimal: true),
                     ),
                     const SizedBox(height: 25),
                     _buildSourceDropdown(),

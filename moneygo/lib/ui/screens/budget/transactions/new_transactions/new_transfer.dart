@@ -109,8 +109,6 @@ class _NewTransferScreenState extends State<NewTransferScreen> {
                       controller: _amountController,
                       labelText: "Amount",
                       validator: _validateAmount,
-                      keyboardType:
-                          const TextInputType.numberWithOptions(decimal: true),
                     ),
                     const SizedBox(height: 25),
                     _buildSourceFromDropdown(),
