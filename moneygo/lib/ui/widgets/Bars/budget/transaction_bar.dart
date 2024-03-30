@@ -289,8 +289,8 @@ class _TransactionBarState extends State<TransactionBar> {
               ),
               if (widget.transaction.description != null &&
                   widget.transaction.description!.isNotEmpty)
-                SizedBox(
-                  height: 150,
+                ConstrainedBox(
+                  constraints: const BoxConstraints(maxHeight: 100),
                   child: SingleChildScrollView(
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
