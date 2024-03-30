@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:moneygo/data/app_database.dart';
-import 'package:moneygo/data/blocs/transactions/transaction_bloc.dart';
-import 'package:moneygo/data/blocs/transactions/transaction_event.dart';
-import 'package:moneygo/data/blocs/transactions/transaction_state.dart';
+import 'package:moneygo/data/blocs/budget/transactions/transaction_bloc.dart';
+import 'package:moneygo/data/blocs/budget/transactions/transaction_event.dart';
+import 'package:moneygo/data/blocs/budget/transactions/transaction_state.dart';
 import 'package:moneygo/data/models/budget/transaction_subtype.dart';
 import 'package:moneygo/routes.dart';
 import 'package:moneygo/ui/widgets/Bars/budget/transaction_bar.dart';
@@ -41,10 +41,33 @@ class _TransactionsCardState extends State<TransactionsCard> {
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const Text(
-              'Transactions',
-              textAlign: TextAlign.left,
-              style: CustomTextStyleScheme.cardTitle,
+            Row(
+              children: [
+                const Text(
+                  'Transactions',
+                  textAlign: TextAlign.left,
+                  style: CustomTextStyleScheme.cardTitle,
+                ),
+                const SizedBox(
+                  width: 5,
+                ),
+                SizedBox(
+                  width: 15,
+                  height: 15,
+                  child: Tooltip(
+                    padding: const EdgeInsets.all(10),
+                    margin: const EdgeInsets.all(10),
+                    triggerMode: TooltipTriggerMode.tap,
+                    message: _getTooltipMessage(),
+                    showDuration: const Duration(seconds: 5),
+                    textAlign: TextAlign.center,
+                    child: const Icon(
+                      Icons.info_outline,
+                      size: 15,
+                    ),
+                  ),
+                ),
+              ],
             ),
             BlocBuilder<TransactionBloc, TransactionState>(
               builder: (context, state) {
@@ -92,17 +115,16 @@ class _TransactionsCardState extends State<TransactionsCard> {
               return Column(
                 children: [
                   _buildTransactionsList(),
+                  const SizedBox(height: 20),
                   if (_displayedTransactionsMap.length <
                       _transactionsMap.length)
                     InkWell(
                       onTap: _loadMoreTransactions,
-                      child: SizedBox(
+                      child: const SizedBox(
                         width: double.infinity,
                         child: Center(
-                          child: IconButton(
-                            onPressed: _loadMoreTransactions,
-                            icon: const Icon(Icons.arrow_drop_down),
-                          ),
+                          child: Text('Load More',
+                              style: CustomTextStyleScheme.cardViewAll),
                         ),
                       ),
                     ),
@@ -117,6 +139,10 @@ class _TransactionsCardState extends State<TransactionsCard> {
         ),
       ],
     ));
+  }
+
+  String _getTooltipMessage() {
+    return 'This is the list of all transactions made. Add a source first to start adding transactions.';
   }
 
   Widget _buildTransactionsList() {

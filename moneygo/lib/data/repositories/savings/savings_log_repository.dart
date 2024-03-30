@@ -12,7 +12,7 @@ import 'package:moneygo/data/models/savings/savings_out_model.dart';
 import 'package:moneygo/data/models/savings/savings_transfer_model.dart';
 import 'package:moneygo/utils/enums.dart';
 
-class SavingsLogReposiory {
+class SavingsLogRepository {
   final SavingsLogDao _savingsLogDao;
   final SavingDao _savingsDao;
   final VaultDao _vaultDao;
@@ -21,7 +21,7 @@ class SavingsLogReposiory {
   final SavingsOutDao _savingsOutDao;
   final SavingsTransferDao _savingsTransferDao;
 
-  SavingsLogReposiory(
+  SavingsLogRepository(
     this._savingsLogDao,
     this._savingsDao,
     this._vaultDao,

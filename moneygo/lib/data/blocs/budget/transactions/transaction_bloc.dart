@@ -1,7 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:moneygo/data/app_database.dart';
-import 'package:moneygo/data/blocs/transactions/transaction_event.dart';
-import 'package:moneygo/data/blocs/transactions/transaction_state.dart';
+import 'package:moneygo/data/blocs/budget/transactions/transaction_event.dart';
+import 'package:moneygo/data/blocs/budget/transactions/transaction_state.dart';
 import 'package:moneygo/data/repositories/budget/transaction_repository.dart';
 
 class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {

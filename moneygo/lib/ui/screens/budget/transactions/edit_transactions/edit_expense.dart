@@ -4,17 +4,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:moneygo/data/app_database.dart';
-import 'package:moneygo/data/blocs/categories/category_bloc.dart';
-import 'package:moneygo/data/blocs/categories/category_event.dart';
-import 'package:moneygo/data/blocs/categories/category_state.dart';
-import 'package:moneygo/data/blocs/periods/period_bloc.dart';
-import 'package:moneygo/data/blocs/periods/period_state.dart';
-import 'package:moneygo/data/blocs/sources/source_bloc.dart';
-import 'package:moneygo/data/blocs/sources/source_event.dart';
-import 'package:moneygo/data/blocs/sources/source_state.dart';
-import 'package:moneygo/data/blocs/transactions/transaction_bloc.dart';
-import 'package:moneygo/data/blocs/transactions/transaction_event.dart';
-import 'package:moneygo/data/blocs/transactions/transaction_state.dart';
+import 'package:moneygo/data/blocs/budget/categories/category_bloc.dart';
+import 'package:moneygo/data/blocs/budget/categories/category_event.dart';
+import 'package:moneygo/data/blocs/budget/categories/category_state.dart';
+import 'package:moneygo/data/blocs/budget/periods/period_bloc.dart';
+import 'package:moneygo/data/blocs/budget/periods/period_state.dart';
+import 'package:moneygo/data/blocs/budget/sources/source_bloc.dart';
+import 'package:moneygo/data/blocs/budget/sources/source_event.dart';
+import 'package:moneygo/data/blocs/budget/sources/source_state.dart';
+import 'package:moneygo/data/blocs/budget/transactions/transaction_bloc.dart';
+import 'package:moneygo/data/blocs/budget/transactions/transaction_event.dart';
+import 'package:moneygo/data/blocs/budget/transactions/transaction_state.dart';
 import 'package:moneygo/data/models/budget/expense_model.dart';
 import 'package:moneygo/ui/utils/screen_utils.dart';
 import 'package:moneygo/ui/widgets/Buttons/dialog_button.dart';
@@ -332,7 +332,8 @@ class _EditExpenseScreenState extends State<EditExpenseScreen> {
           maxBudget: 0,
           balance: 0,
           dateCreated: DateTime.now(),
-          periodId: 0);
+          periodId: 0,
+          order: 0);
 
       final expense = widget.expense.copyWith(
         source: widget.expense.source.copyWith(id: sourceId),

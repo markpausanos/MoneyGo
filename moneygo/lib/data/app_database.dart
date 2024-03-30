@@ -55,6 +55,9 @@ class AppDatabase extends _$AppDatabase {
             await m.createTable(savingsIns);
             await m.createTable(savingsOuts);
             await m.createTable(savingsTransfers);
+
+            await m.addColumn(categories, categories.order);
+            await m.addColumn(sources, sources.order);
           }
         },
         beforeOpen: (details) async {

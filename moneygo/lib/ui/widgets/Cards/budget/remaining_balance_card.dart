@@ -3,9 +3,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:moneygo/data/blocs/settings/settings_bloc.dart';
 import 'package:moneygo/data/blocs/settings/settings_event.dart';
 import 'package:moneygo/data/blocs/settings/settings_state.dart';
-import 'package:moneygo/data/blocs/sources/source_bloc.dart';
-import 'package:moneygo/data/blocs/sources/source_event.dart';
-import 'package:moneygo/data/blocs/sources/source_state.dart';
+import 'package:moneygo/data/blocs/budget/sources/source_bloc.dart';
+import 'package:moneygo/data/blocs/budget/sources/source_event.dart';
+import 'package:moneygo/data/blocs/budget/sources/source_state.dart';
 import 'package:moneygo/ui/widgets/Cards/base_card.dart';
 import 'package:moneygo/ui/widgets/Loaders/loading_state.dart';
 import 'package:moneygo/ui/widgets/Themes/custom_color_scheme.dart';
@@ -75,7 +75,7 @@ class _RemainingBalanceCardState extends State<RemainingBalanceCard> {
                   BlocBuilder<SettingsBloc, SettingsState>(
                     builder: (context, state) {
                       if (state is SettingsLoaded) {
-                        bool isVisible = state.settings['isVisible'] == 'true';
+                        bool isVisible = state.settings['budgetIsVisible'] == 'true';
                         return isVisible
                             ? BlocBuilder<SourceBloc, SourceState>(
                                 builder: (context, state) {
@@ -118,13 +118,13 @@ class _RemainingBalanceCardState extends State<RemainingBalanceCard> {
               BlocBuilder<SettingsBloc, SettingsState>(
                   builder: (context, state) {
                 if (state is SettingsLoaded) {
-                  bool isVisible = state.settings['isVisible'] == 'true';
+                  bool isVisible = state.settings['budgetIsVisible'] == 'true';
 
                   return IconButton(
                     onPressed: () {
                       isVisible = !isVisible;
                       BlocProvider.of<SettingsBloc>(context)
-                          .add(SaveSetting("isVisible", isVisible.toString()));
+                          .add(SaveSetting("budgetIsVisible", isVisible.toString()));
                     },
                     color: CustomColorScheme.appGray,
                     icon: isVisible

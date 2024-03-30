@@ -1,6 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:moneygo/data/blocs/periods/period_event.dart';
-import 'package:moneygo/data/blocs/periods/period_state.dart';
+import 'package:moneygo/data/blocs/budget/periods/period_event.dart';
+import 'package:moneygo/data/blocs/budget/periods/period_state.dart';
 import 'package:moneygo/data/repositories/budget/period_repository.dart';
 
 class PeriodBloc extends Bloc<PeriodEvent, PeriodState> {

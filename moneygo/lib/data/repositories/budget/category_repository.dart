@@ -1,15 +1,15 @@
 import 'package:drift/drift.dart';
 import 'package:moneygo/data/app_database.dart';
 import 'package:moneygo/data/daos/budget/category_dao.dart';
-import 'package:moneygo/data/daos/budget/period_dao.dart';
+import 'package:moneygo/data/repositories/budget/period_repository.dart';
 
 class CategoryRepository {
   final CategoryDao _categoriesDao;
-  final PeriodDao _periodDao;
+  final PeriodRepository _periodRepository;
 
   CategoryRepository(
     this._categoriesDao,
-    this._periodDao,
+    this._periodRepository,
   );
 
   Stream<List<Category>> watchAllCategories() =>
@@ -17,17 +17,22 @@ class CategoryRepository {
 
   Future<List<Category>> getAllCategories() async {
     var categories = await _categoriesDao.getAllCategories();
-    var period = await _periodDao.getLatestPeriod();
+    var period = await _periodRepository.getLatestPeriod();
 
     var latestPeriod = period;
 
-    if (latestPeriod == null) {
-      return [];
-    }
-
     categories = categories
         .where((category) => category.periodId == latestPeriod.id)
-        .toList();
+        .toList()
+      ..sort((a, b) => a.order.compareTo(b.order));
+
+    // check if all category orders are 0
+    if (categories.every((category) => category.order == 0)) {
+      for (var i = 0; i < categories.length; i++) {
+        categories[i] = categories[i].copyWith(order: i);
+        await _categoriesDao.updateCategory(categories[i]);
+      }
+    }
 
     return categories;
   }
@@ -36,19 +41,21 @@ class CategoryRepository {
       await _categoriesDao.getCategoryById(id);
 
   Future<int> insertCategory(CategoriesCompanion category) async {
+    var categoryCount = (await _categoriesDao.getAllCategories()).length;
+
     if (category.name.value.isEmpty) {
       throw Exception('Name cannot be empty');
     } else if (category.maxBudget.value < 0) {
       throw Exception('Max budget cannot be negative');
     }
 
-    var period = await _periodDao.getLatestPeriod();
+    var period = await _periodRepository.getLatestPeriod();
 
-    if (period == null) {
-      throw Exception('Period not found');
-    }
+    category = category.copyWith(
+      periodId: Value(period.id),
+      order: Value(categoryCount),
+    );
 
-    category = category.copyWith(periodId: Value(period.id));
     return await _categoriesDao.insertCategory(category);
   }
 
@@ -69,8 +76,7 @@ class CategoryRepository {
 
     category = category.copyWith(
         balance: category.balance + budgetDifference,
-        dateUpdated: Value(DateTime.now()),
-        periodId: 1);
+        dateUpdated: Value(DateTime.now()));
 
     return await _categoriesDao.updateCategory(category);
   }

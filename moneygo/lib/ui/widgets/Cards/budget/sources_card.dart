@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:moneygo/data/blocs/sources/source_bloc.dart';
-import 'package:moneygo/data/blocs/sources/source_event.dart';
-import 'package:moneygo/data/blocs/sources/source_state.dart';
+import 'package:moneygo/data/blocs/budget/sources/source_bloc.dart';
+import 'package:moneygo/data/blocs/budget/sources/source_event.dart';
+import 'package:moneygo/data/blocs/budget/sources/source_state.dart';
 import 'package:moneygo/ui/widgets/Bars/budget/source_bar.dart';
 import 'package:moneygo/ui/widgets/Cards/base_card.dart';
 import 'package:moneygo/ui/widgets/SizedBoxes/dashed_box_with_message.dart';
@@ -85,7 +85,7 @@ class _SourcesCardState extends State<SourcesCard> {
         BlocBuilder<SourceBloc, SourceState>(builder: (context, state) {
           if (state is SourcesLoaded) {
             return state.sources.isEmpty
-                ? const DashedWidgetWithMessage(message: 'Empty')
+                ? const DashedWidgetWithMessage(message: 'No sources found')
                 : Column(
                     children: state.sources.map((source) {
                       return Column(

@@ -14,4 +14,5 @@ class Savings extends Table {
       dateTime().withDefault(currentDateAndTime)();
   DateTimeColumn get dateUpdated =>
       dateTime().withDefault(currentDateAndTime).nullable()();
+  IntColumn get order => integer().withDefault(const Constant(0))();
 }

@@ -1,6 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:moneygo/data/blocs/sources/source_event.dart';
-import 'package:moneygo/data/blocs/sources/source_state.dart';
+import 'package:moneygo/data/blocs/budget/sources/source_event.dart';
+import 'package:moneygo/data/blocs/budget/sources/source_state.dart';
 import 'package:moneygo/data/repositories/budget/source_repository.dart';
 
 class SourceBloc extends Bloc<SourceEvent, SourceState> {

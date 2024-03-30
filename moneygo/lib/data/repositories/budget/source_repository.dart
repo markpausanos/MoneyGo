@@ -10,16 +10,33 @@ class SourceRepository {
   Stream<List<Source>> watchAllSources() => _sourceDao.watchAllSources();
 
   Future<List<Source>> getAllSources() async {
-    return await _sourceDao.getAllSources();
+    var sources = await _sourceDao.getAllSources();
+
+    sources.sort((a, b) => a.order.compareTo(b.order));
+
+    // check if all source orders are 0
+    if (sources.every((source) => source.order == 0)) {
+      for (var i = 0; i < sources.length; i++) {
+        sources[i] = sources[i].copyWith(order: i);
+        await _sourceDao.updateSource(sources[i]);
+      }
+    }
+
+    return sources;
   }
 
   Future<Source?> getSourceById(int id) async =>
       await _sourceDao.getSourceById(id);
 
   Future<int> insertSource(SourcesCompanion source) async {
+    var sourceCount = (await _sourceDao.getAllSources()).length;
     if (source.name.value.isEmpty) {
       throw Exception('Name cannot be empty');
     }
+
+    source = source.copyWith(
+      order: Value(sourceCount),
+    );
 
     return await _sourceDao.insertSource(source);
   }

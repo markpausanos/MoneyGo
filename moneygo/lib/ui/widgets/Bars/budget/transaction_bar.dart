@@ -289,15 +289,18 @@ class _TransactionBarState extends State<TransactionBar> {
               ),
               if (widget.transaction.description != null &&
                   widget.transaction.description!.isNotEmpty)
-                Flexible(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(widget.transaction.description!,
-                          softWrap: true,
-                          style: CustomTextStyleScheme.dialogBodySmall),
-                    ],
+                SizedBox(
+                  height: 150,
+                  child: SingleChildScrollView(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(widget.transaction.description!,
+                            softWrap: true,
+                            style: CustomTextStyleScheme.dialogBodySmall),
+                      ],
+                    ),
                   ),
                 ),
             ],

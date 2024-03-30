@@ -83,13 +83,16 @@ class PeriodRepository {
             previousPeriod != null && category.periodId == previousPeriod.id)
         .toList();
 
+    int order = 0;
     for (var category in categories) {
       await _categoryDao.insertCategory(CategoriesCompanion(
         name: Value(category.name),
         maxBudget: Value(category.maxBudget),
         periodId: Value(id),
         balance: Value(category.maxBudget),
+        order: Value(order),
       ));
+      order++;
     }
 
     return id;

@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:moneygo/data/blocs/categories/category_bloc.dart';
-import 'package:moneygo/data/blocs/categories/category_event.dart';
-import 'package:moneygo/data/blocs/categories/category_state.dart';
+import 'package:moneygo/data/app_database.dart';
+import 'package:moneygo/data/blocs/budget/categories/category_bloc.dart';
+import 'package:moneygo/data/blocs/budget/categories/category_event.dart';
+import 'package:moneygo/data/blocs/budget/categories/category_state.dart';
 import 'package:moneygo/ui/widgets/Cards/base_card.dart';
 import 'package:moneygo/ui/widgets/Bars/budget/category_bar.dart';
 import 'package:moneygo/ui/widgets/SizedBoxes/dashed_box_with_message.dart';
@@ -16,6 +17,10 @@ class CategoriesCard extends StatefulWidget {
 }
 
 class _CategoriesCardState extends State<CategoriesCard> {
+  List<Category> _categoriesWithUnset = [];
+  List<Category> _categoriesWithoutUnset = [];
+  bool _showUnset = false;
+
   @override
   void initState() {
     super.initState();
@@ -89,23 +94,35 @@ class _CategoriesCardState extends State<CategoriesCard> {
           BlocBuilder<CategoryBloc, CategoryState>(
             builder: (context, state) {
               if (state is CategoriesLoaded) {
+                print('Categories loaded: ${state.categories}');
+                _categoriesWithUnset = state.categories.toList();
+                _categoriesWithoutUnset = state.categories
+                    .where((element) => element.maxBudget != 0.0)
+                    .toList();
+
                 if (state.categories.isEmpty) {
                   return const DashedWidgetWithMessage(
                       message: 'No categories found');
                 }
                 return Column(
                   children: [
-                    Column(
-                      children: state.categories.map((category) {
-                        return Column(
-                          children: [
-                            CategoryBar(
-                              category: category,
-                            ),
-                            const SizedBox(height: 10),
-                          ],
-                        );
-                      }).toList(),
+                    _buildCategoriesList(),
+                    const SizedBox(height: 20),
+                    InkWell(
+                      onTap: () {
+                        setState(() {
+                          _showUnset = !_showUnset;
+                        });
+                      },
+                      child: SizedBox(
+                        height: 20,
+                        child: Center(
+                          child: Text(
+                            _showUnset ? 'Hide Unset' : 'Show Unset',
+                            style: CustomTextStyleScheme.cardViewAll,
+                          ),
+                        ),
+                      ),
                     ),
                   ],
                 );
@@ -125,5 +142,37 @@ class _CategoriesCardState extends State<CategoriesCard> {
 
   String _getTooltipMessage() {
     return 'Categories are used to group transactions together. Transactions can only choose from the available categories within the budget period.';
+  }
+
+  Widget _buildCategoriesList() {
+    return _showUnset
+        ? _categoriesWithUnset.isNotEmpty
+            ? Column(
+                children: _categoriesWithUnset.map((category) {
+                  return Column(
+                    children: [
+                      CategoryBar(
+                        category: category,
+                      ),
+                      const SizedBox(height: 10),
+                    ],
+                  );
+                }).toList(),
+              )
+            : const DashedWidgetWithMessage(message: 'No categories found')
+        : _categoriesWithoutUnset.isNotEmpty
+            ? Column(
+                children: _categoriesWithoutUnset.map((category) {
+                  return Column(
+                    children: [
+                      CategoryBar(
+                        category: category,
+                      ),
+                      const SizedBox(height: 10),
+                    ],
+                  );
+                }).toList(),
+              )
+            : const DashedWidgetWithMessage(message: 'No categories found');
   }
 }

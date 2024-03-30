@@ -3,11 +3,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:moneygo/data/app_database.dart';
 import 'package:moneygo/data/blocs/backups/backup_bloc.dart';
 import 'package:moneygo/data/blocs/backups/backup_event.dart';
-import 'package:moneygo/data/blocs/categories/category_bloc.dart';
-import 'package:moneygo/data/blocs/periods/period_bloc.dart';
+import 'package:moneygo/data/blocs/budget/categories/category_bloc.dart';
+import 'package:moneygo/data/blocs/budget/periods/period_bloc.dart';
 import 'package:moneygo/data/blocs/settings/settings_bloc.dart';
-import 'package:moneygo/data/blocs/sources/source_bloc.dart';
-import 'package:moneygo/data/blocs/transactions/transaction_bloc.dart';
+import 'package:moneygo/data/blocs/budget/sources/source_bloc.dart';
+import 'package:moneygo/data/blocs/budget/transactions/transaction_bloc.dart';
 import 'package:moneygo/data/daos/budget/category_dao.dart';
 import 'package:moneygo/data/daos/budget/expense_dao.dart';
 import 'package:moneygo/data/daos/budget/income_dao.dart';
@@ -72,45 +72,52 @@ class _MyAppState extends State<MyApp> {
     final transactionDao = TransactionDao(widget.database);
     final transferDao = TransferDao(widget.database);
 
+    final backUpRepository = BackupRepository(widget.path, widget.database);
+    final settingsRepository = SettingsRepository();
+    final sourceRepository = SourceRepository(sourceDao);
+    final periodRepository = PeriodRepository(periodDao, categoryDao);
+    final categoryRepository =
+        CategoryRepository(categoryDao, periodRepository);
+    final transactionRepository = TransactionRepository(
+      transactionDao,
+      expenseDao,
+      sourceDao,
+      categoryDao,
+      incomeDao,
+      transferDao,
+      periodDao,
+    );
+
     return MultiProvider(
       providers: [
         Provider<AppDatabase>(create: (_) => widget.database),
         BlocProvider<BackupBloc>(
           create: (context) => BackupBloc(
-            backupRepository: BackupRepository(widget.path, widget.database),
+            backupRepository: backUpRepository,
           ),
         ),
         BlocProvider<SettingsBloc>(
           create: (context) => SettingsBloc(
-            settingsRepository: SettingsRepository(),
+            settingsRepository: settingsRepository,
           ),
         ),
         BlocProvider<CategoryBloc>(
-          create: (context) => CategoryBloc(
-              categoryRepository: CategoryRepository(categoryDao, periodDao)),
-        ),
+            create: (context) => CategoryBloc(
+                  categoryRepository: categoryRepository,
+                )),
         BlocProvider<SourceBloc>(
           create: (context) => SourceBloc(
-            sourceRepository: SourceRepository(sourceDao),
+            sourceRepository: sourceRepository,
           ),
         ),
         BlocProvider<PeriodBloc>(
-          create: (context) => PeriodBloc(
-              periodRepository: PeriodRepository(periodDao, categoryDao)),
-        ),
+            create: (context) => PeriodBloc(
+                  periodRepository: periodRepository,
+                )),
         BlocProvider<TransactionBloc>(
-          create: (context) => TransactionBloc(
-            transactionRepository: TransactionRepository(
-              transactionDao,
-              expenseDao,
-              sourceDao,
-              categoryDao,
-              incomeDao,
-              transferDao,
-              periodDao,
-            ),
-          ),
-        ),
+            create: (context) => TransactionBloc(
+                  transactionRepository: transactionRepository,
+                )),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
