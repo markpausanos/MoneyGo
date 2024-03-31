@@ -596,7 +596,7 @@ class TransactionRepository {
       if (value is ExpenseModel) {
         return value.source.id != sourceId;
       } else if (value is IncomeModel) {
-        return value.placedOnSource.id == sourceId;
+        return value.placedOnSource.id != sourceId;
       } else if (value is TransferModel) {
         return value.fromSource.id != sourceId && value.toSource.id != sourceId;
       }

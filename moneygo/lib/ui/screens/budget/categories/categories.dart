@@ -1,8 +1,5 @@
 import 'package:drift/drift.dart' hide Column;
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:moneygo/data/app_database.dart';
 import 'package:moneygo/data/blocs/budget/categories/category_bloc.dart';
@@ -30,6 +27,7 @@ class CategoriesScreen extends StatefulWidget {
 class _CategoriesScreenState extends State<CategoriesScreen> {
   final _nameController = TextEditingController();
   final _budgetController = TextEditingController();
+  final _targetBudgetController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   bool _autoValidate = false;
   bool _isMoved = false;
@@ -55,6 +53,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
   void dispose() {
     _nameController.dispose();
     _budgetController.dispose();
+    _targetBudgetController.dispose();
     super.dispose();
   }
 
@@ -71,6 +70,21 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                 context, 'Category has been updated');
           } else if (state is CategoriesDeleteSuccess && !_isMoved) {
             ScreenUtils.showSnackBarDelete(context, 'Category/ies deleted');
+          } else if (state is CategoriesError) {
+            ScreenUtils.showSnackBarDelete(context, state.message);
+          }
+        }),
+        BlocListener<SettingsBloc, SettingsState>(listener: (context, state) {
+          if (state is SettingsSaveSuccess && !_isMoved) {
+            ScreenUtils.showSnackBarAddOrUpdate(
+                context, 'Settings have been saved');
+          } else if (state is SettingsUpdateSuccess && !_isMoved) {
+            ScreenUtils.showSnackBarAddOrUpdate(
+                context, 'Settings have been updated');
+          } else if (state is SettingsDeleteSuccess && !_isMoved) {
+            ScreenUtils.showSnackBarDelete(context, 'Settings deleted');
+          } else if (state is SettingsError) {
+            ScreenUtils.showSnackBarDelete(context, state.message);
           }
         }),
       ],
@@ -85,6 +99,12 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
           title: const Text('Categories',
               style: CustomTextStyleScheme.appBarTitleCards),
           centerTitle: true,
+          actions: [
+            IconButtonLarge(
+                onPressed: _showSettingsDialog,
+                icon: Icons.settings,
+                color: Colors.white),
+          ],
         ),
         body: Padding(
           padding: const EdgeInsets.fromLTRB(25.0, 10.0, 25.0, 0),
@@ -330,24 +350,41 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                             if (state is SettingsLoaded) {
                               final settings = state.settings;
                               var currency = settings['currency'] ?? '\$';
-                              return Text(
-                                currency,
-                                style: CustomTextStyleScheme.cardViewAll,
-                              );
-                            }
-                            return const SizedBox.shrink();
-                          },
-                        ),
-                        BlocBuilder<CategoryBloc, CategoryState>(
-                          builder: (context, state) {
-                            if (state is CategoriesLoaded) {
-                              final double total = state.categories
-                                  .map((category) => category.maxBudget)
-                                  .fold(0, (a, b) => a + b);
-                              return Text(
-                                total.toStringAsFixed(2),
-                                style: CustomTextStyleScheme.cardViewAll,
-                              );
+                              var targetBudget = settings['targetBudget'];
+
+                              _targetBudgetController.text =
+                                  targetBudget ?? '0.0';
+
+                              return BlocBuilder<CategoryBloc, CategoryState>(
+                                  builder: (context, state) {
+                                if (state is CategoriesLoaded) {
+                                  double totalBudget = 0.0;
+
+                                  for (final category in state.categories) {
+                                    totalBudget += category.maxBudget;
+                                  }
+
+                                  return Row(
+                                    children: [
+                                      _displayTargetBudget(
+                                          currency, targetBudget, totalBudget),
+                                      const SizedBox(width: 5),
+                                      Text(
+                                        currency,
+                                        style:
+                                            CustomTextStyleScheme.cardViewAll,
+                                      ),
+                                      Text(
+                                        totalBudget.toStringAsFixed(2),
+                                        style:
+                                            CustomTextStyleScheme.cardViewAll,
+                                      ),
+                                    ],
+                                  );
+                                } else {
+                                  return const SizedBox.shrink();
+                                }
+                              });
                             }
                             return const SizedBox.shrink();
                           },
@@ -426,6 +463,27 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
               );
             }).toList(),
           );
+  }
+
+  Widget _displayTargetBudget(
+      String currency, String? targetBudget, double total) {
+    if (targetBudget == null) {
+      return const SizedBox.shrink();
+    }
+
+    double targetBudgetDouble = double.parse(targetBudget);
+    double remaining = targetBudgetDouble - total;
+
+    String adjective = remaining >= 0 ? 'left' : 'over';
+
+    return Text(
+      '($currency${remaining.toStringAsFixed(2)} $adjective)',
+      style: remaining >= 0
+          ? CustomTextStyleScheme.cardViewAll
+              .copyWith(color: CustomColorScheme.appGreen)
+          : CustomTextStyleScheme.cardViewAll
+              .copyWith(color: CustomColorScheme.appRed),
+    );
   }
 
   void _validateForm() {
@@ -568,6 +626,20 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
     _isMoved = true;
   }
 
+  Future<void> _saveSettings() async {
+    final String targetBudgetString = _targetBudgetController.text;
+    final double? targetBudget = double.tryParse(targetBudgetString);
+
+    if (targetBudget != null) {
+      BlocProvider.of<SettingsBloc>(context)
+          .add(SaveSetting('targetBudget', targetBudget.toString()));
+
+      _targetBudgetController.clear();
+    }
+
+    _isMoved = false;
+  }
+
   Future<void> _saveCategory() async {
     final String name = _nameController.text;
     final String budgetString = _budgetController.text;
@@ -622,6 +694,14 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
     _isMoved = false;
   }
 
+  Future<void> _showSettingsDialog() async {
+    final result = await _showSettingsResultDialog();
+
+    if (result == 'save') {
+      await _saveSettings();
+    }
+  }
+
   Future<void> _showAddCategoryDialog() async {
     final result = await _showCategoryDialog(title: 'Add Category');
 
@@ -652,6 +732,105 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
     } else {
       _showAddCategoryDialog();
     }
+  }
+
+  Future<String?> _showSettingsResultDialog() async {
+    return await showDialog<String>(
+      context: context,
+      barrierDismissible: true,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
+          titlePadding: const EdgeInsets.all(0.0),
+          actionsPadding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
+          buttonPadding: const EdgeInsets.all(0.0),
+          title: Container(
+              decoration: const BoxDecoration(
+                color: CustomColorScheme.appGreen,
+                borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(10.0),
+                    topRight: Radius.circular(10.0)),
+              ),
+              child: const Column(
+                children: [
+                  SizedBox(height: 15.0),
+                  Center(
+                    child: Text(
+                      'Settings',
+                      style: CustomTextStyleScheme.dialogTitle,
+                    ),
+                  ),
+                  SizedBox(height: 15.0),
+                ],
+              )),
+          content: SingleChildScrollView(
+            child: BlocBuilder<SettingsBloc, SettingsState>(
+              builder: (context, state) {
+                if (state is SettingsLoaded) {
+                  return Form(
+                    key: _formKey,
+                    autovalidateMode: _autoValidate
+                        ? AutovalidateMode.always
+                        : AutovalidateMode.disabled,
+                    child: ListBody(
+                      children: <Widget>[
+                        TextFormField(
+                          controller: _targetBudgetController,
+                          decoration: const InputDecoration(
+                              labelText: 'Target Budget',
+                              errorBorder: OutlineInputBorder(
+                                  borderSide: BorderSide(
+                                      color: CustomColorScheme.appRed))),
+                          keyboardType: const TextInputType.numberWithOptions(
+                              decimal: true),
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              _targetBudgetController.text = '0.0';
+                            } else if (double.tryParse(value) == null) {
+                              return 'Please enter a numerical budget';
+                            } else if (double.parse(value) < 0.0) {
+                              return 'Budget must be not be less than 0';
+                            }
+                            return null;
+                          },
+                          onFieldSubmitted: (value) {
+                            _validateForm();
+                          },
+                        ),
+                        const SizedBox(height: 20.0),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            DialogButton(
+                              onPressed: () =>
+                                  Navigator.of(context).pop('cancel'),
+                              text: 'Cancel',
+                              backgroundColor:
+                                  CustomColorScheme.dialogButtonCancel,
+                              textColor: Colors.black,
+                            ),
+                            DialogButton(
+                              onPressed: _validateForm,
+                              text: 'Save',
+                              backgroundColor:
+                                  CustomColorScheme.dialogButtonSave,
+                              textColor: CustomColorScheme.appGreen,
+                              borderColor: CustomColorScheme.appGreen,
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  );
+                }
+                return const SizedBox.shrink();
+              },
+            ),
+          ),
+        );
+      },
+    );
   }
 
   Future<String?> _showCategoryDialog(

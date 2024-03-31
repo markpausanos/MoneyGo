@@ -68,10 +68,8 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
       DeleteTransaction event, Emitter<TransactionState> emit) async {
     try {
       await transactionRepository.deleteTransaction(event.transaction);
-      final transactions = await transactionRepository.getAllTransactions();
       add(LoadTransactions());
       emit(TransactionsDeleteSuccess(0));
-      emit(TransactionsLoaded(transactions));
     } catch (e) {
       emit(TransactionsError(e.toString()));
     }
@@ -81,10 +79,8 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
       DeleteTransactionBySource event, Emitter<TransactionState> emit) async {
     try {
       await transactionRepository.deleteTransactionsBySourceId(event.sourceId);
-      final transactions = await transactionRepository.getAllTransactions();
       add(LoadTransactions());
       emit(TransactionsDeleteSuccess(event.sourceId));
-      emit(TransactionsLoaded(transactions));
     } catch (e) {
       emit(TransactionsError(e.toString()));
     }
