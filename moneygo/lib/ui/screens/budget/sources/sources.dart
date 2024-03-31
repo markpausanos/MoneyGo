@@ -1,5 +1,6 @@
 import 'package:drift/drift.dart' hide Column;
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:moneygo/data/app_database.dart';
 import 'package:moneygo/data/blocs/budget/sources/source_bloc.dart';
@@ -89,7 +90,7 @@ class _SourcesScreenState extends State<SourcesScreen> {
                 style: CustomTextStyleScheme.appBarTitleCards),
             centerTitle: true,
           ),
-          body: SingleChildScrollView(
+          body: Padding(
             padding: const EdgeInsets.fromLTRB(25.0, 10.0, 25.0, 0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -232,23 +233,34 @@ class _SourcesScreenState extends State<SourcesScreen> {
                     )
                   ],
                 ),
-                const SizedBox(height: 20),
-                BlocBuilder<SourceBloc, SourceState>(
-                  builder: (context, state) {
-                    if (state is SourcesLoading) {
-                      return const Center(child: Loader());
-                    } else if (state is SourcesLoaded) {
-                      _sources = state.sources;
-                      return _buildSourceList(_sources);
-                    } else if (state is SourcesError) {
-                      return DashedWidgetWithMessage(
-                          message: 'Error: ${state.message}');
-                    } else {
-                      return const DashedWidgetWithMessage(
-                          message: 'Error loading sources');
-                    }
-                  },
-                )
+                Expanded(
+                  child: Container(
+                    padding: const EdgeInsets.only(top: 5.0),
+                    decoration: const BoxDecoration(
+                      borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                      border: Border.fromBorderSide(BorderSide(
+                          color: CustomColorScheme.backgroundColor,
+                          width: 2.0)),
+                    ),
+                    child: BlocBuilder<SourceBloc, SourceState>(
+                      builder: (context, state) {
+                        if (state is SourcesLoading) {
+                          return const Center(child: Loader());
+                        } else if (state is SourcesLoaded) {
+                          _sources = state.sources;
+                          return _buildSourceList(_sources);
+                        } else if (state is SourcesError) {
+                          return DashedWidgetWithMessage(
+                              message: 'Error: ${state.message}');
+                        } else {
+                          return const DashedWidgetWithMessage(
+                              message: 'Error loading sources');
+                        }
+                      },
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 30),
               ],
             ),
           ),

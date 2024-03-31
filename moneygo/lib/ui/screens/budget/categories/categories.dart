@@ -16,6 +16,7 @@ import 'package:moneygo/ui/widgets/Loaders/loading_state.dart';
 import 'package:moneygo/ui/widgets/SizedBoxes/dashed_box_with_message.dart';
 import 'package:moneygo/ui/widgets/Themes/custom_color_scheme.dart';
 import 'package:moneygo/ui/widgets/Themes/custom_text_scheme.dart';
+import 'package:moneygo/utils/utils.dart';
 
 class CategoriesScreen extends StatefulWidget {
   const CategoriesScreen({super.key});
@@ -375,7 +376,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                                             CustomTextStyleScheme.cardViewAll,
                                       ),
                                       Text(
-                                        totalBudget.toStringAsFixed(2),
+                                        Utils.formatNumber(totalBudget),
                                         style:
                                             CustomTextStyleScheme.cardViewAll,
                                       ),
@@ -477,7 +478,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
     String adjective = remaining >= 0 ? 'left' : 'over';
 
     return Text(
-      '($currency${remaining.toStringAsFixed(2)} $adjective)',
+      '($currency${Utils.formatNumber(remaining)} $adjective)',
       style: remaining >= 0
           ? CustomTextStyleScheme.cardViewAll
               .copyWith(color: CustomColorScheme.appGreen)

@@ -1,4 +1,6 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:moneygo/data/blocs/budget/sources/source_bloc.dart';
 import 'package:moneygo/data/blocs/budget/sources/source_event.dart';
@@ -6,6 +8,7 @@ import 'package:moneygo/data/blocs/budget/sources/source_state.dart';
 import 'package:moneygo/ui/widgets/Bars/budget/source_bar.dart';
 import 'package:moneygo/ui/widgets/Cards/base_card.dart';
 import 'package:moneygo/ui/widgets/SizedBoxes/dashed_box_with_message.dart';
+import 'package:moneygo/ui/widgets/Themes/custom_color_scheme.dart';
 import 'package:moneygo/ui/widgets/Themes/custom_text_scheme.dart';
 
 class SourcesCard extends StatefulWidget {
@@ -82,24 +85,39 @@ class _SourcesCardState extends State<SourcesCard> {
           ],
         ),
         const SizedBox(height: 20),
-        BlocBuilder<SourceBloc, SourceState>(builder: (context, state) {
-          if (state is SourcesLoaded) {
-            return state.sources.isEmpty
-                ? const DashedWidgetWithMessage(message: 'No sources found')
-                : Column(
-                    children: state.sources.map((source) {
-                      return Column(
-                        children: [
-                          SourceBar(
-                            source: source,
-                          ),
-                        ],
-                      );
-                    }).toList(),
-                  );
-          }
-          return const CircularProgressIndicator();
-        }),
+        ConstrainedBox(
+          constraints: const BoxConstraints(maxHeight: 350),
+          child: Container(
+            padding: const EdgeInsets.all(10),
+            decoration: const BoxDecoration(
+              borderRadius: BorderRadius.all(Radius.circular(10.0)),
+              border: Border.fromBorderSide(BorderSide(
+                  color: CustomColorScheme.backgroundColor, width: 2.0)),
+            ),
+            child: SingleChildScrollView(
+              child: BlocBuilder<SourceBloc, SourceState>(
+                  builder: (context, state) {
+                if (state is SourcesLoaded) {
+                  return state.sources.isEmpty
+                      ? const DashedWidgetWithMessage(
+                          message: 'No sources found')
+                      : Column(
+                          children: state.sources.map((source) {
+                            return Column(
+                              children: [
+                                SourceBar(
+                                  source: source,
+                                ),
+                              ],
+                            );
+                          }).toList(),
+                        );
+                }
+                return const CircularProgressIndicator();
+              }),
+            ),
+          ),
+        ),
       ],
     ));
   }
