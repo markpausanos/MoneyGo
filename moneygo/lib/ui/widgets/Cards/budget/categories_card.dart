@@ -94,7 +94,6 @@ class _CategoriesCardState extends State<CategoriesCard> {
           BlocBuilder<CategoryBloc, CategoryState>(
             builder: (context, state) {
               if (state is CategoriesLoaded) {
-                print('Categories loaded: ${state.categories}');
                 _categoriesWithUnset = state.categories.toList();
                 _categoriesWithoutUnset = state.categories
                     .where((element) => element.maxBudget != 0.0)

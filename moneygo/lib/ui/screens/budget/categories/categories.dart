@@ -1,10 +1,16 @@
 import 'package:drift/drift.dart' hide Column;
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:moneygo/data/app_database.dart';
 import 'package:moneygo/data/blocs/budget/categories/category_bloc.dart';
 import 'package:moneygo/data/blocs/budget/categories/category_event.dart';
 import 'package:moneygo/data/blocs/budget/categories/category_state.dart';
+import 'package:moneygo/data/blocs/settings/settings_bloc.dart';
+import 'package:moneygo/data/blocs/settings/settings_event.dart';
+import 'package:moneygo/data/blocs/settings/settings_state.dart';
 import 'package:moneygo/ui/utils/screen_utils.dart';
 import 'package:moneygo/ui/widgets/Buttons/dialog_button.dart';
 import 'package:moneygo/ui/widgets/CheckBoxWithItem/budget/category_checkbox.dart';
@@ -28,8 +34,10 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
   bool _autoValidate = false;
   bool _isMoved = false;
 
-  List<Category> _categories = [];
+  final _categoriesNames = ["Custom", "Savings", "Debts"];
+  int _currentIndex = 0;
   final Map<int, bool> _checkedStates = {};
+  List<Category> _categories = [];
   bool _containsChecked = false;
 
   @override
@@ -40,6 +48,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
       _checkedStates[category.id] = false;
     }
     BlocProvider.of<CategoryBloc>(context).add(LoadCategories());
+    BlocProvider.of<SettingsBloc>(context).add(LoadSettings());
   }
 
   @override
@@ -78,164 +87,203 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
           centerTitle: true,
         ),
         body: Padding(
-            padding: const EdgeInsets.fromLTRB(25.0, 10.0, 25.0, 0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          padding: const EdgeInsets.fromLTRB(25.0, 10.0, 25.0, 0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Row(
-                      children: [
-                        AnimatedSwitcher(
-                          duration: const Duration(milliseconds: 200),
-                          transitionBuilder:
-                              (Widget child, Animation<double> animation) {
-                            return FadeTransition(
-                              opacity: animation,
-                              child: child,
-                            );
-                          },
-                          child: IconButton(
-                              key: Key(_containsChecked.toString()),
-                              onPressed: () {
-                                _categories.isEmpty
-                                    ? null
-                                    : _containsChecked
-                                        ? _unselectAllCategories()
-                                        : _selectAllCategories();
-                              },
-                              icon: _containsChecked
-                                  ? const Icon(
-                                      Icons.cancel_rounded,
-                                      color: CustomColorScheme.appRed,
-                                    )
-                                  : const Icon(
-                                      Icons.select_all,
-                                      color: CustomColorScheme.appBlue,
-                                    )),
-                        ),
-                      ],
-                    ),
-                    AnimatedSwitcher(
-                      duration: const Duration(milliseconds: 200),
-                      transitionBuilder:
-                          (Widget child, Animation<double> animation) {
-                        return FadeTransition(opacity: animation, child: child);
+                    // IconButton left
+                    IconButton(
+                      onPressed: () {
+                        setState(() {
+                          _currentIndex = _currentIndex == 0
+                              ? _categoriesNames.length - 1
+                              : _currentIndex - 1;
+                        });
                       },
-                      child: () {
-                        int checkedCount = _checkedStates.values
-                            .where((element) => element)
-                            .length;
-
-                        if (checkedCount == 2) {
-                          return IconButton(
-                            key: const ValueKey('swap'),
-                            onPressed: _swapSelectedCategories,
-                            icon: const Icon(Icons.swap_vert_rounded,
-                                color: CustomColorScheme.appBlue),
-                          );
-                        } else if (checkedCount == 1) {
-                          return Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              // Move to topmost
-                              IconButton(
-                                key: const ValueKey('top'),
-                                onPressed: () {
-                                  final Category category =
-                                      _categories.firstWhere((category) =>
-                                          _checkedStates[category.id] ?? false);
-                                  _moveCategoryToTopMost(category);
-                                },
-                                icon: const Icon(
-                                    Icons.vertical_align_top_rounded,
-                                    color: CustomColorScheme.appGreen),
-                              ),
-
-                              IconButton(
-                                key: const ValueKey('singleUp'),
-                                onPressed: () {
-                                  final Category category =
-                                      _categories.firstWhere((category) =>
-                                          _checkedStates[category.id] ?? false);
-                                  _moveCategoryUp(category);
-                                },
-                                icon: const Icon(Icons.move_up,
-                                    color: CustomColorScheme.appGreen),
-                              ),
-
-                              IconButton(
-                                key: const ValueKey('singleDown'),
-                                onPressed: () {
-                                  final Category category =
-                                      _categories.firstWhere((category) =>
-                                          _checkedStates[category.id] ?? false);
-                                  _moveCategoryDown(category);
-                                },
-                                icon: const Icon(Icons.move_down,
-                                    color: CustomColorScheme.appRed),
-                              ),
-
-                              // Move to bottommost
-                              IconButton(
-                                key: const ValueKey('bottom'),
-                                onPressed: () {
-                                  final Category category =
-                                      _categories.firstWhere((category) =>
-                                          _checkedStates[category.id] ?? false);
-                                  _moveCategoryToBottomMost(category);
-                                },
-                                icon: const Icon(
-                                    Icons.vertical_align_bottom_rounded,
-                                    color: CustomColorScheme.appRed),
-                              ),
-                            ],
-                          );
-                        } else {
-                          return Container(
-                            key: const ValueKey('custom'),
-                            decoration: const BoxDecoration(
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(10.0)),
-                              color: CustomColorScheme.headerWithText,
-                            ),
-                            padding: const EdgeInsets.fromLTRB(30, 5, 30, 5),
-                            child: const Text("Custom",
-                                style: TextStyle(color: Colors.white)),
-                          );
-                        }
-                      }(),
+                      icon: const Icon(Icons.arrow_circle_left,
+                          color: CustomColorScheme.appBlue),
                     ),
-                    AnimatedSwitcher(
-                      duration: const Duration(milliseconds: 200),
-                      transitionBuilder:
-                          (Widget child, Animation<double> animation) {
-                        return FadeTransition(
-                          opacity: animation,
-                          child: child,
-                        );
-                      },
-                      child: IconButton(
-                        key: Key(_containsChecked.toString()),
-                        onPressed: _containsChecked
-                            ? _handleDeleteConfirmation
-                            : _showAddCategoryDialog,
-                        icon: _containsChecked
-                            ? const Icon(
-                                Icons.delete_rounded,
-                                color: CustomColorScheme.appRed,
-                              )
-                            : const Icon(
-                                Icons.add_circle_outline_rounded,
-                                color: CustomColorScheme.appGreen,
-                              ),
+                    Container(
+                      width: 130,
+                      decoration: const BoxDecoration(
+                        borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                        color: CustomColorScheme.headerWithText,
                       ),
+                      padding: const EdgeInsets.fromLTRB(30, 5, 30, 5),
+                      child: Center(
+                        child: Text(_categoriesNames[_currentIndex],
+                            style: const TextStyle(color: Colors.white)),
+                      ),
+                    ),
+                    IconButton(
+                      onPressed: () {
+                        setState(() {
+                          _currentIndex =
+                              _currentIndex == _categoriesNames.length - 1
+                                  ? 0
+                                  : _currentIndex + 1;
+                        });
+                      },
+                      icon: const Icon(Icons.arrow_circle_right,
+                          color: CustomColorScheme.appBlue),
                     ),
                   ],
                 ),
-                const SizedBox(height: 20),
-                Expanded(
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Row(
+                    children: [
+                      AnimatedSwitcher(
+                        duration: const Duration(milliseconds: 200),
+                        transitionBuilder:
+                            (Widget child, Animation<double> animation) {
+                          return FadeTransition(
+                            opacity: animation,
+                            child: child,
+                          );
+                        },
+                        child: IconButton(
+                            key: Key(_containsChecked.toString()),
+                            onPressed: () {
+                              _categories.isEmpty
+                                  ? null
+                                  : _containsChecked
+                                      ? _unselectAllCategories()
+                                      : _selectAllCategories();
+                            },
+                            icon: _containsChecked
+                                ? const Icon(
+                                    Icons.cancel_rounded,
+                                    color: CustomColorScheme.appRed,
+                                  )
+                                : const Icon(
+                                    Icons.select_all,
+                                    color: CustomColorScheme.appBlue,
+                                  )),
+                      ),
+                    ],
+                  ),
+                  AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 200),
+                    transitionBuilder:
+                        (Widget child, Animation<double> animation) {
+                      return FadeTransition(opacity: animation, child: child);
+                    },
+                    child: () {
+                      int checkedCount = _checkedStates.values
+                          .where((element) => element)
+                          .length;
+
+                      if (checkedCount == 2) {
+                        return IconButton(
+                          key: const ValueKey('swap'),
+                          onPressed: _swapSelectedCategories,
+                          icon: const Icon(Icons.swap_vert_rounded,
+                              color: CustomColorScheme.appBlue),
+                        );
+                      } else if (checkedCount == 1) {
+                        return Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            // Move to topmost
+                            IconButton(
+                              key: const ValueKey('top'),
+                              onPressed: () {
+                                final Category category =
+                                    _categories.firstWhere((category) =>
+                                        _checkedStates[category.id] ?? false);
+                                _moveCategoryToTopMost(category);
+                              },
+                              icon: const Icon(Icons.vertical_align_top_rounded,
+                                  color: CustomColorScheme.appGreen),
+                            ),
+
+                            IconButton(
+                              key: const ValueKey('singleUp'),
+                              onPressed: () {
+                                final Category category =
+                                    _categories.firstWhere((category) =>
+                                        _checkedStates[category.id] ?? false);
+                                _moveCategoryUp(category);
+                              },
+                              icon: const Icon(Icons.move_up,
+                                  color: CustomColorScheme.appGreen),
+                            ),
+
+                            IconButton(
+                              key: const ValueKey('singleDown'),
+                              onPressed: () {
+                                final Category category =
+                                    _categories.firstWhere((category) =>
+                                        _checkedStates[category.id] ?? false);
+                                _moveCategoryDown(category);
+                              },
+                              icon: const Icon(Icons.move_down,
+                                  color: CustomColorScheme.appRed),
+                            ),
+
+                            // Move to bottommost
+                            IconButton(
+                              key: const ValueKey('bottom'),
+                              onPressed: () {
+                                final Category category =
+                                    _categories.firstWhere((category) =>
+                                        _checkedStates[category.id] ?? false);
+                                _moveCategoryToBottomMost(category);
+                              },
+                              icon: const Icon(
+                                  Icons.vertical_align_bottom_rounded,
+                                  color: CustomColorScheme.appRed),
+                            ),
+                          ],
+                        );
+                      } else {
+                        return const SizedBox();
+                      }
+                    }(),
+                  ),
+                  AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 200),
+                    transitionBuilder:
+                        (Widget child, Animation<double> animation) {
+                      return FadeTransition(
+                        opacity: animation,
+                        child: child,
+                      );
+                    },
+                    child: IconButton(
+                      key: Key(_containsChecked.toString()),
+                      onPressed: _containsChecked
+                          ? _handleDeleteConfirmation
+                          : _showAddCategoryDialog,
+                      icon: _containsChecked
+                          ? const Icon(
+                              Icons.delete_rounded,
+                              color: CustomColorScheme.appRed,
+                            )
+                          : const Icon(
+                              Icons.add_circle_outline_rounded,
+                              color: CustomColorScheme.appGreen,
+                            ),
+                    ),
+                  ),
+                ],
+              ),
+
+              Expanded(
+                child: Container(
+                  padding: const EdgeInsets.only(top: 5.0),
+                  decoration: const BoxDecoration(
+                    borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                    border: Border.fromBorderSide(BorderSide(
+                        color: CustomColorScheme.backgroundColor, width: 2.0)),
+                  ),
                   child: SingleChildScrollView(
                     child: BlocBuilder<CategoryBloc, CategoryState>(
                       builder: (context, state) {
@@ -255,38 +303,93 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                     ),
                   ),
                 ),
-                const SizedBox(height: 20),
-                // Center(
-                //   child: Container(
-                //     decoration: const BoxDecoration(
-                //         borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                //         color: CustomColorScheme.headerWithText),
-                //     padding: const EdgeInsets.fromLTRB(30, 5, 30, 5),
-                //     child: const Text(
-                //       "Savings",
-                //       style: TextStyle(color: Colors.white),
-                //     ),
-                //   ),
-                // ),
-                // const SizedBox(height: 20),
-                // const DashedWidgetWithMessage(message: "No savings found"),
-                // const SizedBox(height: 20),
-                // Center(
-                //   child: Container(
-                //     decoration: const BoxDecoration(
-                //         borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                //         color: CustomColorScheme.headerWithText),
-                //     padding: const EdgeInsets.fromLTRB(30, 5, 30, 5),
-                //     child: const Text(
-                //       "Debts",
-                //       style: TextStyle(color: Colors.white),
-                //     ),
-                //   ),
-                // ),
+              ),
 
-                // const DashedWidgetWithMessage(message: "No debts found"),
-              ],
-            )),
+              const SizedBox(height: 10),
+
+              Container(
+                padding: const EdgeInsets.fromLTRB(10, 5, 10, 5),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(
+                    color: CustomColorScheme.backgroundColor,
+                    width: 2.0,
+                  ),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text(
+                      'Total:',
+                      style: CustomTextStyleScheme.cardViewAll,
+                    ),
+                    Row(
+                      children: [
+                        BlocBuilder<SettingsBloc, SettingsState>(
+                          builder: (context, state) {
+                            if (state is SettingsLoaded) {
+                              final settings = state.settings;
+                              var currency = settings['currency'] ?? '\$';
+                              return Text(
+                                currency,
+                                style: CustomTextStyleScheme.cardViewAll,
+                              );
+                            }
+                            return const SizedBox.shrink();
+                          },
+                        ),
+                        BlocBuilder<CategoryBloc, CategoryState>(
+                          builder: (context, state) {
+                            if (state is CategoriesLoaded) {
+                              final double total = state.categories
+                                  .map((category) => category.maxBudget)
+                                  .fold(0, (a, b) => a + b);
+                              return Text(
+                                total.toStringAsFixed(2),
+                                style: CustomTextStyleScheme.cardViewAll,
+                              );
+                            }
+                            return const SizedBox.shrink();
+                          },
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 20),
+              // Center(
+              //   child: Container(
+              //     decoration: const BoxDecoration(
+              //         borderRadius: BorderRadius.all(Radius.circular(10.0)),
+              //         color: CustomColorScheme.headerWithText),
+              //     padding: const EdgeInsets.fromLTRB(30, 5, 30, 5),
+              //     child: const Text(
+              //       "Savings",
+              //       style: TextStyle(color: Colors.white),
+              //     ),
+              //   ),
+              // ),
+              // const SizedBox(height: 20),
+              // const DashedWidgetWithMessage(message: "No savings found"),
+              // const SizedBox(height: 20),
+              // Center(
+              //   child: Container(
+              //     decoration: const BoxDecoration(
+              //         borderRadius: BorderRadius.all(Radius.circular(10.0)),
+              //         color: CustomColorScheme.headerWithText),
+              //     padding: const EdgeInsets.fromLTRB(30, 5, 30, 5),
+              //     child: const Text(
+              //       "Debts",
+              //       style: TextStyle(color: Colors.white),
+              //     ),
+              //   ),
+              // ),
+
+              // const DashedWidgetWithMessage(message: "No debts found"),
+            ],
+          ),
+        ),
       ),
     );
   }
