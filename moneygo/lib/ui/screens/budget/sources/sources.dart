@@ -148,7 +148,6 @@ class _SourcesScreenState extends State<SourcesScreen> {
                           return Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              // Move to topmost
                               IconButton(
                                 key: const ValueKey('top'),
                                 onPressed: () {
@@ -174,6 +173,7 @@ class _SourcesScreenState extends State<SourcesScreen> {
                                     color: CustomColorScheme.appGreen),
                               ),
 
+                              const SizedBox(width: 20),
                               IconButton(
                                 key: const ValueKey('singleDown'),
                                 onPressed: () {
@@ -233,32 +233,33 @@ class _SourcesScreenState extends State<SourcesScreen> {
                     )
                   ],
                 ),
-                Expanded(
-                  child: Container(
-                    padding: const EdgeInsets.only(top: 5.0),
-                    decoration: const BoxDecoration(
-                      borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                      border: Border.fromBorderSide(BorderSide(
-                          color: CustomColorScheme.backgroundColor,
-                          width: 2.0)),
-                    ),
-                    child: BlocBuilder<SourceBloc, SourceState>(
-                      builder: (context, state) {
-                        if (state is SourcesLoading) {
-                          return const Center(child: Loader());
-                        } else if (state is SourcesLoaded) {
-                          _sources = state.sources;
-                          return _buildSourceList(_sources);
-                        } else if (state is SourcesError) {
-                          return DashedWidgetWithMessage(
-                              message: 'Error: ${state.message}');
-                        } else {
-                          return const DashedWidgetWithMessage(
-                              message: 'Error loading sources');
-                        }
-                      },
-                    ),
-                  ),
+                BlocBuilder<SourceBloc, SourceState>(
+                  builder: (context, state) {
+                    if (state is SourcesLoading) {
+                      return const Center(child: Loader());
+                    } else if (state is SourcesLoaded) {
+                      _sources = state.sources;
+                      return Expanded(
+                        child: Container(
+                            padding: const EdgeInsets.only(top: 5.0),
+                            decoration: const BoxDecoration(
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(10.0)),
+                              border: Border.fromBorderSide(BorderSide(
+                                  color: CustomColorScheme.backgroundColor,
+                                  width: 2.0)),
+                            ),
+                            child: SingleChildScrollView(
+                                child: _buildSourceList(_sources))),
+                      );
+                    } else if (state is SourcesError) {
+                      return DashedWidgetWithMessage(
+                          message: 'Error: ${state.message}');
+                    } else {
+                      return const DashedWidgetWithMessage(
+                          message: 'Error loading sources');
+                    }
+                  },
                 ),
                 const SizedBox(height: 30),
               ],
@@ -292,7 +293,6 @@ class _SourcesScreenState extends State<SourcesScreen> {
                     _containsChecked = _checkedStates.containsValue(true);
                   }),
                 ),
-                const SizedBox(height: 10),
               ],
             );
           }).toList());

@@ -92,41 +92,36 @@ class _CategoriesCardState extends State<CategoriesCard> {
             ],
           ),
           const SizedBox(height: 20),
-          ConstrainedBox(
-            constraints: const BoxConstraints(maxHeight: 350),
-            child: Container(
-              padding: const EdgeInsets.all(10),
-              decoration: const BoxDecoration(
-                borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                border: Border.fromBorderSide(BorderSide(
-                    color: CustomColorScheme.backgroundColor, width: 2.0)),
-              ),
-              child: SingleChildScrollView(
-                child: BlocBuilder<CategoryBloc, CategoryState>(
-                  builder: (context, state) {
-                    if (state is CategoriesLoaded) {
-                      _categories = state.categories.toList();
+          BlocBuilder<CategoryBloc, CategoryState>(
+            builder: (context, state) {
+              if (state is CategoriesLoaded) {
+                _categories = state.categories.toList();
 
-                      if (state.categories.isEmpty) {
-                        return const DashedWidgetWithMessage(
-                            message: 'No categories found');
-                      }
-                      return Column(
-                        children: [
-                          _buildCategoriesList(),
-                        ],
-                      );
-                    } else if (state is CategoriesError) {
-                      return DashedWidgetWithMessage(message: state.message);
-                    } else {
-                      return const Center(
-                        child: CircularProgressIndicator(),
-                      );
-                    }
-                  },
-                ),
-              ),
-            ),
+                if (state.categories.isEmpty) {
+                  return const DashedWidgetWithMessage(
+                      message: 'No categories found');
+                }
+                return ConstrainedBox(
+                  constraints: const BoxConstraints(maxHeight: 350),
+                  child: Container(
+                      padding: const EdgeInsets.all(2),
+                      decoration: const BoxDecoration(
+                          borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                          border: Border.fromBorderSide(BorderSide(
+                              color: CustomColorScheme.backgroundColor,
+                              width: 2.0)),
+                          color: Colors.transparent),
+                      child:
+                          SingleChildScrollView(child: _buildCategoriesList())),
+                );
+              } else if (state is CategoriesError) {
+                return DashedWidgetWithMessage(message: state.message);
+              } else {
+                return const Center(
+                  child: CircularProgressIndicator(),
+                );
+              }
+            },
           )
         ],
       ),
@@ -145,8 +140,14 @@ class _CategoriesCardState extends State<CategoriesCard> {
                 children: [
                   CategoryBar(
                     category: category,
+                    isFirst: _categories.first == category,
+                    isLast: _categories.last == category,
                   ),
-                  const SizedBox(height: 10),
+                  if (_categories.last != category)
+                    const Divider(
+                      height: 1,
+                      color: CustomColorScheme.backgroundColor,
+                    ),
                 ],
               );
             }).toList(),

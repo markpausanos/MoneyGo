@@ -158,37 +158,33 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Row(
-                    children: [
-                      AnimatedSwitcher(
-                        duration: const Duration(milliseconds: 200),
-                        transitionBuilder:
-                            (Widget child, Animation<double> animation) {
-                          return FadeTransition(
-                            opacity: animation,
-                            child: child,
-                          );
+                  AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 200),
+                    transitionBuilder:
+                        (Widget child, Animation<double> animation) {
+                      return FadeTransition(
+                        opacity: animation,
+                        child: child,
+                      );
+                    },
+                    child: IconButton(
+                        key: Key(_containsChecked.toString()),
+                        onPressed: () {
+                          _categories.isEmpty
+                              ? null
+                              : _containsChecked
+                                  ? _unselectAllCategories()
+                                  : _selectAllCategories();
                         },
-                        child: IconButton(
-                            key: Key(_containsChecked.toString()),
-                            onPressed: () {
-                              _categories.isEmpty
-                                  ? null
-                                  : _containsChecked
-                                      ? _unselectAllCategories()
-                                      : _selectAllCategories();
-                            },
-                            icon: _containsChecked
-                                ? const Icon(
-                                    Icons.cancel_rounded,
-                                    color: CustomColorScheme.appRed,
-                                  )
-                                : const Icon(
-                                    Icons.select_all,
-                                    color: CustomColorScheme.appBlue,
-                                  )),
-                      ),
-                    ],
+                        icon: _containsChecked
+                            ? const Icon(
+                                Icons.cancel_rounded,
+                                color: CustomColorScheme.appRed,
+                              )
+                            : const Icon(
+                                Icons.select_all,
+                                color: CustomColorScheme.appBlue,
+                              )),
                   ),
                   AnimatedSwitcher(
                     duration: const Duration(milliseconds: 200),
@@ -236,7 +232,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                               icon: const Icon(Icons.move_up,
                                   color: CustomColorScheme.appGreen),
                             ),
-
+                            const SizedBox(width: 20),
                             IconButton(
                               key: const ValueKey('singleDown'),
                               onPressed: () {
@@ -297,33 +293,32 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                 ],
               ),
 
-              Expanded(
-                child: Container(
-                  padding: const EdgeInsets.only(top: 5.0),
-                  decoration: const BoxDecoration(
-                    borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                    border: Border.fromBorderSide(BorderSide(
-                        color: CustomColorScheme.backgroundColor, width: 2.0)),
-                  ),
-                  child: SingleChildScrollView(
-                    child: BlocBuilder<CategoryBloc, CategoryState>(
-                      builder: (context, state) {
-                        if (state is CategoriesLoading) {
-                          return const Loader();
-                        } else if (state is CategoriesLoaded) {
-                          _categories = state.categories;
-                          return _buildCategoryList(state.categories);
-                        } else if (state is CategoriesError) {
-                          return DashedWidgetWithMessage(
-                              message: 'Error: ${state.message}');
-                        } else {
-                          return const DashedWidgetWithMessage(
-                              message: 'Error loading categories');
-                        }
-                      },
-                    ),
-                  ),
-                ),
+              BlocBuilder<CategoryBloc, CategoryState>(
+                builder: (context, state) {
+                  if (state is CategoriesLoading) {
+                    return const Loader();
+                  } else if (state is CategoriesLoaded) {
+                    _categories = state.categories;
+                    return Expanded(
+                      child: Container(
+                          decoration: const BoxDecoration(
+                            borderRadius:
+                                BorderRadius.all(Radius.circular(10.0)),
+                            border: Border.fromBorderSide(BorderSide(
+                                color: CustomColorScheme.backgroundColor,
+                                width: 2.0)),
+                          ),
+                          child: SingleChildScrollView(
+                              child: _buildCategoryList(state.categories))),
+                    );
+                  } else if (state is CategoriesError) {
+                    return DashedWidgetWithMessage(
+                        message: 'Error: ${state.message}');
+                  } else {
+                    return const DashedWidgetWithMessage(
+                        message: 'Error loading categories');
+                  }
+                },
               ),
 
               const SizedBox(height: 10),
@@ -459,7 +454,6 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                       });
                     },
                   ),
-                  const SizedBox(height: 10),
                 ],
               );
             }).toList(),
@@ -779,7 +773,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                         TextFormField(
                           controller: _targetBudgetController,
                           decoration: const InputDecoration(
-                              labelText: 'Target Budget',
+                              labelText: 'Max Budget',
                               errorBorder: OutlineInputBorder(
                                   borderSide: BorderSide(
                                       color: CustomColorScheme.appRed))),

@@ -71,85 +71,73 @@ class _TransactionBarState extends State<TransactionBar> {
               });
             }
           },
-          borderRadius: BorderRadius.circular(10),
           splashColor: CustomColorScheme.backgroundColor,
-          child: Padding(
-            padding: const EdgeInsets.all(6.0),
-            child: Stack(
-              children: <Widget>[
-                SizedBox(
-                  height: 63,
-                  child: Padding(
-                    padding: const EdgeInsets.all(10.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              widget.transaction.title.length > 15
-                                  ? '${widget.transaction.title.substring(0, 15)}...'
-                                  : widget.transaction.title,
-                              style: CustomTextStyleScheme.barLabel,
-                            ),
-                            // Date in MMM dd, yyyy format
-                            Text(
-                              Utils.getFormattedDateFull(
-                                  widget.transaction.date),
-                              style: CustomTextStyleScheme.progressBarText,
-                            ),
-                          ],
-                        ),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: [
-                            Row(
-                              children: [
-                                Text(
-                                  _getSign(widget.transaction) ?? '',
-                                  style: CustomTextStyleScheme.barLabel
-                                      .copyWith(
-                                          color: _getColor(widget.transaction,
-                                              widget.transactionType)),
-                                ),
-                                Text(
-                                  _currency,
-                                  style: CustomTextStyleScheme.barLabel
-                                      .copyWith(
-                                          color: _getColor(widget.transaction,
-                                              widget.transactionType),
-                                          fontFamily: CustomTextStyleScheme
-                                              .barBalancePeso.fontFamily),
-                                ),
-                                Text(
-                                    Utils.formatNumber(
-                                        widget.transaction.amount),
-                                    style:
-                                        CustomTextStyleScheme.barLabel.copyWith(
-                                      color: _getColor(widget.transaction,
-                                          widget.transactionType),
-                                    )),
-                              ],
-                            ),
-                            Text(
-                              _getDescription(widget.transaction,
-                                              widget.transactionType)
-                                          .length >
-                                      15
-                                  ? '${_getDescription(widget.transaction, widget.transactionType).substring(0, 15)}...'
-                                  : _getDescription(widget.transaction,
-                                      widget.transactionType),
-                              style: CustomTextStyleScheme.progressBarText,
-                            ),
-                          ],
-                        )
-                      ],
-                    ),
+          child: SizedBox(
+            height: 63,
+            child: Padding(
+              padding: const EdgeInsets.all(10.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        widget.transaction.title.length > 15
+                            ? '${widget.transaction.title.substring(0, 15)}...'
+                            : widget.transaction.title,
+                        style: CustomTextStyleScheme.barLabel,
+                      ),
+                      // Date in MMM dd, yyyy format
+                      Text(
+                        Utils.getFormattedDateFull(widget.transaction.date),
+                        style: CustomTextStyleScheme.progressBarText,
+                      ),
+                    ],
                   ),
-                ),
-              ],
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Row(
+                        children: [
+                          Text(
+                            _getSign(widget.transaction) ?? '',
+                            style: CustomTextStyleScheme.barLabel.copyWith(
+                                color: _getColor(widget.transaction,
+                                    widget.transactionType)),
+                          ),
+                          Text(
+                            _currency,
+                            style: CustomTextStyleScheme.barLabel.copyWith(
+                                color: _getColor(
+                                    widget.transaction, widget.transactionType),
+                                fontFamily: CustomTextStyleScheme
+                                    .barBalancePeso.fontFamily),
+                          ),
+                          Text(
+                              Utils.formatNumber(
+                                  widget.transaction.amount.abs()),
+                              style: CustomTextStyleScheme.barLabel.copyWith(
+                                color: _getColor(
+                                    widget.transaction, widget.transactionType),
+                              )),
+                        ],
+                      ),
+                      Text(
+                        _getDescription(widget.transaction,
+                                        widget.transactionType)
+                                    .length >
+                                15
+                            ? '${_getDescription(widget.transaction, widget.transactionType).substring(0, 15)}...'
+                            : _getDescription(
+                                widget.transaction, widget.transactionType),
+                        style: CustomTextStyleScheme.progressBarText,
+                      ),
+                    ],
+                  )
+                ],
+              ),
             ),
           ),
         );
@@ -279,7 +267,7 @@ class _TransactionBarState extends State<TransactionBar> {
                     const Text('Amount:',
                         style: CustomTextStyleScheme.dialogBodySmall),
                     Text(
-                        '${_getSign(widget.transaction) ?? ''} $_currency${Utils.formatNumber(widget.transaction.amount)}',
+                        '${_getSign(widget.transaction) ?? ''} $_currency${Utils.formatNumber(widget.transaction.amount.abs())}',
                         style: CustomTextStyleScheme.dialogBodySmall),
                   ],
                 ),

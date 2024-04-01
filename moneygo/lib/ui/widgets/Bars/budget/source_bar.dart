@@ -41,48 +41,40 @@ class _SourceBarState extends State<SourceBar> {
             Navigator.pushNamed(context, '/sources/view',
                 arguments: widget.source);
           },
-          borderRadius: BorderRadius.circular(10),
-          child: Stack(
-            children: <Widget>[
-              Container(
-                height: 63,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(10.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Text(
-                        widget.source.name,
-                        style: CustomTextStyleScheme.barLabel,
-                      ),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          Row(
-                            children: [
-                              Text(
-                                _currency,
-                                style: CustomTextStyleScheme.barBalancePeso,
-                              ),
-                              Text(
-                                Utils.formatNumber(widget.source.balance),
-                                style: CustomTextStyleScheme.barBalance,
-                              ),
-                            ],
-                          ),
-                          const Text('remaining balance',
-                              style: CustomTextStyleScheme.progressBarText)
-                        ],
-                      )
-                    ],
+          child: SizedBox(
+            height: 63,
+            child: Padding(
+              padding: const EdgeInsets.all(10.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Text(
+                    widget.source.name,
+                    style: CustomTextStyleScheme.barLabel,
                   ),
-                ),
-              )
-            ],
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Row(
+                        children: [
+                          Text(
+                            _currency,
+                            style: CustomTextStyleScheme.barBalancePeso,
+                          ),
+                          Text(
+                            Utils.formatNumber(widget.source.balance),
+                            style: CustomTextStyleScheme.barBalance,
+                          ),
+                        ],
+                      ),
+                      const Text('remaining balance',
+                          style: CustomTextStyleScheme.progressBarText)
+                    ],
+                  )
+                ],
+              ),
+            ),
           ));
     });
   }

@@ -69,9 +69,9 @@ class Utils {
 
   static String formatNumber(double number) {
     final formatter = NumberFormat('#,##0.00');
-    if (number >= 1000000000) {
+    if (number.abs() >= 1000000000) {
       return '${formatter.format(number / 1000000000)}B';
-    } else if (number >= 1000000) {
+    } else if (number.abs() >= 1000000) {
       return '${formatter.format(number / 1000000)}M';
     }
 

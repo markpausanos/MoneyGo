@@ -1,6 +1,4 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:moneygo/data/blocs/budget/sources/source_bloc.dart';
 import 'package:moneygo/data/blocs/budget/sources/source_event.dart';
@@ -85,39 +83,42 @@ class _SourcesCardState extends State<SourcesCard> {
           ],
         ),
         const SizedBox(height: 20),
-        ConstrainedBox(
-          constraints: const BoxConstraints(maxHeight: 350),
-          child: Container(
-            padding: const EdgeInsets.all(10),
-            decoration: const BoxDecoration(
-              borderRadius: BorderRadius.all(Radius.circular(10.0)),
-              border: Border.fromBorderSide(BorderSide(
-                  color: CustomColorScheme.backgroundColor, width: 2.0)),
-            ),
-            child: SingleChildScrollView(
-              child: BlocBuilder<SourceBloc, SourceState>(
-                  builder: (context, state) {
-                if (state is SourcesLoaded) {
-                  return state.sources.isEmpty
-                      ? const DashedWidgetWithMessage(
-                          message: 'No sources found')
-                      : Column(
+        BlocBuilder<SourceBloc, SourceState>(builder: (context, state) {
+          if (state is SourcesLoaded) {
+            return state.sources.isEmpty
+                ? const DashedWidgetWithMessage(message: 'No sources found')
+                : ConstrainedBox(
+                    constraints: const BoxConstraints(maxHeight: 350),
+                    child: Container(
+                      decoration: const BoxDecoration(
+                          borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                          border: Border.fromBorderSide(BorderSide(
+                              color: CustomColorScheme.backgroundColor,
+                              width: 2.0)),
+                          color: Colors.transparent),
+                      child: SingleChildScrollView(
+                        child: Column(
                           children: state.sources.map((source) {
                             return Column(
                               children: [
                                 SourceBar(
                                   source: source,
                                 ),
+                                if (state.sources.last != source)
+                                  const Divider(
+                                    height: 0,
+                                    color: CustomColorScheme.backgroundColor,
+                                  ),
                               ],
                             );
                           }).toList(),
-                        );
-                }
-                return const CircularProgressIndicator();
-              }),
-            ),
-          ),
-        ),
+                        ),
+                      ),
+                    ),
+                  );
+          }
+          return const CircularProgressIndicator();
+        }),
       ],
     ));
   }
