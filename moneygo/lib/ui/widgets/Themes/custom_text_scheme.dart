@@ -56,6 +56,8 @@ class CustomTextStyleScheme {
 
   static const TextStyle barLabel =
       TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.black);
+  static const TextStyle barLabelSmall =
+      TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.black);
   static const TextStyle barBalance =
       TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.black);
   static TextStyle barBalancePeso = TextStyle(

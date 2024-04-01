@@ -66,19 +66,19 @@ class _CategoryBarState extends State<CategoryBar> {
               .pushNamed('/categories/view', arguments: widget.category);
         },
         child: Stack(children: <Widget>[
-          SizedBox(
-            child: LinearProgressIndicator(
-                borderRadius: widget.isFirst
+          ClipRRect(
+            borderRadius: widget.isFirst
+                ? const BorderRadius.only(
+                    topLeft: Radius.circular(10),
+                    topRight: Radius.circular(10),
+                  )
+                : widget.isLast
                     ? const BorderRadius.only(
-                        topLeft: Radius.circular(10),
-                        topRight: Radius.circular(10),
+                        bottomLeft: Radius.circular(10),
+                        bottomRight: Radius.circular(10),
                       )
-                    : widget.isLast
-                        ? const BorderRadius.only(
-                            bottomLeft: Radius.circular(10),
-                            bottomRight: Radius.circular(10),
-                          )
-                        : BorderRadius.zero,
+                    : BorderRadius.zero,
+            child: LinearProgressIndicator(
                 value: widget.category.maxBudget == 0 ? 0 : percentage,
                 minHeight: 56,
                 backgroundColor: CustomColorScheme.backgroundColor,
