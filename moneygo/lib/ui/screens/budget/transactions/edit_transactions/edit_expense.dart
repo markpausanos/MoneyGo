@@ -99,7 +99,7 @@ class _EditExpenseScreenState extends State<EditExpenseScreen> {
               const SnackBar(
                 content: Text('Expense deleted successfully'),
                 duration: Duration(seconds: 2),
-                backgroundColor: CustomColorScheme.appRed,
+                backgroundColor: CustomColorScheme.appGreen,
               ),
             );
 
@@ -142,6 +142,7 @@ class _EditExpenseScreenState extends State<EditExpenseScreen> {
                       }
                       return BaseDateTimePicker(
                         onDateTimeChanged: _onDateTimeChanged,
+                        initialDate: _selectedDateTime,
                         validator: _validateDate,
                       );
                     }),
@@ -312,9 +313,9 @@ class _EditExpenseScreenState extends State<EditExpenseScreen> {
 
   void _onSaveExpense() {
     if (_formKey.currentState!.validate()) {
-      String title = _titleController.text;
-      String amount = _amountController.text;
-      String description = _descriptionController.text;
+      String title = _titleController.text.trim();
+      String amount = _amountController.text.trim();
+      String description = _descriptionController.text.trim();
       int sourceId = _selectedSourceId!;
       int categoryId = _selectedCategoryId ?? 0;
       DateTime selectedDate = _selectedDateTime;

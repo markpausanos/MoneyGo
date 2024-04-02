@@ -39,7 +39,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase(super.e);
 
   @override
-  int get schemaVersion => 2; // Increment the schema version
+  int get schemaVersion => 3; // Increment the schema version
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -58,6 +58,11 @@ class AppDatabase extends _$AppDatabase {
 
             await m.addColumn(categories, categories.order);
             await m.addColumn(sources, sources.order);
+          } else if (from == 2) {
+            await m.addColumn(expenses, expenses.updatedBalance);
+            await m.addColumn(incomes, incomes.updatedBalance);
+            await m.addColumn(transfers, transfers.updatedBalanceFromSource);
+            await m.addColumn(transfers, transfers.updatedBalanceToSource);
           }
         },
         beforeOpen: (details) async {

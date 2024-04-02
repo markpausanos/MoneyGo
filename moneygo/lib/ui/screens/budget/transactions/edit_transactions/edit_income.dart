@@ -125,7 +125,10 @@ class _EditIncomeScreen extends State<EditIncomeScreen> {
                 key: _formKey,
                 child: Column(
                   children: [
-                    BaseDateTimePicker(onDateTimeChanged: _onDateTimeChanged),
+                    BaseDateTimePicker(
+                      onDateTimeChanged: _onDateTimeChanged,
+                      initialDate: _selectedDateTime,
+                    ),
                     const SizedBox(height: 25),
                     BaseTextField(
                       controller: _titleController,
@@ -238,9 +241,9 @@ class _EditIncomeScreen extends State<EditIncomeScreen> {
 
   void _onSaveIncome() {
     if (_formKey.currentState!.validate()) {
-      String title = _titleController.text;
-      String amount = _amountController.text;
-      String description = _descriptionController.text;
+      String title = _titleController.text.trim();
+      String amount = _amountController.text.trim();
+      String description = _descriptionController.text.trim();
       int sourceId = _selectedSourceId!;
       DateTime selectedDateTime = _selectedDateTime;
 

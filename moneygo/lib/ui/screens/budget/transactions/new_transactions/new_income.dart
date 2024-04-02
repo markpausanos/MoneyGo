@@ -224,9 +224,9 @@ class _NewIncomeScreenState extends State<NewIncomeScreen> {
   void _onSaveIncome() {
     if (_formKey.currentState!.validate()) {
       // If the form is valid, process the data
-      String title = _titleController.text;
-      String amount = _amountController.text;
-      String description = _descriptionController.text;
+      String title = _titleController.text.trim();
+      String amount = _amountController.text.trim();
+      String description = _descriptionController.text.trim();
       int sourceId = _selectedSourceId!;
       DateTime selectedDate = _selectedDateTime;
 

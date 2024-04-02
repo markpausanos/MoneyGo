@@ -281,9 +281,9 @@ class _NewTransferScreenState extends State<NewTransferScreen> {
 
   void _onSaveTransfer() {
     if (_formKey.currentState!.validate()) {
-      String title = _titleController.text;
-      String amount = _amountController.text;
-      String description = _descriptionController.text;
+      String title = _titleController.text.trim();
+      String amount = _amountController.text.trim();
+      String description = _descriptionController.text.trim();
       int sourceFromId = _selectedFromSourceId ?? 0;
       int sourceToId = _selectedToSourceId ?? 0;
       DateTime selectedDate = _selectedDateTime;

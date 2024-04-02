@@ -428,7 +428,7 @@ class _SourcesScreenState extends State<SourcesScreen> {
   }
 
   Future<void> _saveSource() async {
-    final String name = _nameController.text;
+    final String name = _nameController.text.trim();
 
     if (name.isNotEmpty) {
       final source = SourcesCompanion(name: Value(name));

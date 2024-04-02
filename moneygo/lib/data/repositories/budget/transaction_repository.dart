@@ -100,6 +100,7 @@ class TransactionRepository {
 
     return ExpenseModel(
       id: expense.id,
+      updatedBalance: expense.updatedBalance,
       transaction: transaction,
       source: expenseSource,
       category: expenseCategory,
@@ -123,6 +124,7 @@ class TransactionRepository {
 
     return IncomeModel(
       id: income.id,
+      updatedBalance: income.updatedBalance,
       transaction: transaction,
       placedOnSource: placedOnsource,
     );
@@ -145,6 +147,8 @@ class TransactionRepository {
 
     return TransferModel(
       id: transfer.id,
+      updatedBalanceFromSource: transfer.updatedBalanceFromSource,
+      updatedBalanceToSource: transfer.updatedBalanceToSource,
       transaction: transaction,
       fromSource: fromSource,
       toSource: toSource,
@@ -159,12 +163,15 @@ class TransactionRepository {
     switch (transaction.type.value) {
       case TransactionTypes.expense:
         var expense = typeCompanion as ExpensesCompanion;
+        await _updateUpdatedBalanceForOldTransactions(transaction.date.value);
         return await _insertExpenseTransaction(transaction, expense);
       case TransactionTypes.income:
         var income = typeCompanion as IncomesCompanion;
+        await _updateUpdatedBalanceForOldTransactions(transaction.date.value);
         return await _insertIncomeTransaction(transaction, income);
       case TransactionTypes.transfer:
         var transfer = typeCompanion as TransfersCompanion;
+        await _updateUpdatedBalanceForOldTransactions(transaction.date.value);
         return await _insertTransferTransaction(transaction, transfer);
       default:
         break;
@@ -188,6 +195,7 @@ class TransactionRepository {
       source = source.copyWith(
         balance: source.balance - transaction.amount.value,
       );
+      expense = expense.copyWith(updatedBalance: Value(source.balance));
       await _sourceDao.updateSource(source);
     }
 
@@ -235,6 +243,7 @@ class TransactionRepository {
         source = source.copyWith(
           balance: source.balance + transaction.amount.value,
         );
+        income = income.copyWith(updatedBalance: Value(source.balance));
         await _sourceDao.updateSource(source);
       }
     }
@@ -260,6 +269,8 @@ class TransactionRepository {
         fromSource = fromSource.copyWith(
           balance: fromSource.balance - transaction.amount.value,
         );
+        transfer = transfer.copyWith(
+            updatedBalanceFromSource: Value(fromSource.balance));
         await _sourceDao.updateSource(fromSource);
       }
 
@@ -269,11 +280,30 @@ class TransactionRepository {
         toSource = toSource.copyWith(
           balance: toSource.balance + transaction.amount.value,
         );
+        transfer =
+            transfer.copyWith(updatedBalanceToSource: Value(toSource.balance));
         await _sourceDao.updateSource(toSource);
       }
     }
 
     return transactionId;
+  }
+
+  Future<Transaction?> getTransactionBeforeTheId(int id) async {
+    var transaction = await _transactionDao.getTransactionById(id);
+
+    if (transaction == null) return null;
+
+    var transactions = await _transactionDao.getAllTransactions();
+
+    for (var i = 0; i < transactions.length; i++) {
+      if (transactions[i].id == id) {
+        if (i == 0) return null;
+        return transactions[i - 1];
+      }
+    }
+
+    return null;
   }
 
   Future<bool> updateTransaction(
@@ -310,6 +340,8 @@ class TransactionRepository {
         return false;
     }
 
+    await _updateUpdatedBalanceForOldTransactions(transaction.date);
+
     return await _transactionDao.updateTransaction(transaction);
   }
 
@@ -338,6 +370,7 @@ class TransactionRepository {
 
       oldExpense = oldExpense.copyWith(
         sourceId: newExpense.source.id,
+        updatedBalance: newSource.balance,
       );
 
       await _sourceDao.updateSource(oldSource);
@@ -419,6 +452,7 @@ class TransactionRepository {
 
       oldIncome = oldIncome.copyWith(
         placedOnsourceId: newIncome.placedOnSource.id,
+        updatedBalance: newSource.balance,
       );
     } else if (transaction.amount != oldTransaction.amount) {
       oldSource = oldSource.copyWith(
@@ -494,6 +528,8 @@ class TransactionRepository {
     oldTransfer = oldTransfer.copyWith(
       fromSourceId: newTransfer.fromSource.id,
       toSourceId: newTransfer.toSource.id,
+      updatedBalanceFromSource: newTransfer.updatedBalanceFromSource,
+      updatedBalanceToSource: newTransfer.updatedBalanceToSource,
     );
 
     return await _transferDao.updateTransfer(oldTransfer);
@@ -516,6 +552,8 @@ class TransactionRepository {
       default:
         return false;
     }
+
+    await _updateUpdatedBalanceForOldTransactions(transaction.date);
 
     return await _transactionDao.deleteTransactionById(transaction.id) > 0;
   }
@@ -603,12 +641,95 @@ class TransactionRepository {
       return false;
     });
 
+    transactions.keys.toList().sort((a, b) => a.date.compareTo(b.date));
+
+    await _updateUpdatedBalanceForOldTransactions(transactions.keys.first.date);
+
     for (var transaction in transactions.keys) {
       if (!await deleteTransaction(transaction)) {
         return false;
       }
     }
 
+    return true;
+  }
+
+  Future<bool> _updateUpdatedBalanceForOldTransactions(
+      DateTime dateTime) async {
+    var transactions = await _transactionDao.getAllTransactions();
+
+    transactions.sort((a, b) => a.date.compareTo(b.date));
+
+    // Get transactions on and after the given date
+    var dateTimeOnly = DateTime(dateTime.year, dateTime.month, dateTime.day);
+    transactions = transactions
+        .where((element) =>
+            element.date.isAfter(dateTimeOnly) ||
+            element.date.isAtSameMomentAs(dateTimeOnly))
+        .toList();
+
+    Map<Source, double> sourceBalances = {};
+
+    for (var transaction in transactions) {
+      switch (transaction.type) {
+        case TransactionTypes.expense:
+          var expense =
+              await _expenseDao.getExpenseByTransactionId(transaction.id);
+          if (expense == null) continue;
+
+          Source? source = await _sourceDao.getSourceById(expense.sourceId);
+          if (source == null) continue;
+
+          sourceBalances[source] = sourceBalances[source] != null
+              ? sourceBalances[source]! - transaction.amount
+              : -transaction.amount;
+
+          expense = expense.copyWith(updatedBalance: sourceBalances[source]!);
+
+          await _expenseDao.updateExpense(expense);
+          break;
+        case TransactionTypes.income:
+          var income =
+              await _incomeDao.getIncomeByTransactionId(transaction.id);
+          if (income == null) continue;
+
+          Source? source =
+              await _sourceDao.getSourceById(income.placedOnsourceId);
+          if (source == null) continue;
+
+          sourceBalances[source] = sourceBalances[source] != null
+              ? sourceBalances[source]! + transaction.amount
+              : transaction.amount;
+
+          income = income.copyWith(updatedBalance: sourceBalances[source]!);
+
+          await _incomeDao.updateIncome(income);
+        case TransactionTypes.transfer:
+          var transfer =
+              await _transferDao.getTransferByTransactionId(transaction.id);
+          if (transfer == null) continue;
+
+          Source? fromSource =
+              await _sourceDao.getSourceById(transfer.fromSourceId);
+          Source? toSource =
+              await _sourceDao.getSourceById(transfer.toSourceId);
+          if (fromSource == null || toSource == null) continue;
+
+          sourceBalances[fromSource] = sourceBalances[fromSource] != null
+              ? sourceBalances[fromSource]! - transaction.amount
+              : -transaction.amount;
+          sourceBalances[toSource] = sourceBalances[toSource] != null
+              ? sourceBalances[toSource]! + transaction.amount
+              : transaction.amount;
+
+          transfer = transfer.copyWith(
+            updatedBalanceFromSource: sourceBalances[fromSource]!,
+            updatedBalanceToSource: sourceBalances[toSource]!,
+          );
+
+          await _transferDao.updateTransfer(transfer);
+      }
+    }
     return true;
   }
 }

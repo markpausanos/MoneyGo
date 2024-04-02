@@ -246,6 +246,7 @@ class _NewExpenseScreenState extends State<NewExpenseScreen> {
     } else if (value.isEmpty) {
       _titleController.text = "Unnamed";
     }
+
     return null;
   }
 
@@ -297,9 +298,9 @@ class _NewExpenseScreenState extends State<NewExpenseScreen> {
   void _onSaveExpense() {
     if (_formKey.currentState!.validate()) {
       // If the form is valid, process the data
-      String title = _titleController.text;
-      String amount = _amountController.text;
-      String description = _descriptionController.text;
+      String title = _titleController.text.trim();
+      String amount = _amountController.text.trim();
+      String description = _descriptionController.text.trim();
       int sourceId = _selectedSourceId!;
       int categoryId = _selectedCategoryId ?? 0;
       DateTime selectedDate = _selectedDateTime;

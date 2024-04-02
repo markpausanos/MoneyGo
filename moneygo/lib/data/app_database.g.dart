@@ -1397,9 +1397,31 @@ class $TransfersTable extends Transfers
       type: DriftSqlType.int,
       requiredDuringInsert: true,
       $customConstraints: 'REFERENCES sources(id) ON DELETE CASCADE NOT NULL');
+  static const VerificationMeta _updatedBalanceFromSourceMeta =
+      const VerificationMeta('updatedBalanceFromSource');
   @override
-  List<GeneratedColumn> get $columns =>
-      [id, transactionId, fromSourceId, toSourceId];
+  late final GeneratedColumn<double> updatedBalanceFromSource =
+      GeneratedColumn<double>('updated_balance_from_source', aliasedName, false,
+          type: DriftSqlType.double,
+          requiredDuringInsert: false,
+          defaultValue: const Constant(0.0));
+  static const VerificationMeta _updatedBalanceToSourceMeta =
+      const VerificationMeta('updatedBalanceToSource');
+  @override
+  late final GeneratedColumn<double> updatedBalanceToSource =
+      GeneratedColumn<double>('updated_balance_to_source', aliasedName, false,
+          type: DriftSqlType.double,
+          requiredDuringInsert: false,
+          defaultValue: const Constant(0.0));
+  @override
+  List<GeneratedColumn> get $columns => [
+        id,
+        transactionId,
+        fromSourceId,
+        toSourceId,
+        updatedBalanceFromSource,
+        updatedBalanceToSource
+      ];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -1437,6 +1459,19 @@ class $TransfersTable extends Transfers
     } else if (isInserting) {
       context.missing(_toSourceIdMeta);
     }
+    if (data.containsKey('updated_balance_from_source')) {
+      context.handle(
+          _updatedBalanceFromSourceMeta,
+          updatedBalanceFromSource.isAcceptableOrUnknown(
+              data['updated_balance_from_source']!,
+              _updatedBalanceFromSourceMeta));
+    }
+    if (data.containsKey('updated_balance_to_source')) {
+      context.handle(
+          _updatedBalanceToSourceMeta,
+          updatedBalanceToSource.isAcceptableOrUnknown(
+              data['updated_balance_to_source']!, _updatedBalanceToSourceMeta));
+    }
     return context;
   }
 
@@ -1454,6 +1489,12 @@ class $TransfersTable extends Transfers
           .read(DriftSqlType.int, data['${effectivePrefix}from_source_id'])!,
       toSourceId: attachedDatabase.typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}to_source_id'])!,
+      updatedBalanceFromSource: attachedDatabase.typeMapping.read(
+          DriftSqlType.double,
+          data['${effectivePrefix}updated_balance_from_source'])!,
+      updatedBalanceToSource: attachedDatabase.typeMapping.read(
+          DriftSqlType.double,
+          data['${effectivePrefix}updated_balance_to_source'])!,
     );
   }
 
@@ -1468,11 +1509,15 @@ class Transfer extends DataClass implements Insertable<Transfer> {
   final int transactionId;
   final int fromSourceId;
   final int toSourceId;
+  final double updatedBalanceFromSource;
+  final double updatedBalanceToSource;
   const Transfer(
       {required this.id,
       required this.transactionId,
       required this.fromSourceId,
-      required this.toSourceId});
+      required this.toSourceId,
+      required this.updatedBalanceFromSource,
+      required this.updatedBalanceToSource});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -1480,6 +1525,9 @@ class Transfer extends DataClass implements Insertable<Transfer> {
     map['transaction_id'] = Variable<int>(transactionId);
     map['from_source_id'] = Variable<int>(fromSourceId);
     map['to_source_id'] = Variable<int>(toSourceId);
+    map['updated_balance_from_source'] =
+        Variable<double>(updatedBalanceFromSource);
+    map['updated_balance_to_source'] = Variable<double>(updatedBalanceToSource);
     return map;
   }
 
@@ -1489,6 +1537,8 @@ class Transfer extends DataClass implements Insertable<Transfer> {
       transactionId: Value(transactionId),
       fromSourceId: Value(fromSourceId),
       toSourceId: Value(toSourceId),
+      updatedBalanceFromSource: Value(updatedBalanceFromSource),
+      updatedBalanceToSource: Value(updatedBalanceToSource),
     );
   }
 
@@ -1500,6 +1550,10 @@ class Transfer extends DataClass implements Insertable<Transfer> {
       transactionId: serializer.fromJson<int>(json['transactionId']),
       fromSourceId: serializer.fromJson<int>(json['fromSourceId']),
       toSourceId: serializer.fromJson<int>(json['toSourceId']),
+      updatedBalanceFromSource:
+          serializer.fromJson<double>(json['updatedBalanceFromSource']),
+      updatedBalanceToSource:
+          serializer.fromJson<double>(json['updatedBalanceToSource']),
     );
   }
   @override
@@ -1510,16 +1564,29 @@ class Transfer extends DataClass implements Insertable<Transfer> {
       'transactionId': serializer.toJson<int>(transactionId),
       'fromSourceId': serializer.toJson<int>(fromSourceId),
       'toSourceId': serializer.toJson<int>(toSourceId),
+      'updatedBalanceFromSource':
+          serializer.toJson<double>(updatedBalanceFromSource),
+      'updatedBalanceToSource':
+          serializer.toJson<double>(updatedBalanceToSource),
     };
   }
 
   Transfer copyWith(
-          {int? id, int? transactionId, int? fromSourceId, int? toSourceId}) =>
+          {int? id,
+          int? transactionId,
+          int? fromSourceId,
+          int? toSourceId,
+          double? updatedBalanceFromSource,
+          double? updatedBalanceToSource}) =>
       Transfer(
         id: id ?? this.id,
         transactionId: transactionId ?? this.transactionId,
         fromSourceId: fromSourceId ?? this.fromSourceId,
         toSourceId: toSourceId ?? this.toSourceId,
+        updatedBalanceFromSource:
+            updatedBalanceFromSource ?? this.updatedBalanceFromSource,
+        updatedBalanceToSource:
+            updatedBalanceToSource ?? this.updatedBalanceToSource,
       );
   @override
   String toString() {
@@ -1527,13 +1594,16 @@ class Transfer extends DataClass implements Insertable<Transfer> {
           ..write('id: $id, ')
           ..write('transactionId: $transactionId, ')
           ..write('fromSourceId: $fromSourceId, ')
-          ..write('toSourceId: $toSourceId')
+          ..write('toSourceId: $toSourceId, ')
+          ..write('updatedBalanceFromSource: $updatedBalanceFromSource, ')
+          ..write('updatedBalanceToSource: $updatedBalanceToSource')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, transactionId, fromSourceId, toSourceId);
+  int get hashCode => Object.hash(id, transactionId, fromSourceId, toSourceId,
+      updatedBalanceFromSource, updatedBalanceToSource);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -1541,7 +1611,9 @@ class Transfer extends DataClass implements Insertable<Transfer> {
           other.id == this.id &&
           other.transactionId == this.transactionId &&
           other.fromSourceId == this.fromSourceId &&
-          other.toSourceId == this.toSourceId);
+          other.toSourceId == this.toSourceId &&
+          other.updatedBalanceFromSource == this.updatedBalanceFromSource &&
+          other.updatedBalanceToSource == this.updatedBalanceToSource);
 }
 
 class TransfersCompanion extends UpdateCompanion<Transfer> {
@@ -1549,17 +1621,23 @@ class TransfersCompanion extends UpdateCompanion<Transfer> {
   final Value<int> transactionId;
   final Value<int> fromSourceId;
   final Value<int> toSourceId;
+  final Value<double> updatedBalanceFromSource;
+  final Value<double> updatedBalanceToSource;
   const TransfersCompanion({
     this.id = const Value.absent(),
     this.transactionId = const Value.absent(),
     this.fromSourceId = const Value.absent(),
     this.toSourceId = const Value.absent(),
+    this.updatedBalanceFromSource = const Value.absent(),
+    this.updatedBalanceToSource = const Value.absent(),
   });
   TransfersCompanion.insert({
     this.id = const Value.absent(),
     required int transactionId,
     required int fromSourceId,
     required int toSourceId,
+    this.updatedBalanceFromSource = const Value.absent(),
+    this.updatedBalanceToSource = const Value.absent(),
   })  : transactionId = Value(transactionId),
         fromSourceId = Value(fromSourceId),
         toSourceId = Value(toSourceId);
@@ -1568,12 +1646,18 @@ class TransfersCompanion extends UpdateCompanion<Transfer> {
     Expression<int>? transactionId,
     Expression<int>? fromSourceId,
     Expression<int>? toSourceId,
+    Expression<double>? updatedBalanceFromSource,
+    Expression<double>? updatedBalanceToSource,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (transactionId != null) 'transaction_id': transactionId,
       if (fromSourceId != null) 'from_source_id': fromSourceId,
       if (toSourceId != null) 'to_source_id': toSourceId,
+      if (updatedBalanceFromSource != null)
+        'updated_balance_from_source': updatedBalanceFromSource,
+      if (updatedBalanceToSource != null)
+        'updated_balance_to_source': updatedBalanceToSource,
     });
   }
 
@@ -1581,12 +1665,18 @@ class TransfersCompanion extends UpdateCompanion<Transfer> {
       {Value<int>? id,
       Value<int>? transactionId,
       Value<int>? fromSourceId,
-      Value<int>? toSourceId}) {
+      Value<int>? toSourceId,
+      Value<double>? updatedBalanceFromSource,
+      Value<double>? updatedBalanceToSource}) {
     return TransfersCompanion(
       id: id ?? this.id,
       transactionId: transactionId ?? this.transactionId,
       fromSourceId: fromSourceId ?? this.fromSourceId,
       toSourceId: toSourceId ?? this.toSourceId,
+      updatedBalanceFromSource:
+          updatedBalanceFromSource ?? this.updatedBalanceFromSource,
+      updatedBalanceToSource:
+          updatedBalanceToSource ?? this.updatedBalanceToSource,
     );
   }
 
@@ -1605,6 +1695,14 @@ class TransfersCompanion extends UpdateCompanion<Transfer> {
     if (toSourceId.present) {
       map['to_source_id'] = Variable<int>(toSourceId.value);
     }
+    if (updatedBalanceFromSource.present) {
+      map['updated_balance_from_source'] =
+          Variable<double>(updatedBalanceFromSource.value);
+    }
+    if (updatedBalanceToSource.present) {
+      map['updated_balance_to_source'] =
+          Variable<double>(updatedBalanceToSource.value);
+    }
     return map;
   }
 
@@ -1614,7 +1712,9 @@ class TransfersCompanion extends UpdateCompanion<Transfer> {
           ..write('id: $id, ')
           ..write('transactionId: $transactionId, ')
           ..write('fromSourceId: $fromSourceId, ')
-          ..write('toSourceId: $toSourceId')
+          ..write('toSourceId: $toSourceId, ')
+          ..write('updatedBalanceFromSource: $updatedBalanceFromSource, ')
+          ..write('updatedBalanceToSource: $updatedBalanceToSource')
           ..write(')'))
         .toString();
   }
@@ -1651,8 +1751,17 @@ class $IncomesTable extends Incomes with TableInfo<$IncomesTable, Income> {
       type: DriftSqlType.int,
       requiredDuringInsert: true,
       $customConstraints: 'REFERENCES sources(id) ON DELETE CASCADE NOT NULL');
+  static const VerificationMeta _updatedBalanceMeta =
+      const VerificationMeta('updatedBalance');
   @override
-  List<GeneratedColumn> get $columns => [id, transactionId, placedOnsourceId];
+  late final GeneratedColumn<double> updatedBalance = GeneratedColumn<double>(
+      'updated_balance', aliasedName, false,
+      type: DriftSqlType.double,
+      requiredDuringInsert: false,
+      defaultValue: const Constant(0.0));
+  @override
+  List<GeneratedColumn> get $columns =>
+      [id, transactionId, placedOnsourceId, updatedBalance];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -1682,6 +1791,12 @@ class $IncomesTable extends Incomes with TableInfo<$IncomesTable, Income> {
     } else if (isInserting) {
       context.missing(_placedOnsourceIdMeta);
     }
+    if (data.containsKey('updated_balance')) {
+      context.handle(
+          _updatedBalanceMeta,
+          updatedBalance.isAcceptableOrUnknown(
+              data['updated_balance']!, _updatedBalanceMeta));
+    }
     return context;
   }
 
@@ -1697,6 +1812,8 @@ class $IncomesTable extends Incomes with TableInfo<$IncomesTable, Income> {
           .read(DriftSqlType.int, data['${effectivePrefix}transaction_id'])!,
       placedOnsourceId: attachedDatabase.typeMapping.read(
           DriftSqlType.int, data['${effectivePrefix}placed_onsource_id'])!,
+      updatedBalance: attachedDatabase.typeMapping.read(
+          DriftSqlType.double, data['${effectivePrefix}updated_balance'])!,
     );
   }
 
@@ -1710,16 +1827,19 @@ class Income extends DataClass implements Insertable<Income> {
   final int id;
   final int transactionId;
   final int placedOnsourceId;
+  final double updatedBalance;
   const Income(
       {required this.id,
       required this.transactionId,
-      required this.placedOnsourceId});
+      required this.placedOnsourceId,
+      required this.updatedBalance});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<int>(id);
     map['transaction_id'] = Variable<int>(transactionId);
     map['placed_onsource_id'] = Variable<int>(placedOnsourceId);
+    map['updated_balance'] = Variable<double>(updatedBalance);
     return map;
   }
 
@@ -1728,6 +1848,7 @@ class Income extends DataClass implements Insertable<Income> {
       id: Value(id),
       transactionId: Value(transactionId),
       placedOnsourceId: Value(placedOnsourceId),
+      updatedBalance: Value(updatedBalance),
     );
   }
 
@@ -1738,6 +1859,7 @@ class Income extends DataClass implements Insertable<Income> {
       id: serializer.fromJson<int>(json['id']),
       transactionId: serializer.fromJson<int>(json['transactionId']),
       placedOnsourceId: serializer.fromJson<int>(json['placedOnsourceId']),
+      updatedBalance: serializer.fromJson<double>(json['updatedBalance']),
     );
   }
   @override
@@ -1747,71 +1869,87 @@ class Income extends DataClass implements Insertable<Income> {
       'id': serializer.toJson<int>(id),
       'transactionId': serializer.toJson<int>(transactionId),
       'placedOnsourceId': serializer.toJson<int>(placedOnsourceId),
+      'updatedBalance': serializer.toJson<double>(updatedBalance),
     };
   }
 
-  Income copyWith({int? id, int? transactionId, int? placedOnsourceId}) =>
+  Income copyWith(
+          {int? id,
+          int? transactionId,
+          int? placedOnsourceId,
+          double? updatedBalance}) =>
       Income(
         id: id ?? this.id,
         transactionId: transactionId ?? this.transactionId,
         placedOnsourceId: placedOnsourceId ?? this.placedOnsourceId,
+        updatedBalance: updatedBalance ?? this.updatedBalance,
       );
   @override
   String toString() {
     return (StringBuffer('Income(')
           ..write('id: $id, ')
           ..write('transactionId: $transactionId, ')
-          ..write('placedOnsourceId: $placedOnsourceId')
+          ..write('placedOnsourceId: $placedOnsourceId, ')
+          ..write('updatedBalance: $updatedBalance')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, transactionId, placedOnsourceId);
+  int get hashCode =>
+      Object.hash(id, transactionId, placedOnsourceId, updatedBalance);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is Income &&
           other.id == this.id &&
           other.transactionId == this.transactionId &&
-          other.placedOnsourceId == this.placedOnsourceId);
+          other.placedOnsourceId == this.placedOnsourceId &&
+          other.updatedBalance == this.updatedBalance);
 }
 
 class IncomesCompanion extends UpdateCompanion<Income> {
   final Value<int> id;
   final Value<int> transactionId;
   final Value<int> placedOnsourceId;
+  final Value<double> updatedBalance;
   const IncomesCompanion({
     this.id = const Value.absent(),
     this.transactionId = const Value.absent(),
     this.placedOnsourceId = const Value.absent(),
+    this.updatedBalance = const Value.absent(),
   });
   IncomesCompanion.insert({
     this.id = const Value.absent(),
     required int transactionId,
     required int placedOnsourceId,
+    this.updatedBalance = const Value.absent(),
   })  : transactionId = Value(transactionId),
         placedOnsourceId = Value(placedOnsourceId);
   static Insertable<Income> custom({
     Expression<int>? id,
     Expression<int>? transactionId,
     Expression<int>? placedOnsourceId,
+    Expression<double>? updatedBalance,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (transactionId != null) 'transaction_id': transactionId,
       if (placedOnsourceId != null) 'placed_onsource_id': placedOnsourceId,
+      if (updatedBalance != null) 'updated_balance': updatedBalance,
     });
   }
 
   IncomesCompanion copyWith(
       {Value<int>? id,
       Value<int>? transactionId,
-      Value<int>? placedOnsourceId}) {
+      Value<int>? placedOnsourceId,
+      Value<double>? updatedBalance}) {
     return IncomesCompanion(
       id: id ?? this.id,
       transactionId: transactionId ?? this.transactionId,
       placedOnsourceId: placedOnsourceId ?? this.placedOnsourceId,
+      updatedBalance: updatedBalance ?? this.updatedBalance,
     );
   }
 
@@ -1827,6 +1965,9 @@ class IncomesCompanion extends UpdateCompanion<Income> {
     if (placedOnsourceId.present) {
       map['placed_onsource_id'] = Variable<int>(placedOnsourceId.value);
     }
+    if (updatedBalance.present) {
+      map['updated_balance'] = Variable<double>(updatedBalance.value);
+    }
     return map;
   }
 
@@ -1835,7 +1976,8 @@ class IncomesCompanion extends UpdateCompanion<Income> {
     return (StringBuffer('IncomesCompanion(')
           ..write('id: $id, ')
           ..write('transactionId: $transactionId, ')
-          ..write('placedOnsourceId: $placedOnsourceId')
+          ..write('placedOnsourceId: $placedOnsourceId, ')
+          ..write('updatedBalance: $updatedBalance')
           ..write(')'))
         .toString();
   }
@@ -1880,9 +2022,17 @@ class $ExpensesTable extends Expenses with TableInfo<$ExpensesTable, Expense> {
       type: DriftSqlType.int,
       requiredDuringInsert: false,
       $customConstraints: 'REFERENCES categories(id) ON DELETE SET NULL');
+  static const VerificationMeta _updatedBalanceMeta =
+      const VerificationMeta('updatedBalance');
+  @override
+  late final GeneratedColumn<double> updatedBalance = GeneratedColumn<double>(
+      'updated_balance', aliasedName, false,
+      type: DriftSqlType.double,
+      requiredDuringInsert: false,
+      defaultValue: const Constant(0.0));
   @override
   List<GeneratedColumn> get $columns =>
-      [id, transactionId, sourceId, categoryId];
+      [id, transactionId, sourceId, categoryId, updatedBalance];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -1916,6 +2066,12 @@ class $ExpensesTable extends Expenses with TableInfo<$ExpensesTable, Expense> {
           categoryId.isAcceptableOrUnknown(
               data['category_id']!, _categoryIdMeta));
     }
+    if (data.containsKey('updated_balance')) {
+      context.handle(
+          _updatedBalanceMeta,
+          updatedBalance.isAcceptableOrUnknown(
+              data['updated_balance']!, _updatedBalanceMeta));
+    }
     return context;
   }
 
@@ -1933,6 +2089,8 @@ class $ExpensesTable extends Expenses with TableInfo<$ExpensesTable, Expense> {
           .read(DriftSqlType.int, data['${effectivePrefix}source_id'])!,
       categoryId: attachedDatabase.typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}category_id']),
+      updatedBalance: attachedDatabase.typeMapping.read(
+          DriftSqlType.double, data['${effectivePrefix}updated_balance'])!,
     );
   }
 
@@ -1947,11 +2105,13 @@ class Expense extends DataClass implements Insertable<Expense> {
   final int transactionId;
   final int sourceId;
   final int? categoryId;
+  final double updatedBalance;
   const Expense(
       {required this.id,
       required this.transactionId,
       required this.sourceId,
-      this.categoryId});
+      this.categoryId,
+      required this.updatedBalance});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -1961,6 +2121,7 @@ class Expense extends DataClass implements Insertable<Expense> {
     if (!nullToAbsent || categoryId != null) {
       map['category_id'] = Variable<int>(categoryId);
     }
+    map['updated_balance'] = Variable<double>(updatedBalance);
     return map;
   }
 
@@ -1972,6 +2133,7 @@ class Expense extends DataClass implements Insertable<Expense> {
       categoryId: categoryId == null && nullToAbsent
           ? const Value.absent()
           : Value(categoryId),
+      updatedBalance: Value(updatedBalance),
     );
   }
 
@@ -1983,6 +2145,7 @@ class Expense extends DataClass implements Insertable<Expense> {
       transactionId: serializer.fromJson<int>(json['transactionId']),
       sourceId: serializer.fromJson<int>(json['sourceId']),
       categoryId: serializer.fromJson<int?>(json['categoryId']),
+      updatedBalance: serializer.fromJson<double>(json['updatedBalance']),
     );
   }
   @override
@@ -1993,6 +2156,7 @@ class Expense extends DataClass implements Insertable<Expense> {
       'transactionId': serializer.toJson<int>(transactionId),
       'sourceId': serializer.toJson<int>(sourceId),
       'categoryId': serializer.toJson<int?>(categoryId),
+      'updatedBalance': serializer.toJson<double>(updatedBalance),
     };
   }
 
@@ -2000,12 +2164,14 @@ class Expense extends DataClass implements Insertable<Expense> {
           {int? id,
           int? transactionId,
           int? sourceId,
-          Value<int?> categoryId = const Value.absent()}) =>
+          Value<int?> categoryId = const Value.absent(),
+          double? updatedBalance}) =>
       Expense(
         id: id ?? this.id,
         transactionId: transactionId ?? this.transactionId,
         sourceId: sourceId ?? this.sourceId,
         categoryId: categoryId.present ? categoryId.value : this.categoryId,
+        updatedBalance: updatedBalance ?? this.updatedBalance,
       );
   @override
   String toString() {
@@ -2013,13 +2179,15 @@ class Expense extends DataClass implements Insertable<Expense> {
           ..write('id: $id, ')
           ..write('transactionId: $transactionId, ')
           ..write('sourceId: $sourceId, ')
-          ..write('categoryId: $categoryId')
+          ..write('categoryId: $categoryId, ')
+          ..write('updatedBalance: $updatedBalance')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, transactionId, sourceId, categoryId);
+  int get hashCode =>
+      Object.hash(id, transactionId, sourceId, categoryId, updatedBalance);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -2027,7 +2195,8 @@ class Expense extends DataClass implements Insertable<Expense> {
           other.id == this.id &&
           other.transactionId == this.transactionId &&
           other.sourceId == this.sourceId &&
-          other.categoryId == this.categoryId);
+          other.categoryId == this.categoryId &&
+          other.updatedBalance == this.updatedBalance);
 }
 
 class ExpensesCompanion extends UpdateCompanion<Expense> {
@@ -2035,17 +2204,20 @@ class ExpensesCompanion extends UpdateCompanion<Expense> {
   final Value<int> transactionId;
   final Value<int> sourceId;
   final Value<int?> categoryId;
+  final Value<double> updatedBalance;
   const ExpensesCompanion({
     this.id = const Value.absent(),
     this.transactionId = const Value.absent(),
     this.sourceId = const Value.absent(),
     this.categoryId = const Value.absent(),
+    this.updatedBalance = const Value.absent(),
   });
   ExpensesCompanion.insert({
     this.id = const Value.absent(),
     required int transactionId,
     required int sourceId,
     this.categoryId = const Value.absent(),
+    this.updatedBalance = const Value.absent(),
   })  : transactionId = Value(transactionId),
         sourceId = Value(sourceId);
   static Insertable<Expense> custom({
@@ -2053,12 +2225,14 @@ class ExpensesCompanion extends UpdateCompanion<Expense> {
     Expression<int>? transactionId,
     Expression<int>? sourceId,
     Expression<int>? categoryId,
+    Expression<double>? updatedBalance,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (transactionId != null) 'transaction_id': transactionId,
       if (sourceId != null) 'source_id': sourceId,
       if (categoryId != null) 'category_id': categoryId,
+      if (updatedBalance != null) 'updated_balance': updatedBalance,
     });
   }
 
@@ -2066,12 +2240,14 @@ class ExpensesCompanion extends UpdateCompanion<Expense> {
       {Value<int>? id,
       Value<int>? transactionId,
       Value<int>? sourceId,
-      Value<int?>? categoryId}) {
+      Value<int?>? categoryId,
+      Value<double>? updatedBalance}) {
     return ExpensesCompanion(
       id: id ?? this.id,
       transactionId: transactionId ?? this.transactionId,
       sourceId: sourceId ?? this.sourceId,
       categoryId: categoryId ?? this.categoryId,
+      updatedBalance: updatedBalance ?? this.updatedBalance,
     );
   }
 
@@ -2090,6 +2266,9 @@ class ExpensesCompanion extends UpdateCompanion<Expense> {
     if (categoryId.present) {
       map['category_id'] = Variable<int>(categoryId.value);
     }
+    if (updatedBalance.present) {
+      map['updated_balance'] = Variable<double>(updatedBalance.value);
+    }
     return map;
   }
 
@@ -2099,7 +2278,8 @@ class ExpensesCompanion extends UpdateCompanion<Expense> {
           ..write('id: $id, ')
           ..write('transactionId: $transactionId, ')
           ..write('sourceId: $sourceId, ')
-          ..write('categoryId: $categoryId')
+          ..write('categoryId: $categoryId, ')
+          ..write('updatedBalance: $updatedBalance')
           ..write(')'))
         .toString();
   }

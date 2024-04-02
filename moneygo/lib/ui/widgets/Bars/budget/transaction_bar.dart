@@ -195,6 +195,72 @@ class _TransactionBarState extends State<TransactionBar> {
     return color;
   }
 
+  Widget _getUpdatedBalanceWidget(TransactionType transactionType) {
+    if (transactionType is ExpenseModel) {
+      return Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          const Text(
+            'Updated Balance:',
+            style: CustomTextStyleScheme.dialogBodySmall,
+          ),
+          Text(
+            '$_currency${Utils.formatNumber(transactionType.updatedBalance)}',
+            style: CustomTextStyleScheme.dialogBodySmall,
+          ),
+        ],
+      );
+    } else if (transactionType is IncomeModel) {
+      return Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          const Text(
+            'Updated Balance:',
+            style: CustomTextStyleScheme.dialogBodySmall,
+          ),
+          Text(
+            '$_currency${Utils.formatNumber(transactionType.updatedBalance)}',
+            style: CustomTextStyleScheme.dialogBodySmall,
+          ),
+        ],
+      );
+    } else if (transactionType is TransferModel) {
+      return Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                'Updated Balance(From):',
+                style: CustomTextStyleScheme.dialogBodySmall,
+              ),
+              Text(
+                '$_currency${Utils.formatNumber(transactionType.updatedBalanceFromSource)}',
+                style: CustomTextStyleScheme.dialogBodySmall,
+              ),
+            ],
+          ),
+          const SizedBox(width: 10),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                'Updated Balance(To):',
+                style: CustomTextStyleScheme.dialogBodySmall,
+              ),
+              Text(
+                '$_currency${Utils.formatNumber(transactionType.updatedBalanceToSource)}',
+                style: CustomTextStyleScheme.dialogBodySmall,
+              ),
+            ],
+          ),
+        ],
+      );
+    }
+
+    return const SizedBox();
+  }
+
   void _showDetailsDialog(BuildContext context) {
     showDialog(
       context: context,
@@ -270,6 +336,8 @@ class _TransactionBarState extends State<TransactionBar> {
                   ],
                 ),
               ),
+              const SizedBox(height: 3),
+              _getUpdatedBalanceWidget(widget.transactionType),
               const Divider(
                 color: CustomColorScheme.backgroundColor,
               ),

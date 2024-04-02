@@ -636,8 +636,8 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
   }
 
   Future<void> _saveCategory() async {
-    final String name = _nameController.text;
-    final String budgetString = _budgetController.text;
+    final String name = _nameController.text.trim();
+    final String budgetString = _budgetController.text.trim();
     final double? budget = double.tryParse(budgetString);
 
     if (name.isNotEmpty && budget != null) {

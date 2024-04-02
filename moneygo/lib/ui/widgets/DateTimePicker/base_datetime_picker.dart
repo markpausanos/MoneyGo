@@ -4,12 +4,14 @@ import 'package:moneygo/ui/widgets/Themes/custom_color_scheme.dart';
 
 class BaseDateTimePicker extends StatefulWidget {
   final Function(DateTime) onDateTimeChanged;
+  final DateTime? initialDate;
   final DateTime? firstDate;
   final String? Function(String?)? validator;
 
   const BaseDateTimePicker({
     super.key,
     required this.onDateTimeChanged,
+    this.initialDate,
     this.firstDate,
     this.validator,
   });
@@ -25,9 +27,9 @@ class _BaseDateTimePickerState extends State<BaseDateTimePicker> {
   @override
   void initState() {
     super.initState();
-    selectedDateTime = DateTime.now();
-    _dateController.text =
-        DateFormat("MMMM dd, yyyy 'at' hh:mm a").format(selectedDateTime);
+    selectedDateTime = widget.initialDate ?? DateTime.now();
+    _dateController.text = DateFormat("MMMM dd, yyyy 'at' hh:mm a")
+        .format(widget.initialDate ?? selectedDateTime);
   }
 
   Future<void> _pickDateTime(BuildContext context) async {
@@ -38,6 +40,8 @@ class _BaseDateTimePickerState extends State<BaseDateTimePicker> {
       lastDate: DateTime.now(),
     );
     if (pickedDate == null) return;
+
+    if (!mounted) return;
 
     final TimeOfDay? pickedTime = await showTimePicker(
       context: context,

@@ -13,4 +13,5 @@ class Expenses extends Table {
   IntColumn get categoryId => integer()
       .customConstraint('REFERENCES categories(id) ON DELETE SET NULL')
       .nullable()();
+  RealColumn get updatedBalance => real().withDefault(const Constant(0.0))();
 }

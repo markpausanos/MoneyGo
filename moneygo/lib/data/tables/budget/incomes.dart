@@ -9,4 +9,5 @@ class Incomes extends Table {
       'REFERENCES transactions(id) ON DELETE CASCADE NOT NULL')();
   IntColumn get placedOnsourceId => integer()
       .customConstraint('REFERENCES sources(id) ON DELETE CASCADE NOT NULL')();
+  RealColumn get updatedBalance => real().withDefault(const Constant(0.0))();
 }

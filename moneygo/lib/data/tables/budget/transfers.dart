@@ -11,4 +11,8 @@ class Transfers extends Table {
       .customConstraint('REFERENCES sources(id) ON DELETE CASCADE NOT NULL')();
   IntColumn get toSourceId => integer()
       .customConstraint('REFERENCES sources(id) ON DELETE CASCADE NOT NULL')();
+  RealColumn get updatedBalanceFromSource =>
+      real().withDefault(const Constant(0.0))();
+  RealColumn get updatedBalanceToSource =>
+      real().withDefault(const Constant(0.0))();
 }
